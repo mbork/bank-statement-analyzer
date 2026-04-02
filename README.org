@@ -1,0 +1,17 @@
+#+TITLE: Bank Statement Analyzer
+#+AUTHOR: mbork
+
+* Description
+A simple app for ingesting bank statements as csvs and categorizing spending.  My Python learning project.
+
+* Requirements
+
+* Installation
+
+* Configuration
+
+* Usage
+
+* Development
+
+* License
