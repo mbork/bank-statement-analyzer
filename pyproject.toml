@@ -1,0 +1,21 @@
+[project]
+name = "bank-statement-analyzer"
+version = "0.1.0"
+description = "Analyze bank statements from CSV files, categorize transactions, and report spending."
+requires-python = ">=3.10"
+dependencies = [
+	"python-dotenv",
+	"ttkbootstrap",
+]
+
+[dependency-groups]
+dev = [
+	"pytest",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["bank_analyzer"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
