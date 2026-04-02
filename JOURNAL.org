@@ -62,7 +62,15 @@ Allows dev (=./data=) and prod (OS user-data dir) to differ by one env var,
 not by code changes.  =python-dotenv= loads =.env= automatically at startup.
 
 ** Session log
-*** [2026-04-02]
+*** [2026-04-02] (session 2)
+- Completed: full scaffold — =pyproject.toml=, =uv.lock=, =main.py=, all stub modules
+  (type-hinted, =...= bodies), =.env.example=, =.gitignore=, =README.org= stub;
+  hello-world ttkbootstrap window working; switched to spaces indentation
+- In progress: NONE — scaffold DONE
+- Next: start =config.py= (DB path resolution)
+- Blockers: NONE
+- Decisions: use =uv= instead of =pip=; spaces over tabs (Python convention)
+*** [2026-04-02] (session 1)
 - Completed: architecture decisions, =CLAUDE.md=, =JOURNAL.org=
 - In progress: scaffold (not yet started)
 - Next: create directory structure and stub files
