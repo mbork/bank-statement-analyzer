@@ -77,23 +77,47 @@ not by code changes.  =python-dotenv= loads =.env= automatically at startup.
 - Blockers: NONE
 - Decisions: all logged above
 
-* TODO Set up Emacs for Python development
+* DONE Set up Emacs for Python development
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-02 Thu 15:51]
+- State "INPROGRESS" from "TODO"       [2026-04-02 Thu 14:53]
+:END:
 Configure Emacs for a comfortable Python workflow: LSP, venv awareness,
 and test integration.
 
-** Steps [0/5]
-- [ ] Configure Python major mode (=python-ts-mode= with tree-sitter, or built-in =python-mode=)
-- [ ] Install pyright and configure =eglot= to use it in Python buffers
-- [ ] Enable pyright's linting diagnostics in =eglot= / =flymake=
-- [ ] Set up venv detection so Emacs uses the project's =.venv= automatically
-- [ ] Configure test runner integration (e.g. =pytest= via =python-pytest.el= or similar)
+** Steps [5/5]
+- [X] Configure Python major mode (=python-ts-mode= with tree-sitter, or built-in =python-mode=)
+- [X] Install pyright and configure =eglot= to use it in Python buffers
+- [X] Enable pyright's linting diagnostics in =eglot= / =flymake=
+- [X] Set up venv detection so Emacs uses the project's =.venv= automatically
+- [X] Configure test runner integration (=python-pytest.el=, =C-c t= → =python-pytest-dispatch=)
 
 ** Decisions
 *** [2026-04-02] – Use pyright (not pylsp) as the LSP server; rely on it for linting
 **** Reason
 pyright covers both LSP and linting, so no separate linter tool is needed.
 
+*** [2026-04-02] – Exclude =.venv= in =[tool.pyright]= in =pyproject.toml=
+**** Reason
+Without it, pyright tried to index =.venv= on connect and crashed (exit code 1).
+
+*** [2026-04-02] – Use =pyvenv= with a =locate-dominating-file= hook for auto-activation
+**** Reason
+Automatically activates the project =.venv= on =python-ts-mode= without manual
+=M-x pyvenv-activate=; works across multiple projects.
+
+*** [2026-04-02] – Use =:after python= in =python-pytest= =use-package= block
+**** Reason
+Without it, =python-ts-mode-map= doesn't exist yet when the keybinding is set.
+
 ** Session log
+*** [2026-04-02] (session 3)
+- Completed: all 5 steps — =python-ts-mode=, eglot+pyright, flymake, pyvenv auto-activation,
+  =python-pytest-dispatch= on =C-c t=
+- Blockers resolved: pyright crashed on connect (fixed by =exclude = [".venv"]= in =pyproject.toml=);
+  =C-c t= unbound (fixed by =:after python=); treesit display error is a benign Emacs 31 pre-release bug
+- In progress: NONE — all steps done
+- Next: =config.py= — DB path resolution
 
 * TODO =config.py= — DB path resolution
 :LOGBOOK:
