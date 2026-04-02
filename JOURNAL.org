@@ -6,15 +6,18 @@ assigning them to categories, and generating tabular spending reports
 by category and time interval.  Built with Python (learning project),
 SQLite, and Tkinter + ttkbootstrap.
 
-* INPROGRESS Scaffold
+* DONE Scaffold
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-02 Thu 14:46]
+:END:
 Create the project file structure, stub modules, and dev tooling.
 
-** Steps [0/5]
-- [ ] Create directory structure (=bank_analyzer/=, =bank_analyzer/ui/=, =tests/=, =data/=)
-- [ ] Create stub Python files with Outli section headers and imports
-- [ ] Write =pyproject.toml= and run =uv sync= to generate =uv.lock=
-- [ ] Write =.env.example=
-- [ ] Write =.gitignore=
+** Steps [5/5]
+- [X] Create directory structure (=bank_analyzer/=, =bank_analyzer/ui/=, =tests/=, =data/=)
+- [X] Create stub Python files with Outli section headers and imports
+- [X] Write =pyproject.toml= and run =uv sync= to generate =uv.lock=
+- [X] Write =.env.example=
+- [X] Write =.gitignore=
 
 ** Decisions
 *** [2026-04-02] – Chose SQLite + Tkinter (Approach 1) over PySide6 or local web app
@@ -84,7 +87,10 @@ pyright covers both LSP and linting, so no separate linter tool is needed.
 
 ** Session log
 
-* BLOCKED =config.py= — DB path resolution
+* TODO =config.py= — DB path resolution
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-02 Thu 14:52]
+:END:
 Resolve the database file path from env var or OS user-data directory.
 Blocked by: [[*Scaffold]]
 
