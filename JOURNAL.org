@@ -1,0 +1,243 @@
+#+TITLE: Bank Statement Analyzer
+#+AUTHOR: mbork
+
+Desktop app for loading bank CSV exports, deduplicating transactions,
+assigning them to categories, and generating tabular spending reports
+by category and time interval.  Built with Python (learning project),
+SQLite, and Tkinter + ttkbootstrap.
+
+* INPROGRESS Scaffold
+Create the project file structure, stub modules, and dev tooling.
+
+** Steps [0/5]
+- [ ] Create directory structure (=bank_analyzer/=, =bank_analyzer/ui/=, =tests/=, =data/=)
+- [ ] Create stub Python files with Outli section headers and imports
+- [ ] Write =pyproject.toml= and run =uv sync= to generate =uv.lock=
+- [ ] Write =.env.example=
+- [ ] Write =.gitignore=
+
+** Decisions
+*** [2026-04-02] – Chose SQLite + Tkinter (Approach 1) over PySide6 or local web app
+**** Reason
+Fastest path to a working prototype; all dependencies are stdlib or
+near-stdlib.  Explicit migration path to PySide6 planned: keep all
+non-UI code in separate modules so =ui/= can be replaced independently.
+
+**** Alternatives considered
+- PySide6: better UI, but heavier dependency and steeper Qt learning curve
+- Local web app (FastAPI + browser): rich UI, but not a true desktop app and
+  harder to package
+
+*** [2026-04-02] – Dedup via composite unique constraint, not hashing
+**** Reason
+=UNIQUE(date, amount, description)= + =ON CONFLICT DO NOTHING= is DB-enforced,
+transparent to query, and easier to debug than a hash column.
+
+**** Alternatives considered
+Hash of canonical fields: same vulnerability to description variance, but
+opaque column values make debugging harder.
+
+*** [2026-04-02] – Description canonicalization required before insert
+**** Reason
+The composite unique constraint only works if the same transaction always
+produces the same description string.  Raw CSV strings are unreliable
+(trailing spaces, encoding differences, bank formatting changes).
+
+*** [2026-04-02] – Use =uv= instead of =pip= for dependency management
+**** Reason
+=uv= provides a proper lock file (=uv.lock= ≈ =package-lock.json=), manages the
+venv automatically, and replaces =pip=, =venv=, and =pip-tools= in one tool.
+=requirements.txt= has no lock file concept; reproducible installs require pinning
+by hand or a separate tool.
+
+**** Alternatives considered
+Plain =pip= + =requirements.txt=: simpler but no lock file, non-reproducible builds.
+
+*** [2026-04-02] – Data location via =BANK_ANALYZER_DATA_DIR= env var
+**** Reason
+Allows dev (=./data=) and prod (OS user-data dir) to differ by one env var,
+not by code changes.  =python-dotenv= loads =.env= automatically at startup.
+
+** Session log
+*** [2026-04-02]
+- Completed: architecture decisions, =CLAUDE.md=, =JOURNAL.org=
+- In progress: scaffold (not yet started)
+- Next: create directory structure and stub files
+- Blockers: NONE
+- Decisions: all logged above
+
+* TODO Set up Emacs for Python development
+Configure Emacs for a comfortable Python workflow: LSP, venv awareness,
+and test integration.
+
+** Steps [0/5]
+- [ ] Configure Python major mode (=python-ts-mode= with tree-sitter, or built-in =python-mode=)
+- [ ] Install pyright and configure =eglot= to use it in Python buffers
+- [ ] Enable pyright's linting diagnostics in =eglot= / =flymake=
+- [ ] Set up venv detection so Emacs uses the project's =.venv= automatically
+- [ ] Configure test runner integration (e.g. =pytest= via =python-pytest.el= or similar)
+
+** Decisions
+*** [2026-04-02] – Use pyright (not pylsp) as the LSP server; rely on it for linting
+**** Reason
+pyright covers both LSP and linting, so no separate linter tool is needed.
+
+** Session log
+
+* BLOCKED =config.py= — DB path resolution
+Resolve the database file path from env var or OS user-data directory.
+Blocked by: [[*Scaffold]]
+
+** Steps [0/4]
+- [ ] Implement =get_data_dir()=: read =BANK_ANALYZER_DATA_DIR= env var, fall back to OS user-data dir
+- [ ] Implement OS fallback: =~/.local/share/...= on Linux, =%APPDATA%\...= on Windows
+- [ ] Implement =get_db_path()=: combine data dir + filename
+- [ ] Ensure data directory is created if it does not exist
+
+** Decisions
+** Session log
+
+* BLOCKED =db.py= — schema and queries
+Create the database schema and provide all SQL query functions.
+Blocked by: [[*=config.py= — DB path resolution]]
+
+** Steps [0/3]
+- [ ] Write =get_connection()= using =config.get_db_path()=
+- [ ] Write =create_schema()= with =CREATE TABLE IF NOT EXISTS= for =transactions=, =categories=, =imported_files=
+- [ ] Add =UNIQUE(date, amount, description)= constraint on =transactions=
+
+** Decisions
+** Session log
+
+* BLOCKED =importer.py= — CSV parsing and deduplication
+Parse bank CSV files, canonicalize descriptions, and insert with dedup.
+Blocked by: [[*=db.py= — schema and queries]]
+
+** Steps [0/5]
+- [ ] Define =BANKS= dict with per-bank config (column names, date format)
+- [ ] Write =canonicalize_description()=: strip and collapse whitespace
+- [ ] Write =parse_csv(filepath, bank)=: return =list[dict]=
+- [ ] Write =import_file(filepath, bank)=: insert rows with =ON CONFLICT DO NOTHING=
+- [ ] Write =get_import_stats()=: return rows total/inserted/skipped
+
+** Decisions
+** Session log
+
+* BLOCKED =categories.py= — category CRUD
+Manage the list of spending categories.
+Blocked by: [[*=db.py= — schema and queries]]
+
+** Steps [0/4]
+- [ ] Write =get_all_categories()=
+- [ ] Write =add_category(name)=
+- [ ] Write =rename_category(category_id, new_name)=
+- [ ] Write =delete_category(category_id)=
+
+** Decisions
+** Session log
+
+* BLOCKED =reports.py= — spending queries
+Generate spending summaries by category and time interval.
+Blocked by: [[*=categories.py= — category CRUD]]
+
+** Steps [0/2]
+- [ ] Write =spending_by_category(start_date, end_date)=: totals per category
+- [ ] Write =spending_by_month(category_id)=: monthly breakdown for one category
+
+** Decisions
+** Session log
+
+* BLOCKED =ui/app.py= — root window and navigation
+Main application window; wires up DB init and hosts all views.
+Blocked by: [[*=db.py= — schema and queries]]
+
+** Steps [0/3]
+- [ ] Subclass ttkbootstrap =Window=, initialize DB on startup
+- [ ] Add navigation (notebook tabs)
+- [ ] Implement =run()= entry point called from =main.py=
+
+** Decisions
+** Session log
+
+* BLOCKED =ui/import_view.py= — CSV import screen
+Let the user pick a CSV file and bank, run the import, and see results.
+Blocked by: [[*=importer.py= — CSV parsing and deduplication]], [[*=ui/app.py= — root window and navigation]]
+
+** Steps [0/4]
+- [ ] Bank selector dropdown (populated from =BANKS= dict)
+- [ ] File picker button (opens native file dialog)
+- [ ] Import button triggering =importer.import_file()=
+- [ ] Status label showing rows imported/skipped
+
+** Decisions
+** Session log
+
+* BLOCKED =ui/transactions_view.py= — browse and categorize
+Show all transactions in a table; allow assigning categories.
+Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
+
+** Steps [0/4]
+- [ ] Treeview showing date, description, amount, category
+- [ ] Category dropdown (or combobox) for assigning a category to selected rows
+- [ ] Filter by date range
+- [ ] Filter by category
+
+** Decisions
+** Session log
+
+* BLOCKED =ui/reports_view.py= — spending reports
+Date range picker and tabular spending report.
+Blocked by: [[*=reports.py= — spending queries]], [[*=ui/app.py= — root window and navigation]]
+
+** Steps [0/3]
+- [ ] Date range pickers (from / to)
+- [ ] Run report button triggering =reports.spending_by_category()=
+- [ ] Treeview showing category totals
+
+** Decisions
+** Session log
+
+* TODO Fill in =README.org=
+
+** Steps [0/6]
+- [ ] Requirements (minimum Python version, =uv= install link, Linux/Windows support)
+- [ ] Installation (clone, =uv sync=, =cp .env.example .env=)
+- [ ] Configuration (explain =BANK_ANALYZER_DATA_DIR= and the prod fallback)
+- [ ] Usage (=uv run python main.py=; expand as features are added)
+- [ ] Development (how to run tests; pointer to =BANKS= in =importer.py= for new banks)
+- [ ] License (choose and state a license; MIT recommended)
+
+** Decisions
+** Session log
+
+* BLOCKED Apply ttkbootstrap theme
+Apply a consistent visual theme across all views.
+Blocked by: [[*=ui/app.py= — root window and navigation]]
+
+** Steps [0/2]
+- [ ] Choose theme (e.g. =flatly= or =litera=)
+- [ ] Verify consistent styling across all views
+
+** Decisions
+** Session log
+
+* TODO Set up GitHub Actions
+CI pipeline running tests on Linux and Windows; release pipeline building
+standalone executables.
+
+** Steps [0/4]
+- [ ] Write =.github/workflows/ci.yml= — run =pytest= on push (Linux + Windows matrix)
+- [ ] Add PyInstaller to dev dependencies (=uv add --dev pyinstaller=)
+- [ ] Write =.github/workflows/build.yml= — build executables on tag/release (Linux + Windows)
+- [ ] Verify executables run without Python installed
+
+** Decisions
+** Session log
+
+* Config                                                           :noexport:
+#+SEQ_TODO: TODO(!) INPROGRESS(!) | DONE(!)
+#+SEQ_TODO: | CANCELED(!)
+#+SEQ_TODO: BLOCKED(!) TODO(!) |
+#+PROPERTY: CLOCK_INTO_DRAWER t
+#+PROPERTY: LOG_INTO_DRAWER t
+#+CATEGORY: bank-statement-analyzer
