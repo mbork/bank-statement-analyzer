@@ -137,19 +137,27 @@ Blocked by: [[*Scaffold]]
 ** Decisions
 ** Session log
 
-* BLOCKED =db.py= — schema and queries
+* DONE =db.py= — schema and queries
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-07 Tue 09:21]
+- State "INPROGRESS" from "TODO"       [2026-04-07 Tue 08:40]
+- State "TODO"       from "BLOCKED"    [2026-04-07 Tue 08:40]
+:END:
 Create the database schema and provide all SQL query functions.
 Blocked by: [[*=config.py= — DB path resolution]]
 
-** Steps [0/3]
-- [ ] Write =get_connection()= using =config.get_db_path()=
-- [ ] Write =create_schema()= with =CREATE TABLE IF NOT EXISTS= for =transactions=, =categories=, =imported_files=
-- [ ] Add =UNIQUE(date, amount, description)= constraint on =transactions=
+** Steps [3/3]
+- [X] Write =get_connection()= using =config.get_db_path()=
+- [X] Write =create_schema()= with =CREATE TABLE IF NOT EXISTS= for =transactions=, =categories=, =imported_files=
+- [X] Add =UNIQUE(date, amount, description)= constraint on =transactions=
 
 ** Decisions
 ** Session log
 
-* BLOCKED =importer.py= — CSV parsing and deduplication
+* TODO =importer.py= — CSV parsing and deduplication
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
+:END:
 Parse bank CSV files, canonicalize descriptions, and insert with dedup.
 Blocked by: [[*=db.py= — schema and queries]]
 
@@ -163,7 +171,10 @@ Blocked by: [[*=db.py= — schema and queries]]
 ** Decisions
 ** Session log
 
-* BLOCKED =categories.py= — category CRUD
+* TODO =categories.py= — category CRUD
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
+:END:
 Manage the list of spending categories.
 Blocked by: [[*=db.py= — schema and queries]]
 
@@ -187,7 +198,10 @@ Blocked by: [[*=categories.py= — category CRUD]]
 ** Decisions
 ** Session log
 
-* BLOCKED =ui/app.py= — root window and navigation
+* TODO =ui/app.py= — root window and navigation
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
+:END:
 Main application window; wires up DB init and hosts all views.
 Blocked by: [[*=db.py= — schema and queries]]
 
