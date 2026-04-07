@@ -119,18 +119,20 @@ Without it, =python-ts-mode-map= doesn't exist yet when the keybinding is set.
 - In progress: NONE — all steps done
 - Next: =config.py= — DB path resolution
 
-* TODO =config.py= — DB path resolution
+* DONE =config.py= — DB path resolution
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-07 Tue 08:40]
+- State "INPROGRESS" from "TODO"       [2026-04-07 Tue 08:40]
 - State "TODO"       from "BLOCKED"    [2026-04-02 Thu 14:52]
 :END:
 Resolve the database file path from env var or OS user-data directory.
 Blocked by: [[*Scaffold]]
 
-** Steps [0/4]
-- [ ] Implement =get_data_dir()=: read =BANK_ANALYZER_DATA_DIR= env var, fall back to OS user-data dir
-- [ ] Implement OS fallback: =~/.local/share/...= on Linux, =%APPDATA%\...= on Windows
-- [ ] Implement =get_db_path()=: combine data dir + filename
-- [ ] Ensure data directory is created if it does not exist
+** Steps [4/4]
+- [X] Implement =get_data_dir()=: read =BANK_ANALYZER_DATA_DIR= env var, fall back to OS user-data dir
+- [X] Implement OS fallback: =~/.local/share/...= on Linux, =%APPDATA%\...= on Windows
+- [X] Implement =get_db_path()=: combine data dir + filename
+- [X] Ensure data directory is created if it does not exist
 
 ** Decisions
 ** Session log
