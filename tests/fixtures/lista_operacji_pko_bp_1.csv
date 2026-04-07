@@ -1,0 +1,12 @@
+Data operacji,Data waluty,Typ transakcji,Kwota,Waluta,Opis transakcji,,,,,
+2026-03-06,2026-03-06,Op³ata za u¿ytkowanie karty,-10,PLN,"Tytu³: OP£ATA MIESIÊCZNA ZA KARTÊ 123456******7890, 29.01-27.02",,,,,
+2026-03-06,2026-03-06,Op³ata za u¿ytkowanie karty,-10,PLN,"Tytu³: OP£ATA MIESIÊCZNA ZA KARTÊ 123456******0987, 29.01-27.02",,,,,
+2026-02-20,2026-02-19,Wyp³ata z bankomatu,-1600,PLN,Tytu³: PKO BP 10204027S1PO1965N6625C1252,Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA,Data wykonania operacji: 2026-02-19 17:57,Kwota Cash Back:  0.00,Oryginalna kwota operacji: 1600.00,Numer karty: 123456******7890
+2026-02-11,2026-02-10,P³atnoœæ kart¹,-27.04,PLN,Tytu³: 000134679 00000000000000000000006,Lokalizacja: Adres: LIDL W¹ska Miasto: POZNAN Kraj: POLSKA,Data wykonania operacji: 2026-02-10 11:10,Kwota Cash Back:  0.00,Oryginalna kwota operacji: 27.04,Numer karty: 123456******7890
+2026-02-11,2026-02-10,P³atnoœæ kart¹,-29.6,PLN,Tytu³: 000134679 00000000000000000000007,Lokalizacja: Adres: LIDL D³uga Miasto: Poznan Kraj: POLSKA,Data wykonania operacji: 2026-02-10 07:10,Kwota Cash Back:  0.00,Oryginalna kwota operacji: 29.60,Numer karty: 123456******7890
+2026-02-11,2026-02-10,Wyp³ata z bankomatu,-1600,PLN,Tytu³: PKO BP 10000000A0AA0000A0000A0000,Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA,Data wykonania operacji: 2026-02-10 06:55,Kwota Cash Back:  0.00,Oryginalna kwota operacji: 1600.00,Numer karty: 123456******7890
+2026-02-10,2026-02-10,Przelew na konto,8000,PLN,Rachunek nadawcy: 00 0000 0000 0000 0000 0000 0001,Nazwa nadawcy: Smok Wawelski,Adres nadawcy: Smocza Jama Kraków,Tytu³: przelewik,,
+2026-02-07,2026-02-06,Wyp³ata z bankomatu,-800,PLN,Tytu³: PKO BP 10000000A0AA0000A0000A0001,Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA,Data wykonania operacji: 2026-02-06 16:48,Kwota Cash Back:  0.00,Oryginalna kwota operacji: 800.00,Numer karty: 123456******7890
+2026-02-05,2026-02-05,Przelew na konto,939.45,PLN,Rachunek nadawcy: 00 0000 0000 0000 0000 0000 0002,Nazwa nadawcy: Smok Wawelski,Adres nadawcy: Smocza Jama Kraków,Tytu³: przelewik,,
+2026-02-04,2026-02-04,Op³ata za u¿ytkowanie karty,-10,PLN,"Tytu³: OP£ATA MIESIÊCZNA ZA KARTÊ 123456******7890, 29.12-28.01",,,,,
+2026-02-04,2026-02-04,Op³ata za u¿ytkowanie karty,-10,PLN,"Tytu³: OP£ATA MIESIÊCZNA ZA KARTÊ 123456******0987, 29.12-28.01",,,,,

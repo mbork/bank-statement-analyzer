@@ -169,6 +169,16 @@ Blocked by: [[*=db.py= — schema and queries]]
 - [ ] Write =get_import_stats()=: return rows total/inserted/skipped
 
 ** Decisions
+*** [2026-04-07] – Encoding specified per bank in =BANKS= dict, not auto-detected
+**** Reason
+The bank is known in advance (Polish bank, CP-1250), so runtime detection adds
+complexity with no benefit.  Each =BANKS= entry includes an =encoding= key passed
+to =open()= / =csv.DictReader=.
+
+**** Alternatives considered
+=charset-normalizer= for runtime detection: accurate but an extra dependency,
+unnecessary when the encoding is known.
+
 ** Session log
 
 * TODO =categories.py= — category CRUD
