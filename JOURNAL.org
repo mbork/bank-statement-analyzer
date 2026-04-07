@@ -136,6 +136,12 @@ Blocked by: [[*Scaffold]]
 
 ** Decisions
 ** Session log
+*** [2026-04-07]
+- Completed: =config.py= fully implemented — =get_data_dir()= (env var + OS fallback + mkdir), =get_db_path()=
+- In progress: NONE
+- Next: N/A — feature DONE
+- Blockers: NONE
+- Decisions: NONE
 
 * DONE =db.py= — schema and queries
 :LOGBOOK:
@@ -153,9 +159,16 @@ Blocked by: [[*=config.py= — DB path resolution]]
 
 ** Decisions
 ** Session log
+*** [2026-04-07]
+- Completed: =get_connection()= (with =foreign_keys= PRAGMA + =row_factory=), =create_schema()= (3 tables, FK constraints, UNIQUE dedup constraint)
+- In progress: NONE
+- Next: N/A — feature DONE
+- Blockers: NONE
+- Decisions: store amounts in integer cents (grosz); =source_file= column references =imported_files= by FK not filename string
 
-* TODO =importer.py= — CSV parsing and deduplication
+* INPROGRESS =importer.py= — CSV parsing and deduplication
 :LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-04-07 Tue 10:09]
 - State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
 :END:
 Parse bank CSV files, canonicalize descriptions, and insert with dedup.
@@ -180,6 +193,12 @@ to =open()= / =csv.DictReader=.
 unnecessary when the encoding is known.
 
 ** Session log
+*** [2026-04-07]
+- Completed: encoding decision logged; anonymized CSV fixture added to =tests/fixtures/=
+- In progress: NONE — no code written yet
+- Next: implement =canonicalize_description()=, then define =BANKS= dict with column names, date format, encoding
+- Blockers: NONE
+- Decisions: encoding per bank in =BANKS= (already logged above)
 
 * TODO =categories.py= — category CRUD
 :LOGBOOK:
