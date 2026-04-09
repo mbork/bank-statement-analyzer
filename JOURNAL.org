@@ -174,8 +174,11 @@ Blocked by: [[*=config.py= — DB path resolution]]
 Parse bank CSV files, canonicalize descriptions, and insert with dedup.
 Blocked by: [[*=db.py= — schema and queries]]
 
-** Steps [0/5]
-- [ ] Define =BANKS= dict with per-bank config (column names, date format)
+** Steps [0/6]
+- [ ] Define =BANKS= dict with per-bank config (header anchor cols, date/amount/thousand
+  separator, encoding, col_map, description_cols)
+- [ ] Write =find_header_row()=: scan rows until all anchor cols are present; assign
+  synthetic =LastNamed+N= names to unnamed columns; fail if anchor cols are missing
 - [ ] Write =canonicalize_description()=: strip and collapse whitespace
 - [ ] Write =parse_csv(filepath, bank)=: return =list[dict]=
 - [ ] Write =import_file(filepath, bank)=: insert rows with =ON CONFLICT DO NOTHING=
@@ -192,7 +195,62 @@ to =open()= / =csv.DictReader=.
 =charset-normalizer= for runtime detection: accurate but an extra dependency,
 unnecessary when the encoding is known.
 
+*** [2026-04-09] – Header autodetection via anchor column set; synthetic names for unnamed columns
+**** Reason
+Banks may prepend unstructured preamble rows (variable count) before the CSV table,
+and may rename or reorder named columns across export versions.  Scanning for a row
+that contains all anchor column names is resilient to both.  Unnamed columns (empty
+header cells) get synthetic names based on the last preceding named column
+(e.g. =Opis=, =Opis+1=, =Opis+2=) so =col_map= can reference them stably.
+
+**** Alternatives considered
+- Hardcoded =skip_rows= count: breaks silently if preamble length changes.
+- Config-as-module (functions per bank): maximum flexibility but end users cannot
+  define new banks without writing Python — overkill for this use case.
+
+**** Known limitation (deferred)
+Any unexpected *named* column causes a hard error for now.  See
+[[*=importer.py= — resilience: ignore unknown named columns]] for the planned fix.
+
+*** [2026-04-09] – Decimal and thousand separators explicit in bank config
+**** Reason
+Banks are inconsistent: some use a period as decimal separator, some a comma, and
+thousand-grouping characters vary too.  Tolerating both separators without config
+is ambiguous (=1.234= could be 1234 or 1.234).  Explicit per-bank =decimal_sep= and
+=thousand_sep= keys remove the ambiguity and keep parsing deterministic.
+
+**** Alternatives considered
+Auto-detect based on position of separators: complex, error-prone for edge cases
+like round numbers (=1.000=).
+
+*** [2026-04-09] – =amount_regex= in bank config for banks that mix amount and currency in one column
+**** Reason
+Some banks (e.g. mBank) put amount and currency in the same column (e.g. =-43,52 PLN=).
+An optional =amount_regex= key in the bank config holds a pattern with a named capture
+group =amount= (e.g. =r'(?P<amount>-?[\d\s,.]+)\s+[A-Z]{3}'=) to extract just the
+numeric part.  When absent (e.g. PKO BP), the raw column value is used directly.
+
+**** Alternatives considered
+A separate =amount_col= and =currency_col= split: requires the bank to always have
+separate columns, which is not universally true.
+
+*** [2026-04-09] – Multiple CSV columns joined into one =description= field
+**** Reason
+Some banks split transaction details across several columns (e.g. =Opis transakcji=
+holds the title/reference while the next unnamed column holds the merchant location).
+A =description_cols= list in the bank config names the columns to join; they are
+concatenated with a space separator and then passed through =canonicalize_description()=,
+so whitespace collapsing handles any padding between joined fragments automatically.
+
 ** Session log
+*** [2026-04-09]
+- Completed: architecture decisions for header autodetection, unnamed column naming,
+  separator config; steps updated; future =required_cols= work logged as deferred task
+- In progress: NONE — no code written yet
+- Next: implement =BANKS= dict and =find_header_row()=, then =canonicalize_description()=
+- Blockers: NONE
+- Decisions: all logged above
+
 *** [2026-04-07]
 - Completed: encoding decision logged; anonymized CSV fixture added to =tests/fixtures/=
 - In progress: NONE — no code written yet
@@ -313,6 +371,19 @@ standalone executables.
 - [ ] Add PyInstaller to dev dependencies (=uv add --dev pyinstaller=)
 - [ ] Write =.github/workflows/build.yml= — build executables on tag/release (Linux + Windows)
 - [ ] Verify executables run without Python installed
+
+** Decisions
+** Session log
+
+* TODO =importer.py= — resilience: ignore unknown named columns
+Make the importer tolerant of extra named columns in the CSV that are not in the
+bank config.  Currently any unexpected named column causes a hard error.
+
+** Steps [0/2]
+- [ ] Add =required_cols= list to each =BANKS= entry (subset of =col_map= keys that must
+  be present)
+- [ ] In =find_header_row()=: fail only when a required col is missing; silently ignore
+  extra named columns
 
 ** Decisions
 ** Session log
