@@ -271,6 +271,16 @@ so whitespace collapsing handles any padding between joined fragments automatica
 - Blockers: NONE
 - Decisions: encoding per bank in =BANKS= (already logged above)
 
+* TODO Add =ruff= and configure it
+Add =ruff= as a dev dependency and configure line length and any other rules in =pyproject.toml=.
+
+** Steps [0/2]
+- [ ] Add =ruff= with =uv add --dev ruff=
+- [ ] Configure =[tool.ruff]= in =pyproject.toml= (line length, selected rules)
+
+** Decisions
+** Session log
+
 * TODO =categories.py= — category CRUD
 :LOGBOOK:
 - State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
