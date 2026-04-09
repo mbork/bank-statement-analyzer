@@ -246,6 +246,16 @@ concatenated with a space separator and then passed through =canonicalize_descri
 so whitespace collapsing handles any padding between joined fragments automatically.
 
 ** Session log
+*** [2026-04-09] (session 8)
+- Completed: `insert_imported_file` and `insert_transactions` in `db.py`;
+  `tests/test_db.py` with fixture and 4 tests (basic insert, dedup, overlapping sets);
+  decided to drop `get_import_stats` — `import_file` will return stats directly
+- In progress: NONE
+- Next: implement `import_file(filepath, bank)` in `importer.py` — call `parse_csv`,
+  open connection, call both db helpers inside a transaction, return stats dict
+- Blockers: NONE
+- Decisions: `get_import_stats` dropped; stats returned directly from `import_file`
+
 *** [2026-04-09] (session 7)
 - Completed: =parse_amount(raw, bank)= (regex, separator handling, integer cents);
   =parse_csv(filepath, bank)= (header detection, DictReader, empty row skipping, =list[dict]=);
