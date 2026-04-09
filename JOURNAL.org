@@ -247,6 +247,17 @@ concatenated with a space separator and then passed through =canonicalize_descri
 so whitespace collapsing handles any padding between joined fragments automatically.
 
 ** Session log
+*** [2026-04-09] (session 7)
+- Completed: =parse_amount(raw, bank)= (regex, separator handling, integer cents);
+  =parse_csv(filepath, bank)= (header detection, DictReader, empty row skipping, =list[dict]=);
+  parametrized invalid-input tests for =parse_amount=; fixture-based smoke tests for =parse_csv=
+  (mBank + 2 overlapping PKO BP fixtures)
+- In progress: NONE
+- Next: implement =import_file(filepath, bank)= — insert rows with =ON CONFLICT DO NOTHING=
+- Blockers: NONE
+- Decisions: =parse_amount= kept public (private naming caused Pyright false positives);
+  =DictReader= requires explicit =delimiter= matching bank config
+
 *** [2026-04-09] (session 6)
 - Completed: =BANKS= dict (PKO BP + mBank), =canonicalize_description()=,
   =get_anchor_cols()=, =find_header_row()=; tests for all three; mBank fixture added
