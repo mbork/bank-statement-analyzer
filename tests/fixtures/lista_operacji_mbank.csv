@@ -1,0 +1,52 @@
+﻿mBank S.A. Bankowość Detaliczna;
+		Skrytka Pocztowa 2108;
+		90-959 Łódź 2;
+		www.mBank.pl;
+		mLinia: 801 300 800;
+		+48 (42) 6 300 800;
+		
+
+#Klient;
+BALTAZAR GĄBKA;
+
+Lista operacji;
+
+#Za okres:;
+09.04.2025;09.04.2026;
+
+#zgodnie z wybranymi filtrami wyszukiwania;
+      #dla rachunków:;
+      Baltazar - 00000000000000000000000003;
+      
+      #Lista nie jest dokumentem w rozumieniu art. 7 Ustawy Prawo Bankowe (Dz. U. Nr 140 z 1997 roku, poz.939 z późniejszymi zmianami), ponieważ operacje można samodzielnie edytować.;
+      
+      #Waluta;#Wpływy;#Wydatki;
+PLN;584,30;-5 521,28;
+      
+#Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
+2026-04-08;"BLIK WYPŁATA ATM WŁASNY  PLANET CASH                                                                                                                                  BLIK WYPŁATA ATM WŁASNY                                                             ";"Baltazar 0000 ... 0003";"Wypłata gotówki";-800,00 PLN;;
+2026-04-08;"SOME SERVICE (SUBSCRIPTI)  ZAKUP PRZY UŻYCIU KARTY - MO/TO                                                     transakcja nierozliczona";"Baltazar 0000 ... 0003";"Bez kategorii";-31,43 PLN;;
+2026-04-08;"PAYPAL PTE LTD 5 TEMASEK BOULEVARD 09-01 SUNTEC TOWER FIVE SG 038985, SINGAPORE PL, 1049448739482 /RFB/1049448739482  SINGAPORE PL                                                           PRZELEW ZEWNĘTRZNY PRZYCHODZĄCY                                                   51109028510000000137332860  ";"Baltazar 0000 ... 0003";"Wpływy - inne";284,30 PLN;;
+2026-04-07;"UKVI ETAWEB00000105525  ZAKUP PRZY UŻYCIU KARTY - INTERNET                                                  transakcja nierozliczona";"Baltazar 0000 ... 0003";"Płatności - inne";-82,22 PLN;;
+2026-04-07;"UKVI ETAWEB00000105521  ZAKUP PRZY UŻYCIU KARTY - INTERNET                                                  transakcja nierozliczona";"Baltazar 0000 ... 0003";"Płatności - inne";-82,22 PLN;;
+2026-04-07;"mTransfer  PAYPRO                                                                UL.KANCLERSKA 15                   60-327 POZNAŃ POLSKA                PRZELEW MTRANSFER WYCHODZACY                                                      93114020040000310275557792  ";"Baltazar 0000 ... 0003";"Bez kategorii";-400,00 PLN;;
+2026-04-03;"COMPANY X  ZAKUP PRZY UŻYCIU KARTY - INTERNET                                                  ";"Baltazar 0000 ... 0003";"Multimedia, książki i prasa";-26,44 PLN;;
+2026-04-03;"COMPANY X  ZAKUP PRZY UŻYCIU KARTY - MO/TO                                                     ";"Baltazar 0000 ... 0003";"Multimedia, książki i prasa";-95,18 PLN;;
+2026-04-03;"BLIK WYPŁATA ATM WŁASNY  SPOLEM                                                                                                                                       BLIK WYPŁATA ATM WŁASNY                                                             ";"Baltazar 0000 ... 0003";"Wypłata gotówki";-800,00 PLN;;
+2026-04-02;"FUNDACJA MAKATKA, DAROWIZNA NA CELE STATUTOWE                                                                         PRZELEW WEWNĘTRZNY WYCHODZĄCY                                                     53114020040000310282141223  ";"Baltazar 0000 ... 0003";"Bez kategorii";-200,00 PLN;;
+2026-04-01;"Google Play Apps  ZAKUP PRZY UŻYCIU KARTY - INTERNET                                                  ";"Baltazar 0000 ... 0003";"Multimedia, książki i prasa";-22,99 PLN;;
+2026-04-01;"KONTRAHENT  UL.STRASZNA 3                      60-123 POZNAŃ                       PRZELEW WEWNĘTRZNY PRZYCHODZĄCY                                                   00000000000000000000001000  ";"Baltazar 0000 ... 0003";"Wpływy - inne";300,00 PLN;;
+2026-03-28;"SOME SERVICE ZAKUP PRZY UŻYCIU KARTY - MO/TO                                                     ";"Baltazar 0000 ... 0003";"Bez kategorii";-19,77 PLN;;
+2026-03-27;"BLIK WYPŁATA ATM WŁASNY  CH AUCHAN                                                                                                                                    BLIK WYPŁATA ATM WŁASNY                                                             ";"Baltazar 0000 ... 0003";"Wypłata gotówki";-800,00 PLN;;
+2026-03-21;"BLIK WYPŁATA ATM WŁASNY  PLANET CASH                                                                                                                                  BLIK WYPŁATA ATM WŁASNY                                                             ";"Baltazar 0000 ... 0003";"Wypłata gotówki";-800,00 PLN;;
+2026-03-20;"SOME SERVICE  ZAKUP PRZY UŻYCIU KARTY - MO/TO                                                     ";"Baltazar 0000 ... 0003";"Bez kategorii";-19,68 PLN;;
+2026-03-20;"OPŁATA ZA KARTĘ                ";"Baltazar 0000 ... 0003";"Opłaty i odsetki";-10,00 PLN;;
+2026-03-18;"COMPANY Y, FAKTURA VAT NR FVT/0000000/00/2026-S000/E                                                                         PRZELEW ZEWNĘTRZNY WYCHODZĄCY                                                     00000000000000000000001001  ";"Baltazar 0000 ... 0003";"TV, internet, telefon";-71,99 PLN;;
+2026-03-18;"COMPANY Z, FAKTURA NUMER F/00000000/03/26                                                                         PRZELEW ZEWNĘTRZNY WYCHODZĄCY                                                     00000000000000000000001002  ";"Baltazar 0000 ... 0003";"TV, internet, telefon";-31,08 PLN;;
+2026-03-18;"ALLEGRO.PL                                                                         BLIK ZAKUP E-COMMERCE                                                               ";"Baltazar 0000 ... 0003";"Osobiste - inne";-29,95 PLN;;
+2026-03-16;"WWW.LINK4.PL                                                                         BLIK ZAKUP E-COMMERCE                                                               ";"Baltazar 0000 ... 0003";"Ubezpieczenie domu";-843,43 PLN;;
+2026-03-16;"COMPANY P - BALTAZAR, NR F-RY: FV_202603/000000000/00000                                                                         PRZELEW ZEWNĘTRZNY WYCHODZĄCY                                                     00000000000000000000001003  ";"Baltazar 0000 ... 0003";"TV, internet, telefon";-29,90 PLN;;
+2026-03-16;"COMPANY Q, PD2026/0000                                                                         PRZELEW ZEWNĘTRZNY WYCHODZĄCY                                                     00000000000000000000001004  ";"Baltazar 0000 ... 0003";"Bez kategorii";-135,00 PLN;;
+2026-03-15;"COMPANY R                                                                         BLIK ZAKUP E-COMMERCE                                                               ";"Baltazar 0000 ... 0003";"Zajęcia dodatkowe";-190,00 PLN;;
+
+
