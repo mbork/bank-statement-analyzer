@@ -2,6 +2,7 @@
 
 import csv
 import pathlib
+import re
 
 # * Bank configurations
 
@@ -65,6 +66,21 @@ def find_header_row(reader: csv.reader, anchor_cols: set[str]) -> list[str]:  # 
     raise ValueError(f'Header row not found, expected columns: {sorted(anchor_cols)}')
 
 # * Parsing and import
+
+def parse_amount(raw: str, bank: str) -> int:
+    bank_config = BANKS[bank]
+    if 'amount_regex' in bank_config:
+        match = re.search(bank_config['amount_regex'], raw)
+        if match:
+            raw = match.group('amount')
+        else:
+            raise ValueError(f'{raw} is not a valid amount')
+
+    if 'thousand_sep' in bank_config:
+        raw = raw.replace(bank_config['thousand_sep'], '')
+    raw = raw.replace(bank_config['decimal_sep'], '.')
+
+    return round(100 * float(raw))
 
 def parse_csv(filepath: pathlib.Path, bank: str) -> list[dict]:
     ...

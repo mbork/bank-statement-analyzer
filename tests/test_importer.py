@@ -101,3 +101,32 @@ def test_extra_names_columns_included():
     ])
     assert importer.find_header_row(reader, {'Data', 'Kwota', 'Opis'}) == ['Data', 'Opis', 'Kwota', 'Waluta']
     assert next(reader) == ['2026-04-09', 'Żabka', '-20.00', 'PLN']
+
+
+# ** parse_amount
+def test_parse_amount_pko_bp():
+    assert importer.parse_amount('-6743.52', 'pko_bp') == -674352
+
+@pytest.mark.parametrize('raw', [
+    '1,234.56',   # comma not a valid decimal sep for pko_bp
+    '1.234,56',   # European format, comma survives into float()
+    '',           # empty string
+])
+def test_parse_amount_pko_bp_invalid(raw):
+    with pytest.raises(ValueError):
+        importer.parse_amount(raw, 'pko_bp')
+
+def test_parse_amount_mbank_with_thousand_sep():
+    assert importer.parse_amount('-1 234,56 PLN', 'mbank') == -123456
+
+@pytest.mark.parametrize('raw', [
+    'no match here',  # completely wrong
+    '-43.52 PLN',     # period instead of comma
+    '-43,52 USD',     # wrong currency
+    '12,34PLN',       # no space before PLN
+    '12,34  PLN',     # two spaces before PLN
+    'PLN -43,52',     # currency before amount
+])
+def test_parse_amount_mbank_invalid(raw):
+    with pytest.raises(ValueError):
+        importer.parse_amount(raw, 'mbank')
