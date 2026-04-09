@@ -1,8 +1,12 @@
 # * Importer tests
 
 import csv
+import datetime
+import pathlib
 import pytest
 import re
+
+FIXTURES = pathlib.Path(__file__).parent / 'fixtures'
 
 from bank_analyzer import importer
 
@@ -130,3 +134,47 @@ def test_parse_amount_mbank_with_thousand_sep():
 def test_parse_amount_mbank_invalid(raw):
     with pytest.raises(ValueError):
         importer.parse_amount(raw, 'mbank')
+
+
+# ** parse_csv
+def test_parse_csv_mbank():
+    result = importer.parse_csv(FIXTURES / 'lista_operacji_mbank.csv', 'mbank')
+    assert len(result) == 24
+    assert result[0] == {
+        'date': datetime.date(2026, 4, 8),
+        'amount': -80000,
+        'description': 'BLIK WYPŁATA ATM WŁASNY PLANET CASH BLIK WYPŁATA ATM WŁASNY Wypłata gotówki',
+    }
+    assert result[11] == {
+        'date': datetime.date(2026, 4, 1),
+        'amount': 30000,
+        'description': 'KONTRAHENT UL.STRASZNA 3 60-123 POZNAŃ PRZELEW WEWNĘTRZNY PRZYCHODZĄCY 00000000000000000000001000 Wpływy - inne',
+    }
+    assert result[23] == {
+        'date': datetime.date(2026, 3, 15),
+        'amount': -19000,
+        'description': 'COMPANY R BLIK ZAKUP E-COMMERCE Zajęcia dodatkowe',
+    }
+
+def test_parse_csv_pko_bp_1():
+    result = importer.parse_csv(FIXTURES / 'lista_operacji_pko_bp_1.csv', 'pko_bp')
+    assert len(result) == 11
+    assert result[2] == {
+        'date': datetime.date(2026, 2, 19),
+        'amount': -160000,
+        'description': 'Wypłata z bankomatu Tytuł: PKO BP 10204027S1PO1965N6625C1252 Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA Kwota Cash Back: 0.00',
+    }
+    assert result[10] == {
+        'date': datetime.date(2026, 2, 4),
+        'amount': -1000,
+        'description': 'Opłata za użytkowanie karty Tytuł: OPŁATA MIESIĘCZNA ZA KARTĘ 123456******0987, 29.12-28.01',
+    }
+
+def test_parse_csv_pko_bp_2():
+    result = importer.parse_csv(FIXTURES / 'lista_operacji_pko_bp_2.csv', 'pko_bp')
+    assert len(result) == 11
+    assert result[10] == {
+        'date': datetime.date(2026, 2, 19),
+        'amount': -160000,
+        'description': 'Wypłata z bankomatu Tytuł: PKO BP 10204027S1PO1965N6625C1252 Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA Kwota Cash Back: 0.00',
+    }

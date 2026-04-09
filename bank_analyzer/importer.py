@@ -1,6 +1,7 @@
 # * CSV import and deduplication
 
 import csv
+import datetime
 import pathlib
 import re
 
@@ -83,7 +84,21 @@ def parse_amount(raw: str, bank: str) -> int:
     return round(100 * float(raw))
 
 def parse_csv(filepath: pathlib.Path, bank: str) -> list[dict]:
-    ...
+    bank_config = BANKS[bank]
+    with open(filepath, encoding=bank_config['encoding'], newline='') as f:
+        reader = csv.reader(f, delimiter=bank_config['column_sep'])
+        col_names = find_header_row(reader, get_anchor_cols(bank_config))
+        dict_reader = csv.DictReader(f, fieldnames=col_names, delimiter=bank_config['column_sep'])
+        result = []
+        for row in dict_reader:
+            # skip empty rows
+            if not any(row.values()):
+                continue
+            date = datetime.datetime.strptime(row[bank_config['date_col']], bank_config['date_format']).date()
+            amount = parse_amount(row[bank_config['amount_col']], bank)
+            description = canonicalize_description(' '.join(row[col] for col in bank_config['description_cols']))
+            result.append({'date': date, 'amount': amount, 'description': description})
+        return result
 
 def import_file(filepath: pathlib.Path, bank: str) -> dict[str, int]:
     ...
