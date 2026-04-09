@@ -32,7 +32,8 @@ BANKS: dict[str, dict] = {
 # * Canonicalization
 
 def canonicalize_description(description: str) -> str:
-    ...
+    """Strip and collapse all whitespace runs to single spaces."""
+    return ' '.join(description.split())
 
 # * Parsing and import
 

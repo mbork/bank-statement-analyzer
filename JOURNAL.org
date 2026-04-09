@@ -174,12 +174,12 @@ Blocked by: [[*=config.py= — DB path resolution]]
 Parse bank CSV files, canonicalize descriptions, and insert with dedup.
 Blocked by: [[*=db.py= — schema and queries]]
 
-** Steps [1/6]
+** Steps [2/6]
 - [X] Define =BANKS= dict with per-bank config (header anchor cols, date/amount/thousand
   separator, encoding, col_map, description_cols)
 - [ ] Write =find_header_row()=: scan rows until all anchor cols are present; assign
   synthetic =LastNamed+N= names to unnamed columns; fail if anchor cols are missing
-- [ ] Write =canonicalize_description()=: strip and collapse whitespace
+- [X] Write =canonicalize_description()=: strip and collapse whitespace
 - [ ] Write =parse_csv(filepath, bank)=: return =list[dict]=
 - [ ] Write =import_file(filepath, bank)=: insert rows with =ON CONFLICT DO NOTHING=
 - [ ] Write =get_import_stats()=: return rows total/inserted/skipped
