@@ -174,11 +174,14 @@ Blocked by: [[*=config.py= — DB path resolution]]
 Parse bank CSV files, canonicalize descriptions, and insert with dedup.
 Blocked by: [[*=db.py= — schema and queries]]
 
-** Steps [2/6]
-- [X] Define =BANKS= dict with per-bank config (header anchor cols, date/amount/thousand
-  separator, encoding, col_map, description_cols)
-- [ ] Write =find_header_row()=: scan rows until all anchor cols are present; assign
-  synthetic =LastNamed+N= names to unnamed columns; fail if anchor cols are missing
+** Steps [2/7]
+- [X] Define =BANKS= dict with per-bank config (date/amount/thousand separator,
+  encoding, description_cols)
+- [ ] Write =get_anchor_cols(config)=: derive anchor column set from =date_col=,
+  =amount_col=, and the base (non-synthetic) names in =description_cols=
+- [ ] Write =find_header_row(reader, anchor_cols)=: scan rows until all anchor cols are
+  present; assign synthetic =LastNamed+N= names to unnamed columns; ignore extra named
+  cols; fail with clear error if anchor cols are missing
 - [X] Write =canonicalize_description()=: strip and collapse whitespace
 - [ ] Write =parse_csv(filepath, bank)=: return =list[dict]=
 - [ ] Write =import_file(filepath, bank)=: insert rows with =ON CONFLICT DO NOTHING=
@@ -208,9 +211,9 @@ header cells) get synthetic names based on the last preceding named column
 - Config-as-module (functions per bank): maximum flexibility but end users cannot
   define new banks without writing Python — overkill for this use case.
 
-**** Known limitation (deferred)
-Any unexpected *named* column causes a hard error for now.  See
-[[*=importer.py= — resilience: ignore unknown named columns]] for the planned fix.
+**** Anchor columns
+Derived at runtime from =date_col=, =amount_col=, and the base (non-synthetic) names
+in =description_cols=.  Extra named columns not in the anchor set are silently ignored.
 
 *** [2026-04-09] – Decimal and thousand separators explicit in bank config
 **** Reason
@@ -371,19 +374,6 @@ standalone executables.
 - [ ] Add PyInstaller to dev dependencies (=uv add --dev pyinstaller=)
 - [ ] Write =.github/workflows/build.yml= — build executables on tag/release (Linux + Windows)
 - [ ] Verify executables run without Python installed
-
-** Decisions
-** Session log
-
-* TODO =importer.py= — resilience: ignore unknown named columns
-Make the importer tolerant of extra named columns in the CSV that are not in the
-bank config.  Currently any unexpected named column causes a hard error.
-
-** Steps [0/2]
-- [ ] Add =required_cols= list to each =BANKS= entry (subset of =col_map= keys that must
-  be present)
-- [ ] In =find_header_row()=: fail only when a required col is missing; silently ignore
-  extra named columns
 
 ** Decisions
 ** Session log
