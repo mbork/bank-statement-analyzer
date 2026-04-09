@@ -35,6 +35,17 @@ def canonicalize_description(description: str) -> str:
     """Strip and collapse all whitespace runs to single spaces."""
     return ' '.join(description.split())
 
+# * Header detection
+
+def get_anchor_cols(config: dict) -> set[str]:
+    """Derive the set of anchor column names from config"""
+    return {
+        config['date_col'],
+        config['amount_col'],
+        *(col for col in config['description_cols'] if '+' not in col)
+    }
+
+
 # * Parsing and import
 
 def parse_csv(filepath: pathlib.Path, bank: str) -> list[dict]:

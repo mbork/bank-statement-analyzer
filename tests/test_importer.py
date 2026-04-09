@@ -25,3 +25,22 @@ def test_trailing_whitespace_stripped():
 
 def test_whitespace_collapsed():
     assert importer.canonicalize_description('  aqq\t bum\n\n   \tbęc\t\n') == 'aqq bum bęc'
+
+
+# ** get_anchor_cols
+def test_anchor_cols_includes_date_and_amount():
+    config = {
+        'date_col': 'Data',
+        'amount_col': 'Kwota',
+        'description_cols': [],
+    }
+    assert importer.get_anchor_cols(config) == {'Data', 'Kwota'}
+
+
+def test_anchor_cols_includes_non_synthetic_description_cols():
+    config = {
+        'date_col': 'Data',
+        'amount_col': 'Kwota',
+        'description_cols': ['Opis', 'Opis+1', 'Opis+2'],
+    }
+    assert importer.get_anchor_cols(config) == {'Data', 'Kwota', 'Opis'}
