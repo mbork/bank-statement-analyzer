@@ -46,6 +46,24 @@ def get_anchor_cols(config: dict) -> set[str]:
     }
 
 
+def find_header_row(reader: csv.reader, anchor_cols: set[str]) -> list[str]:  # type: ignore[type-arg]
+    """Find a header row in reader, return the list of column names"""
+    for row in reader:
+        if anchor_cols.issubset({cell.strip() for cell in row}):
+            counter = 0
+            last_cell = '_col'
+            header = []
+            for cell in row:
+                if cell == '':
+                    counter += 1
+                    header.append(f'{last_cell}+{counter}')
+                else:
+                    counter = 0
+                    last_cell = cell.strip()
+                    header.append(last_cell)
+            return header
+    raise ValueError(f'Header row not found, expected columns: {sorted(anchor_cols)}')
+
 # * Parsing and import
 
 def parse_csv(filepath: pathlib.Path, bank: str) -> list[dict]:
