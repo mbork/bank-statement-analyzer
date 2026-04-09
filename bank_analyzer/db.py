@@ -1,4 +1,5 @@
 # * Database access
+import datetime
 import sqlite3
 
 from bank_analyzer import config
@@ -40,3 +41,21 @@ def create_schema(conn: sqlite3.Connection) -> None:
         )
     ''')
     conn.commit()
+
+# * Inserting
+
+def insert_imported_file(conn: sqlite3.Connection, filename: str) -> int:
+    cursor = conn.execute(
+        'insert into imported_files (filename, imported_at) values (?, ?)',
+        (filename, datetime.datetime.now().astimezone().isoformat())
+    )
+    imported_file_id = cursor.lastrowid
+    assert imported_file_id is not None # insert raises on failure, so this is always set
+    return imported_file_id
+
+def insert_transactions(conn: sqlite3.Connection, rows: list[dict], imported_file_id: int) -> int:
+    cursor = conn.executemany(
+        'insert into transactions (date, description, amount, imported_file_id) values (?, ?, ?, ?) on conflict do nothing',
+        ((row['date'].isoformat(), row['description'], row['amount'], imported_file_id) for row in rows)
+    )
+    return cursor.rowcount
