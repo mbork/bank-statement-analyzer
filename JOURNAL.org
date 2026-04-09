@@ -246,6 +246,15 @@ concatenated with a space separator and then passed through =canonicalize_descri
 so whitespace collapsing handles any padding between joined fragments automatically.
 
 ** Session log
+*** [2026-04-09] (session 6)
+- Completed: =BANKS= dict (PKO BP + mBank), =canonicalize_description()=,
+  =get_anchor_cols()=, =find_header_row()=; tests for all three; mBank fixture added
+- In progress: NONE
+- Next: implement =parse_csv(filepath, bank)=
+- Blockers: NONE
+- Decisions: anchor cols derived from config (not hardcoded); extra named columns
+  silently ignored; =column_sep= added to bank config; =amount_regex= for mBank
+
 *** [2026-04-09]
 - Completed: architecture decisions for header autodetection, unnamed column naming,
   separator config; steps updated; future =required_cols= work logged as deferred task
