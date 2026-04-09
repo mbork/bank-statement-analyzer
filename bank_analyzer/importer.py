@@ -5,7 +5,29 @@ import pathlib
 
 # * Bank configurations
 
-BANKS: dict[str, dict] = {}
+BANKS: dict[str, dict] = {
+    'pko_bp': {
+        'encoding': 'cp1250',
+        'column_sep': ',',
+        'date_col': 'Data waluty',
+        'date_format': '%Y-%m-%d',
+        'amount_col': 'Kwota',
+        'decimal_sep': '.',
+        'thousand_sep': '',
+        'description_cols': ['Typ transakcji', 'Opis transakcji', 'Opis transakcji+1', 'Opis transakcji+3'],
+    },
+    'mbank': {
+        'encoding': 'utf8',
+        'column_sep': ';',
+        'date_col': '#Data operacji',
+        'date_format': '%Y-%m-%d',
+        'amount_col': '#Kwota',
+        'amount_regex': r'(?P<amount>-?[\d\s]+,\d{2}) PLN',
+        'decimal_sep': ',',
+        'thousand_sep': ' ',
+        'description_cols': ['#Opis operacji', '#Kategoria'],
+    },
+}
 
 # * Canonicalization
 
