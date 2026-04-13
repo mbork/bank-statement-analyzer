@@ -166,15 +166,16 @@ Blocked by: [[*=config.py= — DB path resolution]]
 - Blockers: NONE
 - Decisions: store amounts in integer cents (grosz); =source_file= column references =imported_files= by FK not filename string
 
-* INPROGRESS =importer.py= — CSV parsing and deduplication
+* DONE =importer.py= — CSV parsing and deduplication
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-13 Mon 11:16]
 - State "INPROGRESS" from "TODO"       [2026-04-07 Tue 10:09]
 - State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
 :END:
 Parse bank CSV files, canonicalize descriptions, and insert with dedup.
 Blocked by: [[*=db.py= — schema and queries]]
 
-** Steps [6/7]
+** Steps [7/7]
 - [X] Define =BANKS= dict with per-bank config (date/amount/thousand separator,
   encoding, description_cols)
 - [X] Write =get_anchor_cols(config)=: derive anchor column set from =date_col=,
@@ -185,7 +186,7 @@ Blocked by: [[*=db.py= — schema and queries]]
 - [X] Write =canonicalize_description()=: strip and collapse whitespace
 - [X] Write =parse_amount(raw, config)=: apply regex, strip separators, return integer cents
 - [X] Write =parse_csv(filepath, bank)=: return =list[dict]=
-- [ ] Write =import_file(filepath, bank)=: insert rows with =ON CONFLICT DO NOTHING=
+- [X] Write =import_file(filepath, bank)=: insert rows with =ON CONFLICT DO NOTHING=
 
 ** Decisions
 *** [2026-04-07] – Encoding specified per bank in =BANKS= dict, not auto-detected
@@ -246,6 +247,23 @@ concatenated with a space separator and then passed through =canonicalize_descri
 so whitespace collapsing handles any padding between joined fragments automatically.
 
 ** Session log
+*** [2026-04-13] (session 10)
+- Completed: =test_duplicate_file_raises_error= and =test_duplicate_transactions_are_deduplicated=
+  in =test_importer.py=; fixed =manage_connection()= in =db.py= (commit in normal path, not =finally=)
+- In progress: NONE — all 7 steps done
+- Next: mark feature DONE, commit, then start =categories.py=
+- Blockers: NONE
+- Decisions: =conn.commit()= after =yield= not in =finally= (rollback path must not commit);
+  stats-only assertions sufficient for dedup test (no DB query needed)
+*** [2026-04-10] (session 9)
+- Completed: =import_file()= in =importer.py= (stats dict, =FileAlreadyImportedError=,
+  =skipped= key); =manage_connection()= context manager in =db.py= (replaces =get_connection=);
+  happy-path test scaffold in =test_importer.py= (fixture + test written, not yet committed)
+- In progress: =import_file= tests (happy path written; duplicate-file and dedup tests pending)
+- Next: add duplicate-file and dedup tests for =import_file=, run full suite, then commit
+- Blockers: NONE
+- Decisions: =manage_connection()= handles commit/rollback/close via =@contextmanager=;
+  bare =except:= replaced with =except Exception:=; =FileAlreadyImportedError= (not =...Exception=) per Python convention
 *** [2026-04-09] (session 8)
 - Completed: `insert_imported_file` and `insert_transactions` in `db.py`;
   `tests/test_db.py` with fixture and 4 tests (basic insert, dedup, overlapping sets);

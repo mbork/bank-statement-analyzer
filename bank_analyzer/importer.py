@@ -4,6 +4,14 @@ import csv
 import datetime
 import pathlib
 import re
+import sqlite3
+
+from bank_analyzer import db
+
+# * Exceptions
+
+class FileAlreadyImportedError(Exception):
+    pass
 
 # * Bank configurations
 
@@ -101,4 +109,16 @@ def parse_csv(filepath: pathlib.Path, bank: str) -> list[dict]:
         return result
 
 def import_file(filepath: pathlib.Path, bank: str) -> dict[str, int]:
-    ...
+    """Parse filepath (coming from bank) and insert its transactions into the DB.
+
+    Returns a dict with keys 'total', 'inserted', and 'skipped'.
+    Raises FileAlreadyImportedError if filepath.name was already imported.
+    """
+    rows = parse_csv(filepath, bank)
+    with db.manage_connection() as conn:
+        try:
+            imported_file_id = db.insert_imported_file(conn, filepath.name)
+        except sqlite3.IntegrityError as e:
+            raise FileAlreadyImportedError(f'{filepath.name} has already been imported') from e
+        inserted_count = db.insert_transactions(conn, rows, imported_file_id)
+    return {'total': len(rows), 'inserted': inserted_count, 'skipped': len(rows) - inserted_count}

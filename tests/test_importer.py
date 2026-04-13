@@ -8,7 +8,7 @@ import re
 
 FIXTURES = pathlib.Path(__file__).parent / 'fixtures'
 
-from bank_analyzer import importer
+from bank_analyzer import db, importer
 
 # ** canonicalize_description
 def test_no_whitespace_unchanged():
@@ -178,3 +178,31 @@ def test_parse_csv_pko_bp_2():
         'amount': -160000,
         'description': 'Wypłata z bankomatu Tytuł: PKO BP 10204027S1PO1965N6625C1252 Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA Kwota Cash Back: 0.00',
     }
+
+
+# ** import_file
+
+@pytest.fixture
+def temp_db(tmp_path, monkeypatch):
+    monkeypatch.setenv('BANK_ANALYZER_DATA_DIR', str(tmp_path))
+    with db.manage_connection() as conn:
+        db.create_schema(conn)
+        yield
+
+def test_import_file(temp_db):
+    stats = importer.import_file(FIXTURES / 'lista_operacji_pko_bp_1.csv', 'pko_bp')
+    assert stats['total'] == 11
+    assert stats['inserted'] == 11
+    assert stats['skipped'] == 0
+
+def test_duplicate_file_raises_error(temp_db):
+    importer.import_file(FIXTURES / 'lista_operacji_mbank.csv', 'mbank')
+    with pytest.raises(importer.FileAlreadyImportedError):
+        importer.import_file(FIXTURES / 'lista_operacji_mbank.csv', 'mbank')
+
+def test_duplicate_transactions_are_deduplicated(temp_db):
+    importer.import_file(FIXTURES / 'lista_operacji_pko_bp_1.csv', 'pko_bp')
+    stats2 = importer.import_file(FIXTURES / 'lista_operacji_pko_bp_2.csv', 'pko_bp')
+    assert stats2['total'] == 11
+    assert stats2['inserted'] == 8
+    assert stats2['skipped'] == 3

@@ -1,17 +1,27 @@
 # * Database access
 import datetime
 import sqlite3
+from collections.abc import Generator
+from contextlib import contextmanager
 
 from bank_analyzer import config
 
 # * Connection
 
-def get_connection() -> sqlite3.Connection:
+@contextmanager
+def manage_connection() -> Generator[sqlite3.Connection, None, None]:
     path = config.get_db_path()
     conn = sqlite3.connect(path)
     conn.execute('PRAGMA foreign_keys = ON')
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 # * Schema
 
