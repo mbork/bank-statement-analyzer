@@ -309,15 +309,39 @@ so whitespace collapsing handles any padding between joined fragments automatica
 - Blockers: NONE
 - Decisions: encoding per bank in =BANKS= (already logged above)
 
-* TODO Add =ruff= and configure it
+* DONE Add =ruff= and configure it
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-13 Mon 12:24]
+- State "INPROGRESS" from "TODO"       [2026-04-13 Mon 12:24]
+:END:
 Add =ruff= as a dev dependency and configure line length and any other rules in =pyproject.toml=.
 
-** Steps [0/2]
-- [ ] Add =ruff= with =uv add --dev ruff=
-- [ ] Configure =[tool.ruff]= in =pyproject.toml= (line length, selected rules)
+** Steps [2/2]
+- [X] Add =ruff= with =uv add --dev ruff=
+- [X] Configure =[tool.ruff]= in =pyproject.toml= (line length, selected rules)
 
 ** Decisions
+*** [2026-04-13] – Rule set: E, F, W, I, N, UP, B, C4, SIM, PT
+**** Reason
+Covers real bugs (F, B), style (E, W), imports (I), modern syntax (UP),
+and pytest idioms (PT) without being pedantic.  N included despite deliberate
+naming conventions — can suppress per-file if needed.
+
+*** [2026-04-13] – Suppress E501 per-file for =tests/test_importer.py=
+**** Reason
+Long lines are real bank transaction description strings that cannot be
+shortened without losing fidelity.
+
 ** Session log
+*** [2026-04-13]
+- Completed: =ruff= added as dev dependency; configured in =pyproject.toml=
+  (line-length 100, 10 rule groups, per-file E501 ignore for test_importer.py);
+  all 24 lint errors fixed across =db.py=, =importer.py=, =test_db.py=,
+  =test_importer.py=, =test_reports.py=
+- In progress: NONE — mark as DONE
+- Next: N/A
+- Blockers: NONE
+- Decisions: rule set and per-file ignore logged above
 
 * TODO =categories.py= — category CRUD
 :LOGBOOK:
