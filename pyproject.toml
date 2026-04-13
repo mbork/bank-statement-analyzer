@@ -4,8 +4,8 @@ version = "0.1.0"
 description = "Analyze bank statements from CSV files, categorize transactions, and report spending."
 requires-python = ">=3.10"
 dependencies = [
+	"pyside6>=6.11.0",
 	"python-dotenv",
-	"ttkbootstrap",
 ]
 
 [dependency-groups]
