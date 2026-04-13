@@ -11,7 +11,7 @@ from bank_analyzer.ui import transactions_view
 
 class App(ttk.Window):
     def __init__(self) -> None:
-        super().__init__(title="Bank Statement Analyzer")
+        super().__init__(title="Bank Statement Analyzer", themename="litera")
         notebook = ttk.Notebook(self)
         notebook.pack(fill='both', expand=True)
 

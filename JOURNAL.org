@@ -569,13 +569,18 @@ Blocked by: [[*=reports.py= — spending queries]], [[*=ui/app.py= — root wind
 ** Decisions
 ** Session log
 
-* BLOCKED Apply ttkbootstrap theme
+* DONE Apply ttkbootstrap theme
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-13 Mon 15:19]
+- State "INPROGRESS" from "TODO"       [2026-04-13 Mon 15:19]
+- State "TODO"       from "BLOCKED"    [2026-04-13 Mon 15:19]
+:END:
 Apply a consistent visual theme across all views.
 Blocked by: [[*=ui/app.py= — root window and navigation]]
 
-** Steps [0/2]
-- [ ] Choose theme (e.g. =flatly= or =litera=)
-- [ ] Verify consistent styling across all views
+** Steps [2/2]
+- [X] Choose theme (e.g. =flatly= or =litera=)
+- [X] Verify consistent styling across all views
 
 ** Decisions
 ** Session log
