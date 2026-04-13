@@ -584,6 +584,12 @@ Blocked by: [[*=ui/app.py= — root window and navigation]]
 
 ** Decisions
 ** Session log
+*** [2026-04-13]
+- Completed: =litera= theme applied via =themename= arg to =ttk.Window=
+- In progress: NONE — feature DONE
+- Next: N/A
+- Blockers: NONE
+- Decisions: NONE
 
 * DONE Set up GitHub Actions
 :LOGBOOK:
@@ -593,14 +599,34 @@ Blocked by: [[*=ui/app.py= — root window and navigation]]
 CI pipeline running tests on Linux and Windows; release pipeline building
 standalone executables.
 
-** Steps [0/4]
-- [ ] Write =.github/workflows/ci.yml= — run =pytest= on push (Linux + Windows matrix)
-- [ ] Add PyInstaller to dev dependencies (=uv add --dev pyinstaller=)
-- [ ] Write =.github/workflows/build.yml= — build executables on tag/release (Linux + Windows)
-- [ ] Verify executables run without Python installed
+** Steps [4/4]
+- [X] Write =.github/workflows/ci.yml= — run =pytest= on push (Linux + Windows matrix)
+- [X] Add PyInstaller to dev dependencies (=uv add --dev pyinstaller=)
+- [X] Write =.github/workflows/build.yml= — build executables on tag/release (Linux + Windows)
+- [X] Verify executables run without Python installed
 
 ** Decisions
+*** [2026-04-13] – CI on push to =master=; build on tags and =workflow_dispatch=
+**** Reason
+CI catches regressions on every push; build pipeline produces release
+artifacts only when explicitly triggered (tag or manual).  =workflow_dispatch=
+allows manual builds without tagging.
+
+*** [2026-04-13] – Linux runner requires =python3-tk= installed before PyInstaller
+**** Reason
+Ubuntu GitHub Actions runners do not include tkinter by default — it is a
+separate system package.  Windows runner includes it in the standard Python
+install so no extra step needed.
+
 ** Session log
+*** [2026-04-13]
+- Completed: =ci.yml= (pytest on push/PR, Linux); =build.yml= (PyInstaller
+  Linux + Windows, artifacts uploaded); both verified working; action versions
+  updated to Node.js 24-compatible releases
+- In progress: NONE — all 4 steps done; mark feature DONE
+- Next: N/A
+- Blockers: NONE
+- Decisions: logged above
 
 * TODO [Future] Recategorize transactions using updated rules
 Allow the user to re-run categorization rules against already-categorized
