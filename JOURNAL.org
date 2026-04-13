@@ -343,19 +343,20 @@ shortened without losing fidelity.
 - Blockers: NONE
 - Decisions: rule set and per-file ignore logged above
 
-* INPROGRESS =categories.py= — category CRUD
+* DONE =categories.py= — category CRUD
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-13 Mon 14:01]
 - State "INPROGRESS" from "TODO"       [2026-04-13 Mon 12:26]
 - State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
 :END:
 Manage the list of spending categories.
 Blocked by: [[*=db.py= — schema and queries]]
 
-** Steps [0/4]
-- [ ] Write =get_all_categories()=
-- [ ] Write =add_category(name)=
-- [ ] Write =rename_category(category_id, new_name)=
-- [ ] Write =delete_category(category_id)=
+** Steps [4/4]
+- [X] Write =get_all_categories()=
+- [X] Write =add_category(name)=
+- [X] Write =rename_category(category_id, new_name)=
+- [X] Write =delete_category(category_id)=
 
 ** Decisions
 *** [2026-04-13] – SQL helpers in =db.py= accept =conn=; =categories.py= manages connection internally
@@ -487,7 +488,10 @@ ruled out to avoid schema and UI complexity in the MVP.
 
 ** Session log
 
-* BLOCKED =reports.py= — spending queries
+* TODO =reports.py= — spending queries
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:03]
+:END:
 Generate spending summaries by category and time interval.
 Blocked by: [[*=categories.py= — category CRUD]]
 
