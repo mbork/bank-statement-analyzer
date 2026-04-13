@@ -388,22 +388,37 @@ prior =SELECT= check would have a TOCTOU race and is less reliable.
 - Decisions: =insert_category= uses =RETURNING= (no follow-up SELECT needed);
   =update_category= and =delete_category= raise =ValueError= if no row matched
 
-* TODO =ui/app.py= — root window and navigation
+* DONE =ui/app.py= — root window and navigation
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-13 Mon 14:40]
+- State "INPROGRESS" from "TODO"       [2026-04-13 Mon 14:40]
 - State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
 :END:
 Main application window; wires up DB init and hosts all views.
 Blocked by: [[*=db.py= — schema and queries]]
 
-** Steps [0/3]
-- [ ] Subclass ttkbootstrap =Window=, initialize DB on startup
-- [ ] Add navigation (notebook tabs)
-- [ ] Implement =run()= entry point called from =main.py=
+** Steps [3/3]
+- [X] Subclass ttkbootstrap =Window=, initialize DB on startup
+- [X] Add navigation (notebook tabs)
+- [X] Implement =run()= entry point called from =main.py=
 
 ** Decisions
+*** [2026-04-13] – Call =create_schema()= in =run()=, not in =App.__init__=
+**** Reason
+Keeps =App.__init__= focused on UI construction.  Infrastructure (DB schema) is
+set up before the window is created, matching the pattern of =load_dotenv()= in
+=main.py=.  Errors from schema creation can be handled before any window exists.
+
+**** Alternatives considered
+Call =create_schema()= inside =App.__init__=: self-contained but mixes UI and DB
+concerns; harder to handle errors before the window is visible.
+
 ** Session log
 
-* BLOCKED =ui/import_view.py= — CSV import screen
+* TODO =ui/import_view.py= — CSV import screen
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
+:END:
 Let the user pick a CSV file and bank, run the import, and see results.
 Blocked by: [[*=importer.py= — CSV parsing and deduplication]], [[*=ui/app.py= — root window and navigation]]
 
@@ -416,7 +431,10 @@ Blocked by: [[*=importer.py= — CSV parsing and deduplication]], [[*=ui/app.py=
 ** Decisions
 ** Session log
 
-* BLOCKED =ui/categories_view.py= — manage categories
+* TODO =ui/categories_view.py= — manage categories
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
+:END:
 Allow the user to add, rename, and delete categories.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
 
@@ -428,7 +446,10 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 ** Decisions
 ** Session log
 
-* BLOCKED =ui/transactions_view.py= — browse and categorize
+* TODO =ui/transactions_view.py= — browse and categorize
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
+:END:
 Show all transactions in a table; allow assigning categories.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
 
@@ -454,7 +475,10 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/transactions_view.py=
 ** Decisions
 ** Session log
 
-* BLOCKED =categorizer.py= — rule-based auto-categorization
+* TODO =categorizer.py= — rule-based auto-categorization
+:LOGBOOK:
+- State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
+:END:
 Apply saved substring rules to uncategorized transactions; wire into import
 and expose as an on-demand call.
 Blocked by: [[*=categories.py= — category CRUD]]
