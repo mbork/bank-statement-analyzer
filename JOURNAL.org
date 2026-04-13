@@ -585,7 +585,11 @@ Blocked by: [[*=ui/app.py= — root window and navigation]]
 ** Decisions
 ** Session log
 
-* TODO Set up GitHub Actions
+* DONE Set up GitHub Actions
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-13 Mon 15:55]
+- State "INPROGRESS" from "TODO"       [2026-04-13 Mon 15:55]
+:END:
 CI pipeline running tests on Linux and Windows; release pipeline building
 standalone executables.
 
