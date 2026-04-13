@@ -378,6 +378,15 @@ which =categories.py= can catch and re-raise as a domain exception.  A Python-le
 prior =SELECT= check would have a TOCTOU race and is less reliable.
 
 ** Session log
+*** [2026-04-13] (session 11)
+- Completed: four SQL helpers in =db.py= (=get_all_categories=, =insert_category= with =RETURNING=,
+  =update_category=, =delete_category=); =UNIQUE= constraint on =categories.name=;
+  10 tests in =test_db.py=; all four wrappers in =categories.py= using =manage_connection()=
+- In progress: NONE — feature DONE
+- Next: start =ui/app.py= or =reports.py= (both unblocked)
+- Blockers: NONE
+- Decisions: =insert_category= uses =RETURNING= (no follow-up SELECT needed);
+  =update_category= and =delete_category= raise =ValueError= if no row matched
 
 * TODO =ui/app.py= — root window and navigation
 :LOGBOOK:
