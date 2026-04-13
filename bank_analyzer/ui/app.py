@@ -1,38 +1,34 @@
 # * Main application window
 
-import ttkbootstrap as ttk
+import sys
+
+from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
+
 from bank_analyzer import db
-from bank_analyzer.ui import categories_view
-from bank_analyzer.ui import import_view
-from bank_analyzer.ui import reports_view
-from bank_analyzer.ui import transactions_view
+from bank_analyzer.ui import categories_view, import_view, reports_view, transactions_view
 
 # * Application
 
-class App(ttk.Window):
+class App(QMainWindow):
     def __init__(self) -> None:
-        super().__init__(title="Bank Statement Analyzer", themename="litera")
-        notebook = ttk.Notebook(self)
-        notebook.pack(fill='both', expand=True)
+        super().__init__()
+        self.setWindowTitle("Bank Statement Analyzer")
 
-        import_tab = import_view.ImportView(notebook)
-        notebook.add(import_tab, text='Import')
-
-        transactions_tab = transactions_view.TransactionsView(notebook)
-        notebook.add(transactions_tab, text='Transactions')
-
-        reports_tab = reports_view.ReportsView(notebook)
-        notebook.add(reports_tab, text='Reports')
-
-        categories_tab = categories_view.CategoriesView(notebook)
-        notebook.add(categories_tab, text='Categories')
-
+        tabs = QTabWidget()
+        tabs.addTab(import_view.ImportView(), 'Import')
+        tabs.addTab(transactions_view.TransactionsView(), 'Transactions')
+        tabs.addTab(reports_view.ReportsView(), 'Reports')
+        tabs.addTab(categories_view.CategoriesView(), 'Categories')
         # TODO Rules tab will be here
+
+        self.setCentralWidget(tabs)
 
 # * Entry point
 
 def run() -> None:
     with db.manage_connection() as conn:
         db.create_schema(conn)
-    app = App()
-    app.mainloop()
+    qt_app = QApplication(sys.argv)
+    window = App()
+    window.show()
+    sys.exit(qt_app.exec())

@@ -424,8 +424,10 @@ concerns; harder to handle errors before the window is visible.
 - Decisions: tab order Import → Transactions → Reports → Categories (Rules deferred
   pending =categorizer.py=); =create_schema()= in =run()= (already logged above)
 
-* TODO =ui/import_view.py= — CSV import screen
+* DONE =ui/import_view.py= — CSV import screen
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-13 Mon 16:40]
+- State "INPROGRESS" from "TODO"       [2026-04-13 Mon 16:40]
 - State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
 :END:
 Let the user pick a CSV file and bank, run the import, and see results.

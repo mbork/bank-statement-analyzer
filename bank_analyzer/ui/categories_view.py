@@ -1,8 +1,8 @@
 # * Categories view
 
-import ttkbootstrap as ttk
+from PySide6.QtWidgets import QWidget
 
 # * View
 
-class CategoriesView(ttk.Frame):
+class CategoriesView(QWidget):
     pass

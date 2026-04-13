@@ -1,8 +1,8 @@
 # * Reports view
 
-import ttkbootstrap as ttk
+from PySide6.QtWidgets import QWidget
 
 # * View
 
-class ReportsView(ttk.Frame):
+class ReportsView(QWidget):
     pass
