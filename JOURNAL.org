@@ -438,7 +438,25 @@ Blocked by: [[*=importer.py= — CSV parsing and deduplication]], [[*=ui/app.py=
 - [ ] Status label showing rows imported/skipped
 
 ** Decisions
+- Switching entire =ui/= from ttkbootstrap/Tkinter to PySide6.  ttkbootstrap
+  1.20.2 uses PIL's =_imagingtk= to render widget images; on Arch Linux with
+  Python 3.13 this causes a fatal XCB threading crash (=XInitThreads()= called
+  after X11 is already in use).  Multiple workarounds attempted (OptionMenu
+  instead of Combobox, Pillow downgrade to 10.4.0, pre-importing PIL.ImageTk,
+  calling =XInitThreads()= via ctypes before Tk init) all failed.  PySide6
+  avoids the problem entirely — Qt owns its X11/threading lifecycle.  The
+  architecture was already designed for this migration (=ui/= isolation).
+
 ** Session log
+*** [2026-04-13]
+- Implemented =ui/import_view.py= (all 4 steps: bank dropdown, file picker,
+  import button, status label) using ttkbootstrap
+- Hit fatal XCB crash (PIL + ttkbootstrap + Python 3.13 incompatibility);
+  multiple fixes attempted, none succeeded
+- Decision: migrate =ui/= to PySide6 (see Decisions above)
+- In progress: migration not yet started — deferred to next session
+- Next: replace ttkbootstrap with PySide6 across all =ui/= files
+- Blockers: NONE
 
 * TODO =ui/categories_view.py= — manage categories
 :LOGBOOK:

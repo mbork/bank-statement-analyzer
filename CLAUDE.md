@@ -79,6 +79,8 @@ Inherits all rules from `~/.claude/CLAUDE.md`.  Project-specific additions:
 - Guide and explain rather than writing implementation code unprompted
 - Only write code when explicitly asked to.  When the user says "let's get coding", "time
   to code now", or something similar, it means *the user* wants to start coding.
+- Exception: I don't need to learn UI coding in Python – it's ok and in fact desirable for
+  you to edit/code UI parts yourself.
 - When asked to check or review my code, be critical and honest –
   I want signal, not comfort.  Pay attention to correct but not
   idiomatic code and suggest improvements.
