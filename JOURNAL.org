@@ -343,8 +343,9 @@ shortened without losing fidelity.
 - Blockers: NONE
 - Decisions: rule set and per-file ignore logged above
 
-* TODO =categories.py= — category CRUD
+* INPROGRESS =categories.py= — category CRUD
 :LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-04-13 Mon 12:26]
 - State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
 :END:
 Manage the list of spending categories.
@@ -357,6 +358,24 @@ Blocked by: [[*=db.py= — schema and queries]]
 - [ ] Write =delete_category(category_id)=
 
 ** Decisions
+*** [2026-04-13] – SQL helpers in =db.py= accept =conn=; =categories.py= manages connection internally
+**** Reason
+All SQL must live in =db.py= (per architecture rule), so the testable layer is already
+=db.py=.  =categories.py= functions call =db.py= helpers and own the =manage_connection()=
+call, matching the pattern established by =importer.py=.  Tests exercise =db.py= helpers
+directly with a test =conn=, as in =test_db.py=.
+
+**** Alternatives considered
+=categories.py= functions accept =conn= (caller manages connection): would make
+=categories.py= trivially thin pass-throughs to =db.py=, duplicating the interface
+without adding value.
+
+*** [2026-04-13] – =UNIQUE= constraint on =categories.name= enforced in schema
+**** Reason
+DB-enforced uniqueness is reliable and race-free; raises =IntegrityError= on conflict,
+which =categories.py= can catch and re-raise as a domain exception.  A Python-level
+prior =SELECT= check would have a TOCTOU race and is less reliable.
+
 ** Session log
 
 * TODO =ui/app.py= — root window and navigation

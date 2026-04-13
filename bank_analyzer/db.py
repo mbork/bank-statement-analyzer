@@ -36,7 +36,7 @@ def create_schema(conn: sqlite3.Connection) -> None:
     conn.execute('''
         create table if not exists categories (
             category_id integer primary key,
-            name text not null
+            name text unique not null
         )
     ''')
     conn.execute('''
@@ -52,7 +52,7 @@ def create_schema(conn: sqlite3.Connection) -> None:
     ''')
     conn.commit()
 
-# * Inserting
+# * Importing transactions
 
 def insert_imported_file(conn: sqlite3.Connection, filename: str) -> int:
     cursor = conn.execute(
@@ -75,3 +75,29 @@ def insert_transactions(conn: sqlite3.Connection, rows: list[dict], imported_fil
         )
     )
     return cursor.rowcount
+
+# * Categories
+
+def get_all_categories(conn: sqlite3.Connection) -> list[dict]:
+    cursor = conn.execute('select category_id, name from categories order by name')
+    return [dict(row) for row in cursor]
+
+def insert_category(conn: sqlite3.Connection, name: str) -> dict:
+    cursor = conn.execute(
+        'insert into categories (name) values (?) returning category_id, name',
+        (name,),
+    )
+    return dict(cursor.fetchone())
+
+def update_category(conn: sqlite3.Connection, category_id: int, new_name: str) -> None:
+    cursor = conn.execute(
+        'update categories set name = ? where category_id = ?',
+        (new_name, category_id,),
+    )
+    if cursor.rowcount == 0:
+        raise ValueError(f'no category with id {category_id}')
+
+def delete_category(conn: sqlite3.Connection, category_id: int) -> None:
+    cursor = conn.execute('delete from categories where category_id = ?', (category_id,))
+    if cursor.rowcount == 0:
+        raise ValueError(f'no category with id {category_id}')
