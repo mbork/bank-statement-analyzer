@@ -1,10 +1,12 @@
 # * Database tests
 
 import datetime
-import pytest
 import sqlite3
 
+import pytest
+
 from bank_analyzer import db
+
 
 @pytest.fixture
 def conn():
@@ -32,7 +34,8 @@ ROWS_A = [
 ]
 
 ROWS_B = [
-    {'date': datetime.date(2026, 4, 2), 'amount': -1200, 'description': 'Biedronka'},  # duplicate of ROWS_A[1]
+    # duplicate of ROWS_A[1]
+    {'date': datetime.date(2026, 4, 2), 'amount': -1200, 'description': 'Biedronka'},
     {'date': datetime.date(2026, 4, 3), 'amount': -300, 'description': 'Dino'},
 ]
 

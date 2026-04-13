@@ -24,7 +24,9 @@ BANKS: dict[str, dict] = {
         'amount_col': 'Kwota',
         'decimal_sep': '.',
         'thousand_sep': '',
-        'description_cols': ['Typ transakcji', 'Opis transakcji', 'Opis transakcji+1', 'Opis transakcji+3'],
+        'description_cols': [
+            'Typ transakcji', 'Opis transakcji', 'Opis transakcji+1', 'Opis transakcji+3',
+        ],
     },
     'mbank': {
         'encoding': 'utf8',
@@ -89,7 +91,10 @@ def parse_amount(raw: str, bank: str) -> int:
         raw = raw.replace(bank_config['thousand_sep'], '')
     raw = raw.replace(bank_config['decimal_sep'], '.')
 
-    return round(100 * float(raw))
+    try:
+        return round(100 * float(raw))
+    except ValueError:
+        raise ValueError(f'{raw} is not a valid amount') from None
 
 def parse_csv(filepath: pathlib.Path, bank: str) -> list[dict]:
     bank_config = BANKS[bank]
@@ -102,9 +107,14 @@ def parse_csv(filepath: pathlib.Path, bank: str) -> list[dict]:
             # skip empty rows
             if not any(row.values()):
                 continue
-            date = datetime.datetime.strptime(row[bank_config['date_col']], bank_config['date_format']).date()
+            date = datetime.datetime.strptime(
+                row[bank_config['date_col']],
+                bank_config['date_format']
+            ).date()
             amount = parse_amount(row[bank_config['amount_col']], bank)
-            description = canonicalize_description(' '.join(row[col] for col in bank_config['description_cols']))
+            description = canonicalize_description(
+                ' '.join(row[col] for col in bank_config['description_cols'])
+            )
             result.append({'date': date, 'amount': amount, 'description': description})
         return result
 

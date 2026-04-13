@@ -1,8 +1,7 @@
 # * Configuration and path resolution
 import os
-from pathlib import Path
 import platform
-
+from pathlib import Path
 
 # * Data directory
 

@@ -65,7 +65,13 @@ def insert_imported_file(conn: sqlite3.Connection, filename: str) -> int:
 
 def insert_transactions(conn: sqlite3.Connection, rows: list[dict], imported_file_id: int) -> int:
     cursor = conn.executemany(
-        'insert into transactions (date, description, amount, imported_file_id) values (?, ?, ?, ?) on conflict do nothing',
-        ((row['date'].isoformat(), row['description'], row['amount'], imported_file_id) for row in rows)
+        '''
+            insert into transactions (date, description, amount, imported_file_id)
+            values (?, ?, ?, ?) on conflict do nothing
+        ''',
+        (
+            (row['date'].isoformat(), row['description'], row['amount'], imported_file_id)
+            for row in rows
+        )
     )
     return cursor.rowcount

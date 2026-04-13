@@ -11,6 +11,7 @@ dependencies = [
 [dependency-groups]
 dev = [
 	"pytest",
+	"ruff>=0.15.10",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -24,3 +25,12 @@ build-backend = "hatchling.build"
 venvPath = "."
 venv = ".venv"
 exclude = [".venv"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "PT"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_importer.py" = ["E501"] # allow long descriptions

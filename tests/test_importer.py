@@ -3,12 +3,14 @@
 import csv
 import datetime
 import pathlib
-import pytest
 import re
+
+import pytest
+
+from bank_analyzer import db, importer
 
 FIXTURES = pathlib.Path(__file__).parent / 'fixtures'
 
-from bank_analyzer import db, importer
 
 # ** canonicalize_description
 def test_no_whitespace_unchanged():
@@ -117,7 +119,7 @@ def test_parse_amount_pko_bp():
     '',           # empty string
 ])
 def test_parse_amount_pko_bp_invalid(raw):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='is not a valid amount'):
         importer.parse_amount(raw, 'pko_bp')
 
 def test_parse_amount_mbank_with_thousand_sep():
@@ -132,7 +134,7 @@ def test_parse_amount_mbank_with_thousand_sep():
     'PLN -43,52',     # currency before amount
 ])
 def test_parse_amount_mbank_invalid(raw):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='is not a valid amount'):
         importer.parse_amount(raw, 'mbank')
 
 

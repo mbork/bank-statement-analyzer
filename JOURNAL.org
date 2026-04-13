@@ -519,6 +519,19 @@ have a category assigned.
 ** Decisions
 ** Session log
 
+* TODO Configure eglot to run pyright + ruff simultaneously
+Show ruff diagnostics inline in Emacs alongside pyright, using a
+multi-server eglot setup.
+
+** Steps [0/2]
+- [ ] Identify the correct package/mechanism for multiple eglot servers
+  per mode (name TBD — research needed)
+- [ ] Configure eglot to attach both =pyright= and =ruff server= to
+  =python-ts-mode= buffers
+
+** Decisions
+** Session log
+
 * Config                                                           :noexport:
 #+SEQ_TODO: TODO(!) INPROGRESS(!) | DONE(!)
 #+SEQ_TODO: | CANCELED(!)
