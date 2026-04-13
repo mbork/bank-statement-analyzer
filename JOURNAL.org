@@ -475,8 +475,9 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 ** Decisions
 ** Session log
 
-* TODO =ui/transactions_view.py= — browse and categorize
+* INPROGRESS =ui/transactions_view.py= — browse and categorize
 :LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-04-13 Mon 16:40]
 - State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
 :END:
 Show all transactions in a table; allow assigning categories.

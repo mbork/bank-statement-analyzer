@@ -76,6 +76,17 @@ def insert_transactions(conn: sqlite3.Connection, rows: list[dict], imported_fil
     )
     return cursor.rowcount
 
+# * Transactions
+
+def get_all_transactions(conn: sqlite3.Connection) -> list[dict]:
+    cursor = conn.execute('''
+        select t.transaction_id, t.date, t.description, t.amount, c.name as category
+        from transactions t
+        left join categories c using (category_id)
+        order by t.date desc, t.transaction_id desc
+    ''')
+    return [dict(row) for row in cursor]
+
 # * Categories
 
 def get_all_categories(conn: sqlite3.Connection) -> list[dict]:

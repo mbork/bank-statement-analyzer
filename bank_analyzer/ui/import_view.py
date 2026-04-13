@@ -2,6 +2,7 @@
 
 import pathlib
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -18,6 +19,8 @@ from bank_analyzer import importer
 # * View
 
 class ImportView(QWidget):
+    import_succeeded = Signal()
+
     def __init__(self) -> None:
         super().__init__()
         self._filepath: pathlib.Path | None = None
@@ -77,6 +80,7 @@ class ImportView(QWidget):
                 f"Done: {result['inserted']} inserted, {result['skipped']} skipped "
                 f"(total {result['total']})."
             )
+            self.import_succeeded.emit()
         except importer.FileAlreadyImportedError:
             self._status_label.setText(f"'{self._filepath.name}' has already been imported.")
         except Exception as e:

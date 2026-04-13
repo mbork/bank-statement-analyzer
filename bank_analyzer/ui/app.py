@@ -15,8 +15,13 @@ class App(QMainWindow):
         self.setWindowTitle("Bank Statement Analyzer")
 
         tabs = QTabWidget()
-        tabs.addTab(import_view.ImportView(), 'Import')
-        tabs.addTab(transactions_view.TransactionsView(), 'Transactions')
+
+        import_tab = import_view.ImportView()
+        transactions_tab = transactions_view.TransactionsView()
+        import_tab.import_succeeded.connect(transactions_tab.refresh)
+
+        tabs.addTab(import_tab, 'Import')
+        tabs.addTab(transactions_tab, 'Transactions')
         tabs.addTab(reports_view.ReportsView(), 'Reports')
         tabs.addTab(categories_view.CategoriesView(), 'Categories')
         # TODO Rules tab will be here
