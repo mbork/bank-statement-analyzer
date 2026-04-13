@@ -335,17 +335,6 @@ Blocked by: [[*=db.py= — schema and queries]]
 ** Decisions
 ** Session log
 
-* BLOCKED =reports.py= — spending queries
-Generate spending summaries by category and time interval.
-Blocked by: [[*=categories.py= — category CRUD]]
-
-** Steps [0/2]
-- [ ] Write =spending_by_category(start_date, end_date)=: totals per category
-- [ ] Write =spending_by_month(category_id)=: monthly breakdown for one category
-
-** Decisions
-** Session log
-
 * TODO =ui/app.py= — root window and navigation
 :LOGBOOK:
 - State "TODO"       from "BLOCKED"    [2026-04-07 Tue 09:29]
@@ -374,6 +363,18 @@ Blocked by: [[*=importer.py= — CSV parsing and deduplication]], [[*=ui/app.py=
 ** Decisions
 ** Session log
 
+* BLOCKED =ui/categories_view.py= — manage categories
+Allow the user to add, rename, and delete categories.
+Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
+
+** Steps [0/3]
+- [ ] List all categories in a =Listbox= or =Treeview=
+- [ ] Add category (entry field + button calling =categories.add_category()=)
+- [ ] Rename and delete selected category
+
+** Decisions
+** Session log
+
 * BLOCKED =ui/transactions_view.py= — browse and categorize
 Show all transactions in a table; allow assigning categories.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
@@ -383,6 +384,73 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 - [ ] Category dropdown (or combobox) for assigning a category to selected rows
 - [ ] Filter by date range
 - [ ] Filter by category
+
+** Decisions
+** Session log
+
+* BLOCKED Manual transaction categorization
+Allow the user to assign or change a category on individual transactions
+(or a selection) via the UI.
+Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/transactions_view.py= — browse and categorize]]
+
+** Steps [0/3]
+- [ ] Add =set_transaction_category(conn, transaction_id, category_id)= to =db.py=
+- [ ] Wire category dropdown / combobox in =ui/transactions_view.py= to call it
+- [ ] Support bulk assignment (multiple selected rows → same category)
+
+** Decisions
+** Session log
+
+* BLOCKED =categorizer.py= — rule-based auto-categorization
+Apply saved substring rules to uncategorized transactions; wire into import
+and expose as an on-demand call.
+Blocked by: [[*=categories.py= — category CRUD]]
+
+** Steps [0/5]
+- [ ] Add =categorization_rules= table to schema: =rule_id=, =pattern= (text), =category_id= (FK)
+- [ ] Write =db.py= helpers: =insert_rule=, =get_all_rules=, =delete_rule=
+- [ ] Write =categorize_transactions(conn)=: apply all rules to uncategorized transactions only
+- [ ] Wire =categorize_transactions= into =import_file()= (run after insert)
+- [ ] Expose =categorize_transactions= for on-demand call from the UI
+
+** Decisions
+*** [2026-04-13] – Substring match (not regex) for rules
+**** Reason
+Simpler to enter in a UI; sufficient for typical merchant name matching.  Regex
+adds power the user would rarely need and makes rule authoring harder.
+
+*** [2026-04-13] – Rules applied both at import time and on-demand
+**** Reason
+Automatic application at import is the main convenience; on-demand re-run lets
+the user apply newly added rules to already-imported transactions without
+re-importing.
+
+*** [2026-04-13] – Categorizer skips already-categorized transactions (MVP)
+**** Reason
+Preserves manual corrections — if the user overrides a rule by hand, a
+subsequent auto-run must not undo that.  Future: add a "recategorize since
+date" mode (see deferred task at end of file).
+
+*** [2026-04-13] – Categorization rules are global (not bank-scoped)
+**** Reason
+Most merchants appear across all banks with similar descriptions.  Bank-scoped
+rules would require duplicating every rule per bank — a real usability cost for
+a problem most users will never hit.  No =bank= column on
+=categorization_rules=, no escape hatch, to keep the MVP simple.
+
+**** Alternatives considered
+Optional nullable =bank= FK on =categorization_rules= (global when =NULL=):
+ruled out to avoid schema and UI complexity in the MVP.
+
+** Session log
+
+* BLOCKED =reports.py= — spending queries
+Generate spending summaries by category and time interval.
+Blocked by: [[*=categories.py= — category CRUD]]
+
+** Steps [0/2]
+- [ ] Write =spending_by_category(start_date, end_date)=: totals per category
+- [ ] Write =spending_by_month(category_id)=: monthly breakdown for one category
 
 ** Decisions
 ** Session log
@@ -432,6 +500,21 @@ standalone executables.
 - [ ] Add PyInstaller to dev dependencies (=uv add --dev pyinstaller=)
 - [ ] Write =.github/workflows/build.yml= — build executables on tag/release (Linux + Windows)
 - [ ] Verify executables run without Python installed
+
+** Decisions
+** Session log
+
+* TODO [Future] Recategorize transactions using updated rules
+Allow the user to re-run categorization rules against already-categorized
+transactions, optionally scoped to transactions since a specified date.
+Deferred from MVP: =categorizer.py= currently skips transactions that already
+have a category assigned.
+
+** Steps [0/2]
+- [ ] Add a =recategorize_since(conn, date)= function in =categorizer.py= that
+  applies all rules to transactions on or after =date=, overwriting existing
+  category assignments
+- [ ] Wire into UI (e.g. "Re-apply rules since..." dialog)
 
 ** Decisions
 ** Session log
