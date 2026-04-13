@@ -414,6 +414,15 @@ Call =create_schema()= inside =App.__init__=: self-contained but mixes UI and DB
 concerns; harder to handle errors before the window is visible.
 
 ** Session log
+*** [2026-04-13]
+- Completed: =App= subclasses =ttk.Window=; =Notebook= with four tabs (Import,
+  Transactions, Reports, Categories); =create_schema()= called in =run()=;
+  =categories_view.py= stub created; tab ordering decided; decision logged
+- In progress: NONE — feature DONE
+- Next: start =reports.py= (spending queries, unblocked)
+- Blockers: NONE
+- Decisions: tab order Import → Transactions → Reports → Categories (Rules deferred
+  pending =categorizer.py=); =create_schema()= in =run()= (already logged above)
 
 * TODO =ui/import_view.py= — CSV import screen
 :LOGBOOK:
