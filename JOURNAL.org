@@ -749,6 +749,48 @@ Reduce boilerplate in =tests/test_db.py= by reusing the =transaction_id= fixture
 ** Decisions
 ** Session log
 
+* TODO Multi-select category filter
+
+Allow selecting a set of categories (including "uncategorized") in the
+transactions filter bar, instead of a single category.
+
+** Steps [0/2]
+- [ ] Change =TransactionFilters.category_id= to =category_ids: list[int | None] | None=;
+  update SQL to =WHERE (category_id IN (?, ...) OR category_id IS NULL)= with the
+  =IS NULL= branch added only when =None= is in the list
+- [ ] Replace =_filter_category_combo= (=QComboBox=) with a multi-select widget;
+  preserve selected set across refreshes; show summary label (e.g. "3 categories")
+
+** Decisions
+** Session log
+
+* TODO Amount range filter in transactions view
+
+** Decisions
+*** [2026-04-14] – Amount filter uses =abs()= by default; raw mode activated by explicit sign prefix
+**** Reason
+=abs()= matches natural language ("show me transactions around 300 PLN") and works
+for both income and expenses without requiring the user to think about signs.
+Raw mode (=min <= amount <= max=) is activated when either input contains an
+explicit =+= or =-= prefix, which requires deliberate intent.  A visual indicator
+shows the current mode.  Erroneous/weird combinations (e.g. raw mode with
+=min > max=, or a mixed-sign impossible range) are flagged visually rather than
+silently returning an empty table.
+
+**** Alternatives considered
+- Always =abs()=: can't isolate expenses from income by amount — ruled out.
+- Implicit sign switch (=abs= unless a value is negative): silent mode change,
+  indistinguishable from a typo — ruled out.
+- Explicit toggle (All / Expenses / Income): solves the problem cleanly but
+  user didn't want the extra widget.
+
+** Steps [0/1]
+- [ ] Add min/max amount inputs to filter bar; implement sign-aware =abs()= logic
+  in =db.py= / =TransactionFilters=; add visual mode indicator and highlight
+  impossible/weird combinations
+
+** Session log
+
 * Config                                                           :noexport:
 #+SEQ_TODO: TODO(!) INPROGRESS(!) | DONE(!)
 #+SEQ_TODO: | CANCELED(!)
