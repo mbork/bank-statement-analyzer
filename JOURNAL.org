@@ -522,6 +522,18 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
   polling and keeps tabs decoupled
 
 ** Session log
+*** [2026-04-14] (2)
+- Completed: fixed calendar popup default (`_DefaultPageCalendar` subclass with
+  `showEvent` + `setSelectedDate` + `blockSignals`); amount range filter
+  (`amount_min`/`amount_max` in `TransactionFilters`, `abs()` SQL, UI with
+  `QDoubleValidator`); Unicode `lower` override on SQLite connection; full
+  filter test suite (35 tests, incl. 6 parametrized Polish case combinations)
+- In progress: NONE
+- Next: write tests for `Make tests more DRY` step, or start next feature
+- Blockers: NONE
+- Decisions: `showPopup` not overridable in PySide6 for `QDateTimeEdit` —
+  solved via `setCalendarWidget(_DefaultPageCalendar(...))`
+
 *** [2026-04-14]
 - Completed: category assignment panel (combobox + Assign, multi-row, pre-selects
   current); =categories_changed= signal propagates renames/deletes to transactions
