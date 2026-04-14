@@ -450,14 +450,25 @@ Blocked by: [[*=importer.py= — CSV parsing and deduplication]], [[*=ui/app.py=
   architecture was already designed for this migration (=ui/= isolation).
 
 ** Session log
-*** [2026-04-13]
+*** [2026-04-13] (earlier)
 - Implemented =ui/import_view.py= (all 4 steps: bank dropdown, file picker,
   import button, status label) using ttkbootstrap
 - Hit fatal XCB crash (PIL + ttkbootstrap + Python 3.13 incompatibility);
   multiple fixes attempted, none succeeded
 - Decision: migrate =ui/= to PySide6 (see Decisions above)
-- In progress: migration not yet started — deferred to next session
-- Next: replace ttkbootstrap with PySide6 across all =ui/= files
+- Blockers: NONE
+
+*** [2026-04-13] (later)
+- Removed =ttkbootstrap= + =pillow=; added =pyside6=
+- Migrated all =ui/= stubs to PySide6 (=QWidget=, =QMainWindow=, =QTabWidget=)
+- Reimplemented =ui/import_view.py= in PySide6 — emits =import_succeeded=
+  signal after a successful import
+- Implemented =ui/transactions_view.py= — read-only =QTableWidget=, reverse
+  chronological, auto-refreshes via =import_succeeded= signal; description
+  column stretches, category fixed at 2× amount width
+- Added =get_all_transactions()= to =db.py= (LEFT JOIN categories, newest-first)
+- In progress: NONE — mark =import_view= DONE; =transactions_view= INPROGRESS
+- Next: =ui/categories_view.py=, =ui/reports_view.py=
 - Blockers: NONE
 
 * TODO =ui/categories_view.py= — manage categories
@@ -483,14 +494,27 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 Show all transactions in a table; allow assigning categories.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
 
-** Steps [0/4]
-- [ ] Treeview showing date, description, amount, category
-- [ ] Category dropdown (or combobox) for assigning a category to selected rows
+** Steps [1/4]
+- [X] Table showing date, description, amount, category (read-only for now)
+- [ ] Category dropdown for assigning a category to selected rows
 - [ ] Filter by date range
 - [ ] Filter by category
 
 ** Decisions
+- Read-only for now; category assignment deferred to later step
+- =import_succeeded= signal (on =ImportView=) drives auto-refresh — avoids
+  polling and keeps tabs decoupled
+
 ** Session log
+*** [2026-04-13]
+- Implemented read-only =QTableWidget= (date, description, amount in PLN,
+  category); reverse chronological via =get_all_transactions()= in =db.py=
+- Dynamic column widths: description stretches, others size to content,
+  category fixed at 2× amount width
+- Auto-refresh wired via =import_succeeded= signal in =App.__init__=
+- In progress: category assignment and filters deferred
+- Next: =ui/categories_view.py=
+- Blockers: NONE
 
 * BLOCKED Manual transaction categorization
 Allow the user to assign or change a category on individual transactions
