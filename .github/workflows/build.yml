@@ -16,7 +16,7 @@ jobs:
 
       - run: uv sync
 
-      - run: uv run pyinstaller --onefile --name bank-statement-analyzer main.py
+      - run: uv run pyinstaller --noconsole --onefile --name bank-statement-analyzer main.py
 
       - uses: actions/upload-artifact@v7
         with:
