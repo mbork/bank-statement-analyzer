@@ -85,6 +85,8 @@ class TransactionFilters:
     category_id: int | None = None
     date_from: str | None = None
     date_to: str | None = None
+    amount_min: int | None = None
+    amount_max: int | None = None
     description: str | None = None
 
 def get_all_transactions(
@@ -104,6 +106,12 @@ def get_all_transactions(
         if filters.date_to is not None:
             conditions.append('t.date <= ?')
             params.append(filters.date_to)
+        if filters.amount_min is not None:
+            conditions.append('abs(t.amount) >= ?')
+            params.append(filters.amount_min)
+        if filters.amount_max is not None:
+            conditions.append('abs(t.amount) <= ?')
+            params.append(filters.amount_max)
         if filters.description is not None:
             conditions.append('lower(t.description) like ?')
             params.append('%' + filters.description.lower() + '%')

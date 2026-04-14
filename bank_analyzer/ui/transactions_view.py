@@ -1,7 +1,7 @@
 # * Transactions view
 
 from PySide6.QtCore import QDate, Qt, QTimer
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QDoubleValidator
 from PySide6.QtWidgets import (
     QCalendarWidget,
     QComboBox,
@@ -115,6 +115,21 @@ class TransactionsView(QWidget):
         self._description_input.setPlaceholderText(self.tr('Description…'))
         self._description_input.textChanged.connect(self.refresh)
 
+        amount_validator = QDoubleValidator(0.0, 1e9, 2)
+        amount_validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+
+        self._amount_min_input = QLineEdit()
+        self._amount_min_input.setPlaceholderText(self.tr('min'))
+        self._amount_min_input.setValidator(amount_validator)
+        self._amount_min_input.setFixedWidth(80)
+        self._amount_min_input.textChanged.connect(self.refresh)
+
+        self._amount_max_input = QLineEdit()
+        self._amount_max_input.setPlaceholderText(self.tr('max'))
+        self._amount_max_input.setValidator(amount_validator)
+        self._amount_max_input.setFixedWidth(80)
+        self._amount_max_input.textChanged.connect(self.refresh)
+
         clear_button = QPushButton(self.tr('Clear filters'))
         clear_button.clicked.connect(self._clear_filters)
 
@@ -123,6 +138,10 @@ class TransactionsView(QWidget):
         filter_row.addWidget(self._date_from)
         filter_row.addWidget(QLabel(self.tr('To:')))
         filter_row.addWidget(self._date_to)
+        filter_row.addWidget(QLabel(self.tr('Amount:')))
+        filter_row.addWidget(self._amount_min_input)
+        filter_row.addWidget(QLabel(self.tr('–')))
+        filter_row.addWidget(self._amount_max_input)
         filter_row.addWidget(QLabel(self.tr('Category:')))
         filter_row.addWidget(self._filter_category_combo, stretch=1)
         filter_row.addWidget(self._description_input, stretch=2)
@@ -176,6 +195,15 @@ class TransactionsView(QWidget):
                 break
         self._filter_category_combo.blockSignals(False)
 
+    def _parse_amount(self, text: str) -> int | None:
+        stripped = text.strip()
+        if not stripped:
+            return None
+        try:
+            return round(float(stripped) * 100)
+        except ValueError:
+            return None
+
     def _build_filters(self) -> db.TransactionFilters | None:
         date_from = (
             self._date_from.date().toString('yyyy-MM-dd')
@@ -188,13 +216,20 @@ class TransactionsView(QWidget):
         category_id: int | None = self._filter_category_combo.currentData()
         description_text = self._description_input.text().strip()
         description = description_text if description_text else None
-        is_active = any(v is not None for v in [date_from, date_to, category_id, description])
+        amount_min = self._parse_amount(self._amount_min_input.text())
+        amount_max = self._parse_amount(self._amount_max_input.text())
+        is_active = any(
+            v is not None
+            for v in [date_from, date_to, category_id, description, amount_min, amount_max]
+        )
         if is_active:
             return db.TransactionFilters(
                 date_from=date_from,
                 date_to=date_to,
                 category_id=category_id,
                 description=description,
+                amount_min=amount_min,
+                amount_max=amount_max,
             )
         return None
 
@@ -221,15 +256,17 @@ class TransactionsView(QWidget):
     # ** Slots
 
     def _clear_filters(self) -> None:
-        for widget in [self._date_from, self._date_to,
-                       self._filter_category_combo, self._description_input]:
+        for widget in [self._date_from, self._date_to, self._filter_category_combo,
+                       self._description_input, self._amount_min_input, self._amount_max_input]:
             widget.blockSignals(True)
         self._date_from.setDate(_MIN_DATE)
         self._date_to.setDate(_MIN_DATE)
         self._filter_category_combo.setCurrentIndex(0)
         self._description_input.clear()
-        for widget in [self._date_from, self._date_to,
-                       self._filter_category_combo, self._description_input]:
+        self._amount_min_input.clear()
+        self._amount_max_input.clear()
+        for widget in [self._date_from, self._date_to, self._filter_category_combo,
+                       self._description_input, self._amount_min_input, self._amount_max_input]:
             widget.blockSignals(False)
         self.refresh()
 

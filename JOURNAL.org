@@ -496,7 +496,7 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 Show all transactions in a table; allow assigning categories.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
 
-** Steps [3/5]
+** Steps [3/6]
 - [X] Table showing date, description, amount, category (read-only for now)
 - [X] Category dropdown for assigning a category to selected rows
 - [ ] Filters (date range, category, description) — UI + =get_all_transactions= tests:
@@ -509,6 +509,11 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
   - [ ] =test_get_all_transactions_filters_by_description_case_insensitive_ascii=
   - [ ] =test_get_all_transactions_filters_by_description_case_insensitive_polish=
   - [ ] =test_get_all_transactions_combined_filters=
+- [ ] Amount range filter (=abs()= logic) — =db.py= + UI + tests:
+  - [ ] =test_get_all_transactions_filters_by_amount_min=
+  - [ ] =test_get_all_transactions_filters_by_amount_max=
+  - [ ] =test_get_all_transactions_filters_by_amount_range=
+  - [ ] =test_get_all_transactions_amount_filter_includes_income=
 - [X] Sort by column (header click); handle amount column numerically
 
 ** Decisions
