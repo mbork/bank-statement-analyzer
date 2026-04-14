@@ -496,11 +496,12 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 Show all transactions in a table; allow assigning categories.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
 
-** Steps [2/4]
+** Steps [3/5]
 - [X] Table showing date, description, amount, category (read-only for now)
 - [X] Category dropdown for assigning a category to selected rows
 - [ ] Filter by date range
 - [ ] Filter by category
+- [X] Sort by column (header click); handle amount column numerically
 
 ** Decisions
 - Read-only for now; category assignment deferred to later step

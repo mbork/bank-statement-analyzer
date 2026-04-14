@@ -21,6 +21,17 @@ NUM_COLUMNS = 4
 _ROLE_TRANSACTION_ID = Qt.ItemDataRole.UserRole
 _ROLE_CATEGORY_ID = Qt.ItemDataRole.UserRole + 1
 
+class _SortableItem(QTableWidgetItem):
+    """QTableWidgetItem that sorts by a numeric key rather than display text."""
+    def __init__(self, text: str, sort_key: int | float) -> None:
+        super().__init__(text)
+        self._sort_key = sort_key
+
+    def __lt__(self, other: QTableWidgetItem) -> bool:
+        if isinstance(other, _SortableItem):
+            return self._sort_key < other._sort_key
+        return super().__lt__(other)
+
 # * View
 
 class TransactionsView(QWidget):
@@ -39,6 +50,7 @@ class TransactionsView(QWidget):
         self._table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self._table.verticalHeader().setVisible(False)
+        self._table.setSortingEnabled(True)
         self._table.selectionModel().selectionChanged.connect(self._on_selection_changed)
 
         header = self._table.horizontalHeader()
@@ -133,13 +145,18 @@ class TransactionsView(QWidget):
         with db.manage_connection() as conn:
             rows = db.get_all_transactions(conn)
 
+        self._table.setSortingEnabled(False)
         self._table.setRowCount(len(rows))
         for row_idx, row in enumerate(rows):
             amount_pln = f"{row['amount'] / 100:.2f}"
             category = row['category'] or ''
-            values = [row['date'], row['description'], amount_pln, category]
-            for col_idx, value in enumerate(values):
-                item = QTableWidgetItem(value)
+            items = [
+                QTableWidgetItem(row['date']),
+                QTableWidgetItem(row['description']),
+                _SortableItem(amount_pln, row['amount']),
+                QTableWidgetItem(category),
+            ]
+            for col_idx, item in enumerate(items):
                 if col_idx == 0:
                     item.setData(_ROLE_TRANSACTION_ID, row['transaction_id'])
                     item.setData(_ROLE_CATEGORY_ID, row['category_id'])
@@ -147,6 +164,7 @@ class TransactionsView(QWidget):
                     align = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
                     item.setTextAlignment(align)
                 self._table.setItem(row_idx, col_idx, item)
+        self._table.setSortingEnabled(True)
 
         header = self._table.horizontalHeader()
         amount_width = header.sectionSize(2)
