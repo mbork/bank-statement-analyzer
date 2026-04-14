@@ -69,6 +69,9 @@ Inherits all rules from `~/.claude/CLAUDE.md`.  Project-specific additions:
 - Tests use plain `pytest` functions (no classes) with descriptive names, e.g.
   `test_duplicate_transactions_are_deduplicated`; use fixtures for shared setup
 - Use type hints throughout (function signatures and local variables where non-obvious)
+- Wrap all user-facing strings in `ui/` with `self.tr()`; for strings with
+  interpolated values use `self.tr('template {x}').format(x=x)` (not f-strings),
+  so `lupdate` can extract them for translation
 
 # Learning guidance
 

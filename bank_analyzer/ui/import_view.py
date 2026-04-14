@@ -31,10 +31,10 @@ class ImportView(QWidget):
             self._bank_selector.addItem(name)
 
         # ** File picker row
-        self._file_label = QLabel('(no file selected)')
+        self._file_label = QLabel(self.tr('(no file selected)'))
         self._file_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self._file_label.mousePressEvent = lambda _: self._pick_file()
-        browse_button = QPushButton('Browse...')
+        browse_button = QPushButton(self.tr('Browse...'))
         browse_button.clicked.connect(self._pick_file)
 
         file_row = QHBoxLayout()
@@ -43,11 +43,11 @@ class ImportView(QWidget):
 
         # ** Form
         form = QFormLayout()
-        form.addRow('Bank:', self._bank_selector)
-        form.addRow('File:', file_row)
+        form.addRow(self.tr('Bank:'), self._bank_selector)
+        form.addRow(self.tr('File:'), file_row)
 
         # ** Import button and status
-        import_button = QPushButton('Import')
+        import_button = QPushButton(self.tr('Import'))
         import_button.clicked.connect(self._run_import)
 
         self._status_label = QLabel()
@@ -65,7 +65,8 @@ class ImportView(QWidget):
 
     def _pick_file(self) -> None:
         path_str, _ = QFileDialog.getOpenFileName(
-            self, 'Select CSV file', '', 'CSV files (*.csv);;All files (*)'
+            self, self.tr('Select CSV file'), '',
+            self.tr('CSV files (*.csv);;All files (*)')
         )
         if path_str:
             self._filepath = pathlib.Path(path_str)
@@ -73,17 +74,26 @@ class ImportView(QWidget):
 
     def _run_import(self) -> None:
         if self._filepath is None:
-            self._status_label.setText('Please select a file first.')
+            self._status_label.setText(self.tr('Please select a file first.'))
             return
         bank = self._bank_selector.currentText()
         try:
             result = importer.import_file(self._filepath, bank)
             self._status_label.setText(
-                f"Done: {result['inserted']} inserted, {result['skipped']} skipped "
-                f"(total {result['total']})."
+                self.tr(
+                    'Done: {inserted} inserted, {skipped} skipped (total {total}).'
+                ).format(
+                    inserted=result['inserted'],
+                    skipped=result['skipped'],
+                    total=result['total'],
+                )
             )
             self.import_succeeded.emit()
         except importer.FileAlreadyImportedError:
-            self._status_label.setText(f"'{self._filepath.name}' has already been imported.")
+            self._status_label.setText(
+                self.tr("'{filename}' has already been imported.").format(
+                    filename=self._filepath.name
+                )
+            )
         except Exception as e:
-            self._status_label.setText(f'Error: {e}')
+            self._status_label.setText(self.tr('Error: {error}').format(error=e))

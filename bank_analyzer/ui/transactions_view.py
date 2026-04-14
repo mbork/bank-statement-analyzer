@@ -7,7 +7,7 @@ from bank_analyzer import db
 
 # * Helpers
 
-COLUMNS = ['Date', 'Description', 'Amount (PLN)', 'Category']
+NUM_COLUMNS = 4
 
 # * View
 
@@ -15,8 +15,14 @@ class TransactionsView(QWidget):
     def __init__(self) -> None:
         super().__init__()
 
-        self._table = QTableWidget(0, len(COLUMNS))
-        self._table.setHorizontalHeaderLabels(COLUMNS)
+        columns = [
+            self.tr('Date'),
+            self.tr('Description'),
+            self.tr('Amount (PLN)'),
+            self.tr('Category'),
+        ]
+        self._table = QTableWidget(0, NUM_COLUMNS)
+        self._table.setHorizontalHeaderLabels(columns)
         self._table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self._table.verticalHeader().setVisible(False)

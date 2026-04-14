@@ -516,6 +516,20 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 - Next: =ui/categories_view.py=
 - Blockers: NONE
 
+* TODO Internationalization (English/Polish)
+Support English and Polish UI, selected by system locale or manually by the
+user.  Language change takes effect after restart.
+
+** Steps [1/5]
+- [X] Wrap all user-visible strings in =ui/= with =self.tr()=
+- [ ] Run =lupdate= to extract strings into a =.ts= file; create Polish translation
+- [ ] Run =lrelease= to compile =.ts= → =.qm= binary
+- [ ] Auto-detect language at startup via =QLocale.system()= and load the right =.qm=
+- [ ] Add manual language selection (combo box in settings or menu); store preference; restart to apply
+
+** Decisions
+** Session log
+
 * BLOCKED Manual transaction categorization
 Allow the user to assign or change a category on individual transactions
 (or a selection) via the UI.

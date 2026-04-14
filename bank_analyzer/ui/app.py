@@ -12,7 +12,7 @@ from bank_analyzer.ui import categories_view, import_view, reports_view, transac
 class App(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Bank Statement Analyzer")
+        self.setWindowTitle(self.tr("Bank Statement Analyzer"))
 
         tabs = QTabWidget()
 
@@ -20,10 +20,10 @@ class App(QMainWindow):
         transactions_tab = transactions_view.TransactionsView()
         import_tab.import_succeeded.connect(transactions_tab.refresh)
 
-        tabs.addTab(import_tab, 'Import')
-        tabs.addTab(transactions_tab, 'Transactions')
-        tabs.addTab(reports_view.ReportsView(), 'Reports')
-        tabs.addTab(categories_view.CategoriesView(), 'Categories')
+        tabs.addTab(import_tab, self.tr('Import'))
+        tabs.addTab(transactions_tab, self.tr('Transactions'))
+        tabs.addTab(reports_view.ReportsView(), self.tr('Reports'))
+        tabs.addTab(categories_view.CategoriesView(), self.tr('Categories'))
         # TODO Rules tab will be here
 
         self.setCentralWidget(tabs)
