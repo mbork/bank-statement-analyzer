@@ -672,6 +672,33 @@ Blocked by: [[*=categories.py= — category CRUD]]
   while the user is selecting multiple categories
 
 ** Decisions
+*** [2026-04-14] – =category_ids= is =list[int | None]=; no outer =None= allowed; =[]= returns empty
+**** Reason
+Forbidding outer =None= (meaning "all categories") forces the caller to be
+explicit; the UI always knows the full category list and passes it in.
+=None= inside the list is a sentinel for "uncategorized" transactions
+(=category_id IS NULL=), handled via a split into real IDs + =IS NULL= clause.
+This avoids the SQL NULL trap (=NULL IN (...)= is always NULL, not TRUE).
+
+**** Alternatives considered
+- Outer =None= meaning "all": implicit, hides dependency on category list in caller.
+
+*** [2026-04-14] – =spending_report= always excludes income; flips sign of expenses
+**** Reason
+Report operates on expenses only (=WHERE amount < 0=); amounts are returned as
+positive values (=SELECT -amount=) for readability.  Income entries are
+always excluded — the report is a spending report, not a cash-flow report.
+
+*** [2026-04-14] – =date_from=/=date_to= use =datetime.date= in both =spending_report= and =TransactionFilters=
+**** Reason
+=datetime.date= is the natural Python type; passing strings risks silent
+misformatting.  =TransactionFilters= converted at the same time for
+consistency.  Callers in =ui/= use =QDate.toPython()= (one-liner).
+
+**** Alternatives considered
+- Keep =str= in =TransactionFilters= for backwards compat: not worth it — the
+  UI layer was already doing =.toString('yyyy-MM-dd')= which is equally fragile.
+
 *** [2026-04-14] – Single combined report function replacing two separate ones
 **** Reason
 One function covers all use cases: time granularity is a parameter, not a
