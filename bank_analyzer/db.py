@@ -3,6 +3,7 @@ import datetime
 import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
+from dataclasses import dataclass
 
 from bank_analyzer import config
 
@@ -79,14 +80,42 @@ def insert_transactions(conn: sqlite3.Connection, rows: list[dict], imported_fil
 
 # * Transactions
 
-def get_all_transactions(conn: sqlite3.Connection) -> list[dict]:
-    cursor = conn.execute('''
+@dataclass
+class TransactionFilters:
+    category_id: int | None = None
+    date_from: str | None = None
+    date_to: str | None = None
+    description: str | None = None
+
+def get_all_transactions(
+        conn: sqlite3.Connection,
+        filters: TransactionFilters | None = None,
+) -> list[dict]:
+    conditions: list[str] = []
+    params: list[str | int] = []
+    where = ''
+    if filters is not None:
+        if filters.category_id is not None:
+            conditions.append('t.category_id = ?')
+            params.append(filters.category_id)
+        if filters.date_from is not None:
+            conditions.append('t.date >= ?')
+            params.append(filters.date_from)
+        if filters.date_to is not None:
+            conditions.append('t.date <= ?')
+            params.append(filters.date_to)
+        if filters.description is not None:
+            conditions.append('lower(t.description) like ?')
+            params.append('%' + filters.description.lower() + '%')
+        where = ('where ' + ' and '.join(conditions)) if conditions else ''
+    cursor = conn.execute(f'''
         select t.transaction_id, t.date, t.description, t.amount,
                t.category_id, c.name as category
         from transactions t
         left join categories c using (category_id)
+        {where}
         order by t.date desc, t.transaction_id desc
-    ''')
+    ''', params)
     return [dict(row) for row in cursor]
 
 def set_transaction_category(

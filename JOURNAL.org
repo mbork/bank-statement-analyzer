@@ -499,8 +499,16 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 ** Steps [3/5]
 - [X] Table showing date, description, amount, category (read-only for now)
 - [X] Category dropdown for assigning a category to selected rows
-- [ ] Filter by date range
-- [ ] Filter by category
+- [ ] Filters (date range, category, description) — UI + =get_all_transactions= tests:
+  - [ ] =test_get_all_transactions_filters_by_category=
+  - [ ] =test_get_all_transactions_no_filter_returns_all=
+  - [ ] =test_get_all_transactions_filters_by_date_from=
+  - [ ] =test_get_all_transactions_filters_by_date_to=
+  - [ ] =test_get_all_transactions_filters_by_date_range=
+  - [ ] =test_get_all_transactions_filters_by_description=
+  - [ ] =test_get_all_transactions_filters_by_description_case_insensitive_ascii=
+  - [ ] =test_get_all_transactions_filters_by_description_case_insensitive_polish=
+  - [ ] =test_get_all_transactions_combined_filters=
 - [X] Sort by column (header click); handle amount column numerically
 
 ** Decisions
@@ -509,6 +517,18 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
   polling and keeps tabs decoupled
 
 ** Session log
+*** [2026-04-14]
+- Completed: category assignment panel (combobox + Assign, multi-row, pre-selects
+  current); =categories_changed= signal propagates renames/deletes to transactions
+  view; column sorting with =_SortableItem= for correct numeric amount sort;
+  =TransactionFilters= dataclass + filter bar (date range, category, description)
+  with =_DateFilterEdit= calendar popup; friendly FK error on category delete
+- In progress: filter tests not yet written
+- Next: write =test_db.py= tests for all =TransactionFilters= combinations
+- Blockers: NONE
+- Decisions: =TransactionFilters= dataclass over multiple params (extensible,
+  single signature); =categories_changed= signal pattern mirrors =import_succeeded=
+
 *** [2026-04-13]
 - Implemented read-only =QTableWidget= (date, description, amount in PLN,
   category); reverse chronological via =get_all_transactions()= in =db.py=

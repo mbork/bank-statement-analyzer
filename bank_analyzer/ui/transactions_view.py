@@ -1,12 +1,15 @@
 # * Transactions view
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QDate, Qt, QTimer
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
+    QCalendarWidget,
     QComboBox,
+    QDateEdit,
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QLineEdit,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
@@ -23,6 +26,31 @@ _ROLE_TRANSACTION_ID = Qt.ItemDataRole.UserRole
 _ROLE_CATEGORY_ID = Qt.ItemDataRole.UserRole + 1
 _ROLE_IS_INCOME = Qt.ItemDataRole.UserRole + 2
 _COLOR_INCOME = QColor(160, 160, 160)
+_MIN_DATE = QDate(2000, 1, 1)
+
+class _DefaultPageCalendar(QCalendarWidget):
+    """Calendar widget that navigates to a default page when the owning date edit has no date."""
+    def __init__(self, owner: QDateEdit, default_page: QDate) -> None:
+        super().__init__()
+        self._owner = owner
+        self._default_page = default_page
+
+    def showEvent(self, event) -> None:  # type: ignore[override]  # noqa: N802
+        super().showEvent(event)
+        if self._owner.date() == self._owner.minimumDate():
+            default = self._default_page
+            def navigate() -> None:
+                self.blockSignals(True)
+                self.setSelectedDate(default)
+                self.blockSignals(False)
+            QTimer.singleShot(0, navigate)
+
+class _DateFilterEdit(QDateEdit):
+    """QDateEdit that opens its calendar at a given default when no date is set."""
+    def __init__(self, popup_default: QDate) -> None:
+        super().__init__()
+        self.setCalendarPopup(True)
+        self.setCalendarWidget(_DefaultPageCalendar(self, popup_default))
 
 class _SortableItem(QTableWidgetItem):
     """QTableWidgetItem that sorts by a numeric key rather than display text."""
@@ -62,6 +90,44 @@ class TransactionsView(QWidget):
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)  # Amount
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)             # Category
 
+        # ** Filter bar
+        today = QDate.currentDate()
+        first_of_month = QDate(today.year(), today.month(), 1)
+
+        self._date_from = _DateFilterEdit(popup_default=first_of_month)
+        self._date_from.setSpecialValueText(self.tr('(any)'))
+        self._date_from.setMinimumDate(_MIN_DATE)
+        self._date_from.setDate(_MIN_DATE)
+        self._date_from.setDisplayFormat('yyyy-MM-dd')
+        self._date_from.dateChanged.connect(self.refresh)
+
+        self._date_to = _DateFilterEdit(popup_default=today)
+        self._date_to.setSpecialValueText(self.tr('(any)'))
+        self._date_to.setMinimumDate(_MIN_DATE)
+        self._date_to.setDate(_MIN_DATE)
+        self._date_to.setDisplayFormat('yyyy-MM-dd')
+        self._date_to.dateChanged.connect(self.refresh)
+
+        self._filter_category_combo = QComboBox()
+        self._filter_category_combo.currentIndexChanged.connect(self.refresh)
+
+        self._description_input = QLineEdit()
+        self._description_input.setPlaceholderText(self.tr('Description…'))
+        self._description_input.textChanged.connect(self.refresh)
+
+        clear_button = QPushButton(self.tr('Clear filters'))
+        clear_button.clicked.connect(self._clear_filters)
+
+        filter_row = QHBoxLayout()
+        filter_row.addWidget(QLabel(self.tr('From:')))
+        filter_row.addWidget(self._date_from)
+        filter_row.addWidget(QLabel(self.tr('To:')))
+        filter_row.addWidget(self._date_to)
+        filter_row.addWidget(QLabel(self.tr('Category:')))
+        filter_row.addWidget(self._filter_category_combo, stretch=1)
+        filter_row.addWidget(self._description_input, stretch=2)
+        filter_row.addWidget(clear_button)
+
         # ** Category assignment panel
         self._category_label = QLabel(self.tr('Assign category:'))
         self._category_combo = QComboBox()
@@ -77,6 +143,7 @@ class TransactionsView(QWidget):
 
         # ** Outer layout
         layout = QVBoxLayout()
+        layout.addLayout(filter_row)
         layout.addWidget(self._table)
         layout.addLayout(assign_row)
         self.setLayout(layout)
@@ -96,6 +163,41 @@ class TransactionsView(QWidget):
         for cat in categories.get_all_categories():
             self._category_combo.addItem(cat['name'], userData=cat['category_id'])
 
+    def _populate_filter_categories(self) -> None:
+        current_id = self._filter_category_combo.currentData()
+        self._filter_category_combo.blockSignals(True)
+        self._filter_category_combo.clear()
+        self._filter_category_combo.addItem(self.tr('(all)'), userData=None)
+        for cat in categories.get_all_categories():
+            self._filter_category_combo.addItem(cat['name'], userData=cat['category_id'])
+        for i in range(self._filter_category_combo.count()):
+            if self._filter_category_combo.itemData(i) == current_id:
+                self._filter_category_combo.setCurrentIndex(i)
+                break
+        self._filter_category_combo.blockSignals(False)
+
+    def _build_filters(self) -> db.TransactionFilters | None:
+        date_from = (
+            self._date_from.date().toString('yyyy-MM-dd')
+            if self._date_from.date() != _MIN_DATE else None
+        )
+        date_to = (
+            self._date_to.date().toString('yyyy-MM-dd')
+            if self._date_to.date() != _MIN_DATE else None
+        )
+        category_id: int | None = self._filter_category_combo.currentData()
+        description_text = self._description_input.text().strip()
+        description = description_text if description_text else None
+        is_active = any(v is not None for v in [date_from, date_to, category_id, description])
+        if is_active:
+            return db.TransactionFilters(
+                date_from=date_from,
+                date_to=date_to,
+                category_id=category_id,
+                description=description,
+            )
+        return None
+
     def _selected_transaction_ids(self) -> list[int]:
         seen: set[int] = set()
         result: list[int] = []
@@ -112,10 +214,24 @@ class TransactionsView(QWidget):
 
     def showEvent(self, event) -> None:  # type: ignore[override]  # noqa: N802
         super().showEvent(event)
+        self._populate_filter_categories()
         if self._category_combo.isEnabled():
             self._populate_categories()
 
     # ** Slots
+
+    def _clear_filters(self) -> None:
+        for widget in [self._date_from, self._date_to,
+                       self._filter_category_combo, self._description_input]:
+            widget.blockSignals(True)
+        self._date_from.setDate(_MIN_DATE)
+        self._date_to.setDate(_MIN_DATE)
+        self._filter_category_combo.setCurrentIndex(0)
+        self._description_input.clear()
+        for widget in [self._date_from, self._date_to,
+                       self._filter_category_combo, self._description_input]:
+            widget.blockSignals(False)
+        self.refresh()
 
     def _on_selection_changed(self) -> None:
         selected_rows = {idx.row() for idx in self._table.selectedIndexes()}
@@ -150,8 +266,10 @@ class TransactionsView(QWidget):
         self.refresh()
 
     def refresh(self) -> None:
+        self._populate_filter_categories()
+        filters = self._build_filters()
         with db.manage_connection() as conn:
-            rows = db.get_all_transactions(conn)
+            rows = db.get_all_transactions(conn, filters)
 
         self._table.setSortingEnabled(False)
         self._table.setRowCount(len(rows))
