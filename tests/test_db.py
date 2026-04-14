@@ -17,12 +17,13 @@ def conn():
     connection.close()
 
 def test_insert_imported_file(conn):
-    assert db.insert_imported_file(conn, 'filename.csv') == 1
+    assert db.insert_imported_file(conn, 'filename.csv', 'bank') == 1
     rows = conn.execute('select * from imported_files').fetchall()
     assert len(rows) == 1
     row = rows[0]
     assert row['imported_file_id'] == 1
     assert row['filename'] == 'filename.csv'
+    assert row['bank'] == 'bank'
     datetime.datetime.fromisoformat(row['imported_at']) # raises if invalid
 
 
@@ -41,7 +42,7 @@ ROWS_B = [
 
 
 def test_insert_transactions_inserts_rows(conn):
-    file_id = db.insert_imported_file(conn, 'file.csv')
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
     count = db.insert_transactions(conn, ROWS_A, file_id)
     assert count == 2
     rows = conn.execute('select * from transactions').fetchall()
@@ -49,7 +50,7 @@ def test_insert_transactions_inserts_rows(conn):
 
 
 def test_insert_transactions_deduplicates_identical_set(conn):
-    file_id = db.insert_imported_file(conn, 'file.csv')
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
     db.insert_transactions(conn, ROWS_A, file_id)
     count = db.insert_transactions(conn, ROWS_A, file_id)
     assert count == 0
@@ -58,7 +59,7 @@ def test_insert_transactions_deduplicates_identical_set(conn):
 
 
 def test_insert_transactions_deduplicates_overlapping_sets(conn):
-    file_id = db.insert_imported_file(conn, 'file.csv')
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
     db.insert_transactions(conn, ROWS_A, file_id)
     count = db.insert_transactions(conn, ROWS_B, file_id)
     assert count == 1
@@ -116,7 +117,7 @@ def test_delete_category_raises_when_referenced_by_transaction(conn):
     conn.execute('PRAGMA foreign_keys = ON')
     category = db.insert_category(conn, 'food')
     category_id = category['category_id']
-    file_id = db.insert_imported_file(conn, 'file.csv')
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
     row = {
         'date': datetime.date(2026, 4, 1),
         'amount': -500,

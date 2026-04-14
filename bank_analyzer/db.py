@@ -30,6 +30,7 @@ def create_schema(conn: sqlite3.Connection) -> None:
         create table if not exists imported_files (
             imported_file_id integer primary key,
             filename text unique not null,
+            bank text not null,
             imported_at text not null
         )
     ''')
@@ -54,10 +55,10 @@ def create_schema(conn: sqlite3.Connection) -> None:
 
 # * Importing transactions
 
-def insert_imported_file(conn: sqlite3.Connection, filename: str) -> int:
+def insert_imported_file(conn: sqlite3.Connection, filename: str, bank: str) -> int:
     cursor = conn.execute(
-        'insert into imported_files (filename, imported_at) values (?, ?)',
-        (filename, datetime.datetime.now().astimezone().isoformat())
+        'insert into imported_files (filename, bank, imported_at) values (?, ?, ?)',
+        (filename, bank, datetime.datetime.now().astimezone().isoformat())
     )
     imported_file_id = cursor.lastrowid
     assert imported_file_id is not None # insert raises on failure, so this is always set

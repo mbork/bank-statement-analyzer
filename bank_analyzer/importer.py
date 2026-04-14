@@ -127,7 +127,7 @@ def import_file(filepath: pathlib.Path, bank: str) -> dict[str, int]:
     rows = parse_csv(filepath, bank)
     with db.manage_connection() as conn:
         try:
-            imported_file_id = db.insert_imported_file(conn, filepath.name)
+            imported_file_id = db.insert_imported_file(conn, filepath.name, bank)
         except sqlite3.IntegrityError as e:
             raise FileAlreadyImportedError(f'{filepath.name} has already been imported') from e
         inserted_count = db.insert_transactions(conn, rows, imported_file_id)
