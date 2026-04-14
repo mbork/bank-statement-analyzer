@@ -2,7 +2,7 @@
 
 import pathlib
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -32,6 +32,8 @@ class ImportView(QWidget):
 
         # ** File picker row
         self._file_label = QLabel('(no file selected)')
+        self._file_label.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._file_label.mousePressEvent = lambda _: self._pick_file()
         browse_button = QPushButton('Browse...')
         browse_button.clicked.connect(self._pick_file)
 
