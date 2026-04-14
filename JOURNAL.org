@@ -522,6 +522,17 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
   polling and keeps tabs decoupled
 
 ** Session log
+*** [2026-04-14] (3)
+- Completed: designed spending report API (=spending_report()= with granularity
+  param, century-as-Roman-numeral trick, window function for %, live updates
+  with debounce); consolidated =reports.py= + =ui/reports_view.py= into one task;
+  added spending chart as BLOCKED task; updated all journal steps with [me]/[Claude] tags
+- In progress: NONE
+- Next: start =Make tests more DRY= or =spending_report()= in =reports.py=
+- Blockers: NONE
+- Decisions: live report updates (no Run button) with 200ms debounce on category
+  selector; grouping/Roman numeral helpers written by user, unit-testable
+
 *** [2026-04-14] (2)
 - Completed: fixed calendar popup default (`_DefaultPageCalendar` subclass with
   `showEvent` + `setSelectedDate` + `blockSignals`); amount range filter
@@ -634,30 +645,44 @@ ruled out to avoid schema and UI complexity in the MVP.
 
 ** Session log
 
-* TODO =reports.py= — spending queries
+* TODO Spending reports (=reports.py= + =ui/reports_view.py=)
 :LOGBOOK:
 - State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:03]
 :END:
-Generate spending summaries by category and time interval.
+Spending summary by category and time interval: backend query + UI.
 Blocked by: [[*=categories.py= — category CRUD]]
 
-** Steps [0/2]
-- [ ] Write =spending_by_category(start_date, end_date)=: totals per category
-- [ ] Write =spending_by_month(category_id)=: monthly breakdown for one category
+** Steps [0/5]
+- [ ] [me] Write =spending_report(date_from, date_to, granularity, category_ids)= in
+  =reports.py=: returns flat list of =(period, category, total_grosz, pct_of_period)=
+  rows; =granularity= is one of =month= / =quarter= / =year= / =century=; =century=
+  uses actual calendar centuries (I, II, …, XXI, …) displayed as Roman numerals,
+  so the query structure is always uniform (current data falls under "XXI");
+  percentage computed via =SUM(...) OVER (PARTITION BY period)= window function
+- [ ] [me] Write unit-testable helper functions (in =reports.py= or a separate
+  module): Arabic→Roman numeral conversion; grouping of flat rows by period
+  (returns e.g. =list[tuple[str, list[Row]]]=); these must have =pytest= tests
+- [ ] [Claude] Controls in =ui/reports_view.py=: date range pickers (from / to),
+  four granularity radio buttons (month / quarter / year / century), multi-select
+  category checkboxes
+- [ ] [Claude] Two-level table: period as section header rows, one category per
+  data row with amount and percentage columns; uses grouping helper from step 2;
+  report updates live on any control change (no "Run" button); category selector
+  uses a 200ms =QTimer.singleShot= debounce to avoid re-running on every tick
+  while the user is selecting multiple categories
 
 ** Decisions
-** Session log
+*** [2026-04-14] – Single combined report function replacing two separate ones
+**** Reason
+One function covers all use cases: time granularity is a parameter, not a
+separate query.  "Century" granularity replaces "all time" so the GROUP BY
+structure is always =period, category= with no special-casing.  Percentage
+column uses a SQLite window function to avoid Python post-processing.
 
-* BLOCKED =ui/reports_view.py= — spending reports
-Date range picker and tabular spending report.
-Blocked by: [[*=reports.py= — spending queries]], [[*=ui/app.py= — root window and navigation]]
+**** Alternatives considered
+- =spending_by_category= + =spending_by_month(category_id)=: two functions,
+  single-category limitation, no uniform structure — replaced by this design.
 
-** Steps [0/3]
-- [ ] Date range pickers (from / to)
-- [ ] Run report button triggering =reports.spending_by_category()=
-- [ ] Treeview showing category totals
-
-** Decisions
 ** Session log
 
 * TODO Fill in =README.org=
@@ -810,6 +835,27 @@ silently returning an empty table.
 - [ ] Add min/max amount inputs to filter bar; implement sign-aware =abs()= logic
   in =db.py= / =TransactionFilters=; add visual mode indicator and highlight
   impossible/weird combinations
+
+** Session log
+
+* BLOCKED Spending chart in reports view
+Stacked bar chart of spending by period, one bar per time bucket, segments
+per category.
+Blocked by: [[*Spending reports (=reports.py= + =ui/reports_view.py=)]]
+
+** Steps [0/3]
+- [ ] Add =matplotlib= dependency; embed =FigureCanvasQTAgg= in =ui/reports_view.py=
+- [ ] Render stacked bar chart from =spending_report()= data: x-axis = periods,
+  y-axis = amount, one color per category; group remainder as "Other" if >8
+  categories selected
+- [ ] Add tooltip or bar-segment label showing percentage
+
+** Decisions
+*** [2026-04-14] – matplotlib via FigureCanvasQTAgg; stacked bar; cap at 8 categories
+**** Reason
+Stacked bar shows both period trend and category breakdown simultaneously.
+matplotlib is the natural choice for a personal tool (no extra Qt charting dep).
+Cap at 8 categories to keep colors distinguishable; overflow bucketed as "Other".
 
 ** Session log
 
