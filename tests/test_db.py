@@ -13,6 +13,8 @@ def conn():
     connection = sqlite3.connect(':memory:')
     connection.row_factory = sqlite3.Row
     db.create_schema(connection)
+    connection.execute('PRAGMA foreign_keys = ON')
+    connection.create_function('lower', 1, lambda s: s.lower() if isinstance(s, str) else s)
     yield connection
     connection.close()
 
@@ -114,7 +116,6 @@ def test_delete_category_nonexistent_raises(conn):
         db.delete_category(conn, 1337)
 
 def test_delete_category_raises_when_referenced_by_transaction(conn):
-    conn.execute('PRAGMA foreign_keys = ON')
     category = db.insert_category(conn, 'food')
     category_id = category['category_id']
     file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
@@ -159,3 +160,167 @@ def test_set_transaction_category_clears_category(conn, transaction_id):
     rows = db.get_all_transactions(conn)
     assert rows[0]['category_id'] is None
     assert rows[0]['category'] is None
+
+# * Filters
+
+def test_get_all_transactions_no_filter_returns_all(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': -500, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 2), 'amount': -1000, 'description': 'Biedronka'},
+    ], file_id)
+    assert len(db.get_all_transactions(conn)) == 2
+
+def test_get_all_transactions_filters_by_category(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': -500, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 2), 'amount': -1000, 'description': 'Biedronka'},
+    ], file_id)
+    category_id = db.insert_category(conn, 'groceries')['category_id']
+    t_id = conn.execute(
+        "select transaction_id from transactions where description = 'Żabka'"
+    ).fetchone()[0]
+    db.set_transaction_category(conn, t_id, category_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(category_id=category_id))
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Żabka'
+
+def test_get_all_transactions_filters_by_date_from(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 3, 31), 'amount': -500, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 1), 'amount': -1000, 'description': 'Biedronka'},
+    ], file_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(date_from='2026-04-01'))
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Biedronka'
+
+def test_get_all_transactions_filters_by_date_to(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 3, 31), 'amount': -500, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 1), 'amount': -1000, 'description': 'Biedronka'},
+    ], file_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(date_to='2026-03-31'))
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Żabka'
+
+def test_get_all_transactions_filters_by_date_range(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 3, 1), 'amount': -500, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 15), 'amount': -1000, 'description': 'Biedronka'},
+        {'date': datetime.date(2026, 5, 31), 'amount': -300, 'description': 'Dino'},
+    ], file_id)
+    rows = db.get_all_transactions(
+        conn, db.TransactionFilters(date_from='2026-04-01', date_to='2026-04-30')
+    )
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Biedronka'
+
+def test_get_all_transactions_filters_by_description(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': -500, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 2), 'amount': -1000, 'description': 'Biedronka'},
+    ], file_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(description='biedronka'))
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Biedronka'
+
+@pytest.mark.parametrize(('stored','search'), [
+    ('zażółć gęślą jaźń', 'zażółć gęślą jaźń'),  # db lower, filter lower
+    ('zażółć gęślą jaźń', 'ZAŻÓŁĆ GĘŚLĄ JAŹŃ'),  # db lower, filter upper
+    ('ZAŻÓŁĆ GĘŚLĄ JAŹŃ', 'zażółć gęślą jaźń'),  # db upper, filter lower
+    ('ZAŻÓŁĆ GĘŚLĄ JAŹŃ', 'ZAŻÓŁĆ GĘŚLĄ JAŹŃ'),  # db upper, filter upper
+    ('ZaŻółć gęŚLĄ jaŹŃ', 'zażółć gęślą jaźń'),  # db mixed, filter lower
+    ('ZaŻółć gęŚLĄ jaŹŃ', 'ZAŻÓŁĆ GĘŚLĄ JAŹŃ'),  # db mixed, filter upper
+])
+def test_get_all_transactions_filters_by_description_case_insensitive_polish(
+        conn, stored, search):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': -500, 'description': stored},
+        {'date': datetime.date(2026, 4, 2), 'amount': -300, 'description': 'Biedronka'},
+    ], file_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(description=search))
+    assert len(rows) == 1
+    assert rows[0]['description'] == stored
+
+def test_get_all_transactions_filters_by_amount_min(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': -500, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 2), 'amount': -2000, 'description': 'Biedronka'},
+    ], file_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(amount_min=1000))
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Biedronka'
+
+def test_get_all_transactions_filters_by_amount_max(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': -500, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 2), 'amount': -2000, 'description': 'Biedronka'},
+    ], file_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(amount_max=1000))
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Żabka'
+
+def test_get_all_transactions_filters_by_amount_range(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': -300, 'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 2), 'amount': -1500, 'description': 'Biedronka'},
+        {'date': datetime.date(2026, 4, 3), 'amount': -5000, 'description': 'Dino'},
+    ], file_id)
+    rows = db.get_all_transactions(
+        conn, db.TransactionFilters(amount_min=1000, amount_max=3000)
+    )
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Biedronka'
+
+def test_get_all_transactions_amount_filter_includes_income(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': 200000, 'description': 'Salary'},
+        {'date': datetime.date(2026, 4, 2), 'amount': -500, 'description': 'Żabka'},
+    ], file_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(amount_min=100000))
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Salary'
+
+def test_get_all_transactions_amount_range_includes_matching_income_and_expense(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    # amounts (abs): 500 too small, 1500 in range, 5000 too large — for both expense and income
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 1), 'amount': -500,   'description': 'Żabka'},
+        {'date': datetime.date(2026, 4, 2), 'amount': -1500,  'description': 'Biedronka'},
+        {'date': datetime.date(2026, 4, 3), 'amount': -5000,  'description': 'Dino'},
+        {'date': datetime.date(2026, 4, 4), 'amount': 800,    'description': 'Zwrot'},
+        {'date': datetime.date(2026, 4, 5), 'amount': 2000,   'description': 'Premia'},
+        {'date': datetime.date(2026, 4, 6), 'amount': 200000, 'description': 'Salary'},
+    ], file_id)
+    rows = db.get_all_transactions(
+        conn, db.TransactionFilters(amount_min=1000, amount_max=3000)
+    )
+    assert len(rows) == 2
+    assert {r['description'] for r in rows} == {'Biedronka', 'Premia'}
+
+def test_get_all_transactions_combined_filters(conn):
+    file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
+    db.insert_transactions(conn, [
+        {'date': datetime.date(2026, 4, 15), 'amount': -1500, 'description': 'Biedronka Centrum'},
+        {'date': datetime.date(2026, 3, 1),  'amount': -1500, 'description': 'Biedronka Stara'},
+        {'date': datetime.date(2026, 4, 15), 'amount': -100,  'description': 'Biedronka Mała'},
+        {'date': datetime.date(2026, 4, 15), 'amount': -1500, 'description': 'Żabka'},
+    ], file_id)
+    rows = db.get_all_transactions(conn, db.TransactionFilters(
+        date_from='2026-04-01',
+        date_to='2026-04-30',
+        amount_min=1000,
+        description='biedronka',
+    ))
+    assert len(rows) == 1
+    assert rows[0]['description'] == 'Biedronka Centrum'

@@ -14,6 +14,7 @@ def manage_connection() -> Generator[sqlite3.Connection, None, None]:
     path = config.get_db_path()
     conn = sqlite3.connect(path)
     conn.execute('PRAGMA foreign_keys = ON')
+    conn.create_function('lower', 1, lambda s: s.lower() if isinstance(s, str) else s)
     conn.row_factory = sqlite3.Row
     try:
         yield conn
