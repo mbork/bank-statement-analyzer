@@ -84,8 +84,8 @@ def insert_transactions(conn: sqlite3.Connection, rows: list[dict], imported_fil
 @dataclass
 class TransactionFilters:
     category_id: int | None = None
-    date_from: str | None = None
-    date_to: str | None = None
+    date_from: datetime.date | None = None
+    date_to: datetime.date | None = None
     amount_min: int | None = None
     amount_max: int | None = None
     description: str | None = None
@@ -103,10 +103,10 @@ def get_all_transactions(
             params.append(filters.category_id)
         if filters.date_from is not None:
             conditions.append('t.date >= ?')
-            params.append(filters.date_from)
+            params.append(filters.date_from.isoformat())
         if filters.date_to is not None:
             conditions.append('t.date <= ?')
-            params.append(filters.date_to)
+            params.append(filters.date_to.isoformat())
         if filters.amount_min is not None:
             conditions.append('abs(t.amount) >= ?')
             params.append(filters.amount_min)

@@ -192,7 +192,10 @@ def test_get_all_transactions_filters_by_date_from(conn):
         {'date': datetime.date(2026, 3, 31), 'amount': -500, 'description': 'Żabka'},
         {'date': datetime.date(2026, 4, 1), 'amount': -1000, 'description': 'Biedronka'},
     ], file_id)
-    rows = db.get_all_transactions(conn, db.TransactionFilters(date_from='2026-04-01'))
+    rows = db.get_all_transactions(
+        conn,
+        db.TransactionFilters(date_from=datetime.date(2026, 4, 1)),
+    )
     assert len(rows) == 1
     assert rows[0]['description'] == 'Biedronka'
 
@@ -202,7 +205,10 @@ def test_get_all_transactions_filters_by_date_to(conn):
         {'date': datetime.date(2026, 3, 31), 'amount': -500, 'description': 'Żabka'},
         {'date': datetime.date(2026, 4, 1), 'amount': -1000, 'description': 'Biedronka'},
     ], file_id)
-    rows = db.get_all_transactions(conn, db.TransactionFilters(date_to='2026-03-31'))
+    rows = db.get_all_transactions(
+        conn,
+        db.TransactionFilters(date_to=datetime.date(2026, 3, 31)),
+    )
     assert len(rows) == 1
     assert rows[0]['description'] == 'Żabka'
 
@@ -214,7 +220,10 @@ def test_get_all_transactions_filters_by_date_range(conn):
         {'date': datetime.date(2026, 5, 31), 'amount': -300, 'description': 'Dino'},
     ], file_id)
     rows = db.get_all_transactions(
-        conn, db.TransactionFilters(date_from='2026-04-01', date_to='2026-04-30')
+        conn, db.TransactionFilters(
+            date_from=datetime.date(2026, 4, 1),
+            date_to=datetime.date(2026, 4, 30),
+        )
     )
     assert len(rows) == 1
     assert rows[0]['description'] == 'Biedronka'
@@ -317,8 +326,8 @@ def test_get_all_transactions_combined_filters(conn):
         {'date': datetime.date(2026, 4, 15), 'amount': -1500, 'description': 'Żabka'},
     ], file_id)
     rows = db.get_all_transactions(conn, db.TransactionFilters(
-        date_from='2026-04-01',
-        date_to='2026-04-30',
+        date_from=datetime.date(2026, 4, 1),
+        date_to=datetime.date(2026, 4, 30),
         amount_min=1000,
         description='biedronka',
     ))

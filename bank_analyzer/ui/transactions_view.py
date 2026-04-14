@@ -206,11 +206,11 @@ class TransactionsView(QWidget):
 
     def _build_filters(self) -> db.TransactionFilters | None:
         date_from = (
-            self._date_from.date().toString('yyyy-MM-dd')
+            self._date_from.date().toPython()
             if self._date_from.date() != _MIN_DATE else None
         )
         date_to = (
-            self._date_to.date().toString('yyyy-MM-dd')
+            self._date_to.date().toPython()
             if self._date_to.date() != _MIN_DATE else None
         )
         category_id: int | None = self._filter_category_combo.currentData()
