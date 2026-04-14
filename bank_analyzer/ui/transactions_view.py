@@ -1,6 +1,7 @@
 # * Transactions view
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
@@ -20,6 +21,8 @@ from bank_analyzer import categories, db
 NUM_COLUMNS = 4
 _ROLE_TRANSACTION_ID = Qt.ItemDataRole.UserRole
 _ROLE_CATEGORY_ID = Qt.ItemDataRole.UserRole + 1
+_ROLE_IS_INCOME = Qt.ItemDataRole.UserRole + 2
+_COLOR_INCOME = QColor(160, 160, 160)
 
 class _SortableItem(QTableWidgetItem):
     """QTableWidgetItem that sorts by a numeric key rather than display text."""
@@ -101,7 +104,7 @@ class TransactionsView(QWidget):
             if row not in seen:
                 seen.add(row)
                 item = self._table.item(row, 0)
-                if item is not None:
+                if item is not None and not item.data(_ROLE_IS_INCOME):
                     result.append(item.data(_ROLE_TRANSACTION_ID))
         return result
 
@@ -116,13 +119,18 @@ class TransactionsView(QWidget):
 
     def _on_selection_changed(self) -> None:
         selected_rows = {idx.row() for idx in self._table.selectedIndexes()}
-        if not selected_rows:
+        expense_rows = {
+            row for row in selected_rows
+            if (item := self._table.item(row, 0)) is not None
+            and not item.data(_ROLE_IS_INCOME)
+        }
+        if not expense_rows:
             self._set_panel_enabled(False)
             return
         self._populate_categories()
         self._set_panel_enabled(True)
-        if len(selected_rows) == 1:
-            row = next(iter(selected_rows))
+        if len(expense_rows) == 1:
+            row = next(iter(expense_rows))
             item = self._table.item(row, 0)
             if item is not None:
                 category_id = item.data(_ROLE_CATEGORY_ID)
@@ -150,6 +158,7 @@ class TransactionsView(QWidget):
         for row_idx, row in enumerate(rows):
             amount_pln = f"{row['amount'] / 100:.2f}"
             category = row['category'] or ''
+            is_income = row['amount'] > 0
             items = [
                 QTableWidgetItem(row['date']),
                 QTableWidgetItem(row['description']),
@@ -160,9 +169,12 @@ class TransactionsView(QWidget):
                 if col_idx == 0:
                     item.setData(_ROLE_TRANSACTION_ID, row['transaction_id'])
                     item.setData(_ROLE_CATEGORY_ID, row['category_id'])
+                    item.setData(_ROLE_IS_INCOME, is_income)
                 if col_idx == 2:  # amount — right-align
                     align = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
                     item.setTextAlignment(align)
+                if is_income:
+                    item.setForeground(_COLOR_INCOME)
                 self._table.setItem(row_idx, col_idx, item)
         self._table.setSortingEnabled(True)
 
