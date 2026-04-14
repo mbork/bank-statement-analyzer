@@ -558,18 +558,20 @@ user.  Language change takes effect after restart.
 ** Decisions
 ** Session log
 
-* TODO Manual transaction categorization
+* DONE Manual transaction categorization
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-14 Tue 11:04]
+- State "INPROGRESS" from "TODO"       [2026-04-14 Tue 11:04]
 - State "TODO"       from "BLOCKED"    [2026-04-14 Tue 11:02]
 :END:
 Allow the user to assign or change a category on individual transactions
 (or a selection) via the UI.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/transactions_view.py= — browse and categorize]]
 
-** Steps [0/3]
-- [ ] Add =set_transaction_category(conn, transaction_id, category_id)= to =db.py=
-- [ ] Wire category dropdown / combobox in =ui/transactions_view.py= to call it
-- [ ] Support bulk assignment (multiple selected rows → same category)
+** Steps [3/3]
+- [X] Add =set_transaction_category(conn, transaction_id, category_id)= to =db.py=
+- [X] Wire category dropdown / combobox in =ui/transactions_view.py= to call it
+- [X] Support bulk assignment (multiple selected rows → same category)
 
 ** Decisions
 ** Session log
