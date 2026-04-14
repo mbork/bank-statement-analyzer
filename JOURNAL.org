@@ -471,17 +471,19 @@ Blocked by: [[*=importer.py= — CSV parsing and deduplication]], [[*=ui/app.py=
 - Next: =ui/categories_view.py=, =ui/reports_view.py=
 - Blockers: NONE
 
-* TODO =ui/categories_view.py= — manage categories
+* DONE =ui/categories_view.py= — manage categories
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-14 Tue 08:28]
+- State "INPROGRESS" from "TODO"       [2026-04-14 Tue 08:28]
 - State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
 :END:
 Allow the user to add, rename, and delete categories.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
 
-** Steps [0/3]
-- [ ] List all categories in a =Listbox= or =Treeview=
-- [ ] Add category (entry field + button calling =categories.add_category()=)
-- [ ] Rename and delete selected category
+** Steps [3/3]
+- [X] List all categories in a =QListWidget=
+- [X] Add category (entry field + button calling =categories.add_category()=)
+- [X] Rename and delete selected category
 
 ** Decisions
 ** Session log
