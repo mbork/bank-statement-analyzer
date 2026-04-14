@@ -496,9 +496,9 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 Show all transactions in a table; allow assigning categories.
 Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root window and navigation]]
 
-** Steps [1/4]
+** Steps [2/4]
 - [X] Table showing date, description, amount, category (read-only for now)
-- [ ] Category dropdown for assigning a category to selected rows
+- [X] Category dropdown for assigning a category to selected rows
 - [ ] Filter by date range
 - [ ] Filter by category
 
@@ -713,6 +713,17 @@ multi-server eglot setup.
   per mode (name TBD — research needed)
 - [ ] Configure eglot to attach both =pyright= and =ruff server= to
   =python-ts-mode= buffers
+
+** Decisions
+** Session log
+
+* TODO Make tests more DRY
+Reduce boilerplate in =tests/test_db.py= by reusing the =transaction_id= fixture.
+
+** Steps [0/1]
+- [ ] Refactor =test_delete_category_raises_when_referenced_by_transaction= to use
+  the =transaction_id= fixture instead of manually calling =insert_imported_file=,
+  =insert_transactions=, and a raw =SELECT transaction_id=
 
 ** Decisions
 ** Session log

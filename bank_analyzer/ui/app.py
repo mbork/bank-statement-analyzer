@@ -18,12 +18,14 @@ class App(QMainWindow):
 
         import_tab = import_view.ImportView()
         transactions_tab = transactions_view.TransactionsView()
+        categories_tab = categories_view.CategoriesView()
         import_tab.import_succeeded.connect(transactions_tab.refresh)
+        categories_tab.categories_changed.connect(transactions_tab.refresh)
 
         tabs.addTab(import_tab, self.tr('Import'))
         tabs.addTab(transactions_tab, self.tr('Transactions'))
         tabs.addTab(reports_view.ReportsView(), self.tr('Reports'))
-        tabs.addTab(categories_view.CategoriesView(), self.tr('Categories'))
+        tabs.addTab(categories_tab, self.tr('Categories'))
         # TODO Rules tab will be here
 
         self.setCentralWidget(tabs)

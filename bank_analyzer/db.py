@@ -81,12 +81,21 @@ def insert_transactions(conn: sqlite3.Connection, rows: list[dict], imported_fil
 
 def get_all_transactions(conn: sqlite3.Connection) -> list[dict]:
     cursor = conn.execute('''
-        select t.transaction_id, t.date, t.description, t.amount, c.name as category
+        select t.transaction_id, t.date, t.description, t.amount,
+               t.category_id, c.name as category
         from transactions t
         left join categories c using (category_id)
         order by t.date desc, t.transaction_id desc
     ''')
     return [dict(row) for row in cursor]
+
+def set_transaction_category(
+    conn: sqlite3.Connection, transaction_id: int, category_id: int | None
+) -> None:
+    conn.execute(
+        'update transactions set category_id = ? where transaction_id = ?',
+        (category_id, transaction_id),
+    )
 
 # * Categories
 

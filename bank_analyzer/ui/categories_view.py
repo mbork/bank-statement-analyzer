@@ -1,6 +1,8 @@
 # * Categories view
 
-from PySide6.QtCore import Qt
+from sqlite3 import IntegrityError
+
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QInputDialog,
@@ -19,6 +21,8 @@ from bank_analyzer import categories
 # * View
 
 class CategoriesView(QWidget):
+    categories_changed = Signal()
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -95,6 +99,7 @@ class CategoriesView(QWidget):
             self._name_input.clear()
             self._status_label.clear()
             self._refresh()
+            self.categories_changed.emit()
         except Exception as e:
             self._status_label.setText(self.tr('Error: {error}').format(error=e))
 
@@ -113,6 +118,7 @@ class CategoriesView(QWidget):
             categories.rename_category(category_id, new_name.strip())
             self._status_label.clear()
             self._refresh()
+            self.categories_changed.emit()
         except Exception as e:
             self._status_label.setText(self.tr('Error: {error}').format(error=e))
 
@@ -132,5 +138,12 @@ class CategoriesView(QWidget):
             categories.delete_category(category_id)
             self._status_label.clear()
             self._refresh()
+            self.categories_changed.emit()
+        except IntegrityError:
+            self._status_label.setText(
+                self.tr("Cannot delete: '{name}' is used by existing transactions.").format(
+                    name=name
+                )
+            )
         except Exception as e:
             self._status_label.setText(self.tr('Error: {error}').format(error=e))
