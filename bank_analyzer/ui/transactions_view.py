@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from bank_analyzer import categories, db
+from bank_analyzer.money import format_amount_ui
 
 # * Helpers
 
@@ -314,7 +315,7 @@ class TransactionsView(QWidget):
         self._table.setSortingEnabled(False)
         self._table.setRowCount(len(rows))
         for row_idx, row in enumerate(rows):
-            amount_pln = f"{row['amount'] / 100:.2f}"
+            amount_pln = format_amount_ui(row['amount'])
             category = row['category'] or ''
             is_income = row['amount'] > 0
             items = [

@@ -592,10 +592,12 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/transactions_view.py=
 Export the full transactions table and current report to CSV format
 for analysis in spreadsheets or other tools.
 
-** Steps [1/5]
+** Steps [3/6]
 - [X] Design CSV format for transactions (columns, date format)
-- [ ] Implement =transactions_to_csv()= and =report_to_csv()= in new =export.py=
-- [ ] Add export buttons to UI (transactions view and report view)
+- [X] Implement =transactions_to_csv()= and =report_to_csv()= in new =export.py=
+- [X] Write unit tests for =export.py=
+- [ ] Add export buttons to UI (transactions view and report view); UI writes header row
+- [ ] Write UI test verifying header/data column alignment (via =io.StringIO()=)
 - [ ] Test CSV import/export round-trip in spreadsheet
 
 ** Decisions
@@ -607,6 +609,18 @@ A separate =export.py= keeps both modules focused.
 **** Alternatives considered
 Putting both in =reports.py= (simpler, one place to look) — rejected because it
 mixes query logic with serialization concerns.
+
+*** [2026-04-15] – Headers written by the UI caller, not by =export.py=
+**** Reason
+Headers are user-visible strings that need translation; =export.py= is a non-UI module
+and must not contain translated strings.  =export.py= writes only data rows.
+
+**** Alternatives considered
+Passing headers as a parameter with defaults — workable but makes =export.py= aware of
+column order in two places (header param and data extraction).
+Passing =(header, key)= pairs — eliminates mismatch risk but overengineered for this use.
+Chosen approach: UI owns the header row; the header/data coupling is verified by a UI
+test that writes to =io.StringIO()= and asserts column count and header values match.
 
 *** [2026-04-15] – Functions accept =TextIO=, not a file path
 **** Reason
@@ -620,8 +634,20 @@ End-user is a Windows/Polish Excel user (per CLAUDE.md).  Polish Excel uses comm
 as decimal separator and semicolon as field separator — this format opens without
 any import wizard.  BOM lets Excel auto-detect UTF-8.  Python codec =utf-8-sig=
 writes the BOM automatically.  Decimal PLN (divided by 100) friendlier than raw grosz.
-Transactions columns: =date=, =description=, =amount=, =category=.
-Report columns: =period=, =category=, =total=.
+Transactions columns: =date=, =description=, =amount= (decimal PLN, comma decimal separator),
+=category= (=-= for uncategorized).
+Report columns: =period=, =category=, =total= (decimal PLN, comma decimal separator).
+
+**** Alternatives considered
+Empty string for uncategorized — rejected because an empty cell is ambiguous in a
+spreadsheet; =-= is explicit.  Risk: user names a category =-=; mitigated by
+validating against it in =categories.py= (see separate TODO).
+
+*** [2026-04-15] – Validate category names in =add_category= and =rename_category=
+**** Reason
+Empty string and =-= must be rejected: empty is nonsensical; =-= is reserved as the
+CSV sentinel for uncategorized.  Raise =ValueError= in =categories.py= for both.
+Tracked separately from CSV export — not blocking it.
 
 **** Alternatives considered
 Comma separator with decimal point (RFC 4180) — rejected because Polish Excel users
@@ -910,6 +936,17 @@ transactions filter bar, instead of a single category.
   =IS NULL= branch added only when =None= is in the list
 - [ ] Replace =_filter_category_combo= (=QComboBox=) with a multi-select widget;
   preserve selected set across refreshes; show summary label (e.g. "3 categories")
+
+** Decisions
+** Session log
+
+* TODO Validate category names in =categories.py=
+Reject blank names and =-= (reserved as CSV sentinel for uncategorized) in
+=add_category= and =rename_category=.  Raise =ValueError= for both.
+
+** Steps
+- [ ] Add validation in =add_category= and =rename_category= in =categories.py=
+- [ ] Add tests
 
 ** Decisions
 ** Session log

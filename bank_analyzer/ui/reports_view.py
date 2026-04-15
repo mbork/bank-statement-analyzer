@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from bank_analyzer import categories, db, reports
+from bank_analyzer.money import format_amount_ui
 
 # * Helpers
 
@@ -194,7 +195,7 @@ class ReportsView(QWidget):
                 data_row = self._table.rowCount()
                 self._table.insertRow(data_row)
                 category = row['category'] or self.tr('(uncategorized)')
-                amount_pln = f"{row['total_grosz'] / 100:.2f}"
+                amount_pln = format_amount_ui(row['total_grosz'])
                 percentage = f"{row['percentage']:.1f}"
                 self._table.setItem(data_row, 0, QTableWidgetItem(category))
                 amount_item = QTableWidgetItem(amount_pln)
