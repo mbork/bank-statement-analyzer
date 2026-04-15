@@ -56,11 +56,21 @@ class _DefaultPageCalendar(QCalendarWidget):
             QTimer.singleShot(0, navigate)
 
 class _DateFilterEdit(QDateEdit):
-    """QDateEdit that opens its calendar at a given default when no date is set."""
-    def __init__(self, popup_default: QDate) -> None:
+    """QDateEdit that opens its calendar at a given default when no date is set.
+
+    If `any_at_max` is True, displays '(any)' when the date equals the widget's
+    maximum (i.e. the MAX_DATE sentinel meaning 'no upper bound').
+    """
+    def __init__(self, popup_default: QDate, any_at_max: bool = False) -> None:
         super().__init__()
+        self._any_at_max = any_at_max
         self.setCalendarPopup(True)
         self.setCalendarWidget(_DefaultPageCalendar(self, popup_default))
+
+    def textFromDateTime(self, dt) -> str:  # type: ignore[override]  # noqa: N802
+        if self._any_at_max and self.date() == self.maximumDate():
+            return self.tr('(any)')
+        return super().textFromDateTime(dt)
 
 class _SortableItem(QTableWidgetItem):
     """QTableWidgetItem that sorts by a numeric key rather than display text."""
@@ -111,11 +121,13 @@ class TransactionsView(QWidget):
         self._date_from.setDisplayFormat('yyyy-MM-dd')
         self._date_from.dateChanged.connect(self.refresh)
 
-        self._date_to = _DateFilterEdit(popup_default=today)
+        self._date_to = _DateFilterEdit(popup_default=today, any_at_max=True)
+        self._date_to.setSpecialValueText(self.tr('(any)'))
         self._date_to.setMinimumDate(MIN_DATE)
         self._date_to.setMaximumDate(MAX_DATE)
         self._date_to.setDate(MAX_DATE)
         self._date_to.setDisplayFormat('yyyy-MM-dd')
+        self._date_to.setFixedWidth(self._date_from.sizeHint().width())
         self._date_to.dateChanged.connect(self.refresh)
 
         self._filter_category_combo = QComboBox()
