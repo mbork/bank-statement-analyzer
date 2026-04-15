@@ -714,6 +714,19 @@ ruled out to avoid schema and UI complexity in the MVP.
 
 ** Session log
 
+*** [2026-04-15]
+- Completed: all 5 steps — `rules` table in `db.py`, DB helpers (`insert_rule`,
+  `get_all_rules`, `update_rule`, `delete_rule`), `categorize_transactions` in
+  `categorizer.py`, wired into `import_file`, "Re-categorize" button in UI;
+  `categorized` count shown in import status message; filter row reorganized
+  with "Description:" label and action row below
+- In progress: NONE
+- Next: NONE — feature complete
+- Blockers: NONE
+- Decisions: substring matching case-insensitive via `lower()`; earlier rules
+  (lower `rule_id`) win on overlap; rules are global not bank-scoped;
+  button widths equalized via `QFontMetrics` (not `sizeHint()`)
+
 * DONE Spending reports (=reports.py= + =ui/reports_view.py=)
 :LOGBOOK:
 - State "DONE"       from "INPROGRESS" [2026-04-15 Wed 09:49]
