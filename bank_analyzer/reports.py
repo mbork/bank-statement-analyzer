@@ -1,6 +1,8 @@
 # * Spending reports
 
 import datetime
+import itertools
+import operator
 import sqlite3
 from typing import Literal
 
@@ -32,6 +34,16 @@ def arabic_to_roman(n: int) -> str:
         count, n = divmod(n, value)
         result.append(symbol * count)
     return ''.join(result)
+
+# * Row grouping
+
+def group_rows_by_period(rows: list[dict]) -> list[tuple[str, list[dict]]]:
+    """Group a flat list of report rows by their 'period' field.
+
+    Returns a list of (period, rows) pairs in the order periods first appear.
+    """
+    grouped = itertools.groupby(rows, operator.itemgetter('period'))
+    return [(period, list(group)) for period, group in grouped]
 
 # * Queries
 

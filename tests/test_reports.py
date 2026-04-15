@@ -37,6 +37,53 @@ def test_arabic_to_roman_raises_for_negative() -> None:
         reports.arabic_to_roman(-1)
 
 
+# * group_rows_by_period tests
+
+def test_group_rows_by_period_empty() -> None:
+    assert reports.group_rows_by_period([]) == []
+
+
+def test_group_rows_by_period_single_period() -> None:
+    rows = [
+        {'period': '2026-01', 'category': 'Food',      'total_grosz': 1000},
+        {'period': '2026-01', 'category': 'Transport', 'total_grosz': 500},
+    ]
+    result = reports.group_rows_by_period(rows)
+    assert result == [('2026-01', rows)]
+
+
+def test_group_rows_by_period_multiple_periods() -> None:
+    jan = [
+        {'period': '2026-01', 'category': 'Food',      'total_grosz': 1000},
+        {'period': '2026-01', 'category': 'Transport', 'total_grosz': 500},
+    ]
+    feb = [
+        {'period': '2026-02', 'category': 'Food', 'total_grosz': 800},
+    ]
+    result = reports.group_rows_by_period(jan + feb)
+    assert result == [('2026-01', jan), ('2026-02', feb)]
+
+
+def test_group_rows_by_period_one_row_per_period() -> None:
+    rows = [
+        {'period': '2026-01', 'category': 'Food', 'total_grosz': 1000},
+        {'period': '2026-02', 'category': 'Food', 'total_grosz': 800},
+        {'period': '2026-03', 'category': 'Food', 'total_grosz': 600},
+    ]
+    result = reports.group_rows_by_period(rows)
+    assert [period for period, _ in result] == ['2026-01', '2026-02', '2026-03']
+    assert all(len(group) == 1 for _, group in result)
+
+
+def test_group_rows_by_period_preserves_order() -> None:
+    rows = [
+        {'period': 'B', 'category': 'X', 'total_grosz': 1},
+        {'period': 'A', 'category': 'X', 'total_grosz': 2},
+    ]
+    result = reports.group_rows_by_period(rows)
+    assert [period for period, _ in result] == ['B', 'A']
+
+
 # * Fixtures
 
 @pytest.fixture

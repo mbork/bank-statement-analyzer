@@ -664,14 +664,14 @@ ruled out to avoid schema and UI complexity in the MVP.
 Spending summary by category and time interval: backend query + UI.
 Blocked by: [[*=categories.py= — category CRUD]]
 
-** Steps [1/4]
+** Steps [2/4]
 - [X] [me] Write =spending_report(date_from, date_to, granularity, category_ids)= in
   =reports.py=: returns flat list of =(period, category, total_grosz, percentage)=
   rows; =granularity= is one of =month= / =quarter= / =year= / =century=; =century=
   uses actual calendar centuries (I, II, …, XXI, …) displayed as Roman numerals,
   so the query structure is always uniform (current data falls under "XXI");
   percentage computed via =SUM(...) OVER (PARTITION BY period)= window function
-- [ ] [me] Write unit-testable helper functions (in =reports.py= or a separate
+- [X] [me] Write unit-testable helper functions (in =reports.py= or a separate
   module): Arabic→Roman numeral conversion; grouping of flat rows by period
   (returns e.g. =list[tuple[str, list[Row]]]=); these must have =pytest= tests
 - [ ] [Claude] Controls in =ui/reports_view.py=: date range pickers (from / to),
