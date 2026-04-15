@@ -1,5 +1,6 @@
 # * Transactions view
 
+import csv
 import datetime
 from typing import cast
 
@@ -9,6 +10,7 @@ from PySide6.QtWidgets import (
     QCalendarWidget,
     QComboBox,
     QDateEdit,
+    QFileDialog,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -20,17 +22,18 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bank_analyzer import categories, db
+from bank_analyzer import categories, db, export
 from bank_analyzer.money import format_amount_ui
+from bank_analyzer.ui.constants import MAX_DATE, MIN_DATE
 
 # * Helpers
 
 NUM_COLUMNS = 4
+_TRANSACTIONS_CSV_HEADERS = ('date', 'description', 'amount', 'category')
 _ROLE_TRANSACTION_ID = Qt.ItemDataRole.UserRole
 _ROLE_CATEGORY_ID = Qt.ItemDataRole.UserRole + 1
 _ROLE_IS_INCOME = Qt.ItemDataRole.UserRole + 2
 _COLOR_INCOME = QColor(160, 160, 160)
-_MIN_DATE = QDate(2000, 1, 1)
 
 class _DefaultPageCalendar(QCalendarWidget):
     """Calendar widget that navigates to a default page when the owning date edit has no date."""
@@ -41,7 +44,10 @@ class _DefaultPageCalendar(QCalendarWidget):
 
     def showEvent(self, event) -> None:  # type: ignore[override]  # noqa: N802
         super().showEvent(event)
-        if self._owner.date() == self._owner.minimumDate():
+        is_at_sentinel = self._owner.date() in (
+            self._owner.minimumDate(), self._owner.maximumDate()
+        )
+        if is_at_sentinel:
             default = self._default_page
             def navigate() -> None:
                 self.blockSignals(True)
@@ -100,15 +106,15 @@ class TransactionsView(QWidget):
 
         self._date_from = _DateFilterEdit(popup_default=first_of_month)
         self._date_from.setSpecialValueText(self.tr('(any)'))
-        self._date_from.setMinimumDate(_MIN_DATE)
-        self._date_from.setDate(_MIN_DATE)
+        self._date_from.setMinimumDate(MIN_DATE)
+        self._date_from.setDate(MIN_DATE)
         self._date_from.setDisplayFormat('yyyy-MM-dd')
         self._date_from.dateChanged.connect(self.refresh)
 
         self._date_to = _DateFilterEdit(popup_default=today)
-        self._date_to.setSpecialValueText(self.tr('(any)'))
-        self._date_to.setMinimumDate(_MIN_DATE)
-        self._date_to.setDate(_MIN_DATE)
+        self._date_to.setMinimumDate(MIN_DATE)
+        self._date_to.setMaximumDate(MAX_DATE)
+        self._date_to.setDate(MAX_DATE)
         self._date_to.setDisplayFormat('yyyy-MM-dd')
         self._date_to.dateChanged.connect(self.refresh)
 
@@ -137,6 +143,9 @@ class TransactionsView(QWidget):
         clear_button = QPushButton(self.tr('Clear filters'))
         clear_button.clicked.connect(self._clear_filters)
 
+        export_button = QPushButton(self.tr('Export CSV\u2026'))
+        export_button.clicked.connect(self._export_csv)
+
         filter_row = QHBoxLayout()
         filter_row.addWidget(QLabel(self.tr('From:')))
         filter_row.addWidget(self._date_from)
@@ -150,6 +159,7 @@ class TransactionsView(QWidget):
         filter_row.addWidget(self._filter_category_combo, stretch=1)
         filter_row.addWidget(self._description_input, stretch=2)
         filter_row.addWidget(clear_button)
+        filter_row.addWidget(export_button)
 
         # ** Category assignment panel
         self._category_label = QLabel(self.tr('Assign category:'))
@@ -163,6 +173,7 @@ class TransactionsView(QWidget):
         assign_row.addWidget(self._assign_button)
 
         self._set_panel_enabled(False)
+        self._rows: list[dict] = []
 
         # ** Outer layout
         layout = QVBoxLayout()
@@ -211,11 +222,11 @@ class TransactionsView(QWidget):
     def _build_filters(self) -> db.TransactionFilters | None:
         date_from: datetime.date | None = (
             cast(datetime.date, self._date_from.date().toPython())
-            if self._date_from.date() != _MIN_DATE else None
+            if self._date_from.date() != MIN_DATE else None
         )
         date_to: datetime.date | None = (
             cast(datetime.date, self._date_to.date().toPython())
-            if self._date_to.date() != _MIN_DATE else None
+            if self._date_to.date() != MAX_DATE else None
         )
         category_id: int | None = self._filter_category_combo.currentData()
         description_text = self._description_input.text().strip()
@@ -263,8 +274,8 @@ class TransactionsView(QWidget):
         for widget in [self._date_from, self._date_to, self._filter_category_combo,
                        self._description_input, self._amount_min_input, self._amount_max_input]:
             widget.blockSignals(True)
-        self._date_from.setDate(_MIN_DATE)
-        self._date_to.setDate(_MIN_DATE)
+        self._date_from.setDate(MIN_DATE)
+        self._date_to.setDate(MAX_DATE)
         self._filter_category_combo.setCurrentIndex(0)
         self._description_input.clear()
         self._amount_min_input.clear()
@@ -311,6 +322,7 @@ class TransactionsView(QWidget):
         filters = self._build_filters()
         with db.manage_connection() as conn:
             rows = db.get_all_transactions(conn, filters)
+        self._rows = rows
 
         self._table.setSortingEnabled(False)
         self._table.setRowCount(len(rows))
@@ -340,3 +352,23 @@ class TransactionsView(QWidget):
         header = self._table.horizontalHeader()
         amount_width = header.sectionSize(2)
         header.resizeSection(3, 2 * amount_width)
+
+    def _csv_filename(self, base: str) -> str:
+        from_str = self._date_from.date().toString('yyyy-MM-dd')
+        to_str = self._date_to.date().toString('yyyy-MM-dd')
+        return f'{base}--{from_str}--{to_str}.csv'
+
+    def _export_csv(self) -> None:
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            self.tr('Export transactions'),
+            self._csv_filename('transactions'),
+            self.tr('CSV files (*.csv)'),
+        )
+        if not path:
+            return
+        headers = [self.tr(h) for h in _TRANSACTIONS_CSV_HEADERS]
+        with open(path, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.writer(f, delimiter=';')
+            writer.writerow(headers)
+            export.transactions_to_csv(self._rows, f)

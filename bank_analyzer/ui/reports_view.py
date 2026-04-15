@@ -1,5 +1,6 @@
 # * Reports view
 
+import csv
 import datetime
 from typing import Literal, cast
 
@@ -7,6 +8,7 @@ from PySide6.QtCore import QDate, Qt, QTimer
 from PySide6.QtWidgets import (
     QButtonGroup,
     QDateEdit,
+    QFileDialog,
     QGroupBox,
     QHBoxLayout,
     QHeaderView,
@@ -21,13 +23,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bank_analyzer import categories, db, reports
+from bank_analyzer import categories, db, export, reports
 from bank_analyzer.money import format_amount_ui
+from bank_analyzer.ui.constants import MAX_DATE, MIN_DATE
 
 # * Helpers
 
-_MIN_DATE = QDate(2000, 1, 1)
 _GRANULARITIES = ['month', 'quarter', 'year', 'century']
+_REPORT_CSV_HEADERS = ('period', 'category', 'total')
 
 # * View
 
@@ -47,7 +50,7 @@ class ReportsView(QWidget):
         self._date_from = QDateEdit()
         self._date_from.setCalendarPopup(True)
         self._date_from.setSpecialValueText(self.tr('(any)'))
-        self._date_from.setMinimumDate(_MIN_DATE)
+        self._date_from.setMinimumDate(MIN_DATE)
         self._date_from.setDate(first_of_month)
         self._date_from.setDisplayFormat('yyyy-MM-dd')
         self._date_from.dateChanged.connect(self.refresh)
@@ -55,10 +58,14 @@ class ReportsView(QWidget):
         self._date_to = QDateEdit()
         self._date_to.setCalendarPopup(True)
         self._date_to.setSpecialValueText(self.tr('(any)'))
-        self._date_to.setMinimumDate(_MIN_DATE)
+        self._date_to.setMinimumDate(MIN_DATE)
+        self._date_to.setMaximumDate(MAX_DATE)
         self._date_to.setDate(today)
         self._date_to.setDisplayFormat('yyyy-MM-dd')
         self._date_to.dateChanged.connect(self.refresh)
+
+        export_button = QPushButton(self.tr('Export CSV\u2026'))
+        export_button.clicked.connect(self._export_csv)
 
         date_row = QHBoxLayout()
         date_row.addWidget(QLabel(self.tr('From:')))
@@ -66,6 +73,7 @@ class ReportsView(QWidget):
         date_row.addWidget(QLabel(self.tr('To:')))
         date_row.addWidget(self._date_to)
         date_row.addStretch()
+        date_row.addWidget(export_button)
 
         # ** Granularity
         granularity_box = QGroupBox(self.tr('Granularity'))
@@ -125,6 +133,8 @@ class ReportsView(QWidget):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+
+        self._report_rows: list[dict] = []
 
         # ** Outer layout
         layout = QVBoxLayout()
@@ -241,11 +251,11 @@ class ReportsView(QWidget):
     def refresh(self) -> None:
         date_from: datetime.date | None = (
             cast(datetime.date, self._date_from.date().toPython())
-            if self._date_from.date() != _MIN_DATE else None
+            if self._date_from.date() != MIN_DATE else None
         )
         date_to: datetime.date | None = (
             cast(datetime.date, self._date_to.date().toPython())
-            if self._date_to.date() != _MIN_DATE else None
+            if self._date_to.date() != MAX_DATE else None
         )
         granularity = self._granularity()
         category_ids = self._selected_category_ids()
@@ -254,6 +264,7 @@ class ReportsView(QWidget):
             return
         with db.manage_connection() as conn:
             rows = reports.spending_report(conn, date_from, date_to, category_ids, granularity)
+        self._report_rows = rows
         grouped = reports.group_rows_by_period(rows)
         if granularity == 'century':
             grouped = [
@@ -261,3 +272,23 @@ class ReportsView(QWidget):
                 for period, period_rows in grouped
             ]
         self._populate_table(grouped)
+
+    def _csv_filename(self, base: str) -> str:
+        from_str = self._date_from.date().toString('yyyy-MM-dd')
+        to_str = self._date_to.date().toString('yyyy-MM-dd')
+        return f'{base}--{from_str}--{to_str}.csv'
+
+    def _export_csv(self) -> None:
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            self.tr('Export report'),
+            self._csv_filename('report'),
+            self.tr('CSV files (*.csv)'),
+        )
+        if not path:
+            return
+        headers = [self.tr(h) for h in _REPORT_CSV_HEADERS]
+        with open(path, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.writer(f, delimiter=';')
+            writer.writerow(headers)
+            export.report_to_csv(self._report_rows, f)
