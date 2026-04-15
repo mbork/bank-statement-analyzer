@@ -276,7 +276,8 @@ class ReportsView(QWidget):
     def _csv_filename(self, base: str) -> str:
         from_str = self._date_from.date().toString('yyyy-MM-dd')
         to_str = self._date_to.date().toString('yyyy-MM-dd')
-        return f'{base}--{from_str}--{to_str}.csv'
+        granularity = self._granularity()
+        return f'{base}--{granularity}--{from_str}--{to_str}.csv'
 
     def _export_csv(self) -> None:
         path, _ = QFileDialog.getSaveFileName(
