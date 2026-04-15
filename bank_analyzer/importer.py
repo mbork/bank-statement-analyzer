@@ -7,6 +7,7 @@ import re
 import sqlite3
 
 from bank_analyzer import db
+from bank_analyzer.categorizer import categorize_transactions
 
 # * Exceptions
 
@@ -131,4 +132,10 @@ def import_file(filepath: pathlib.Path, bank: str) -> dict[str, int]:
         except sqlite3.IntegrityError as e:
             raise FileAlreadyImportedError(f'{filepath.name} has already been imported') from e
         inserted_count = db.insert_transactions(conn, rows, imported_file_id)
-    return {'total': len(rows), 'inserted': inserted_count, 'skipped': len(rows) - inserted_count}
+        categorized_count = categorize_transactions(conn)
+    return {
+        'total': len(rows),
+        'inserted': inserted_count,
+        'skipped': len(rows) - inserted_count,
+        'categorized': categorized_count,
+    }

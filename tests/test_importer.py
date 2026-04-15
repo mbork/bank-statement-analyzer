@@ -192,10 +192,14 @@ def temp_db(tmp_path, monkeypatch):
         yield
 
 def test_import_file(temp_db):
+    with db.manage_connection() as conn:
+        category_id = db.insert_category(conn, 'fees')['category_id']
+        db.insert_rule(conn, 'opłata miesięczna za kartę', category_id)
     stats = importer.import_file(FIXTURES / 'lista_operacji_pko_bp_1.csv', 'pko_bp')
     assert stats['total'] == 11
     assert stats['inserted'] == 11
     assert stats['skipped'] == 0
+    assert stats['categorized'] == 4
 
 def test_duplicate_file_raises_error(temp_db):
     importer.import_file(FIXTURES / 'lista_operacji_mbank.csv', 'mbank')

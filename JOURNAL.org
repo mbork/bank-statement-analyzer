@@ -675,11 +675,11 @@ Apply saved substring rules to uncategorized transactions; wire into import
 and expose as an on-demand call.
 Blocked by: [[*=categories.py= — category CRUD]]
 
-** Steps [3/5]
+** Steps [4/5]
 - [X] Add =rules= table to schema: =rule_id=, =pattern= (text), =category_id= (FK)
 - [X] Write =db.py= helpers: =insert_rule=, =get_all_rules=, =delete_rule=
 - [X] Write =categorize_transactions(conn)=: apply all rules to uncategorized transactions only
-- [ ] Wire =categorize_transactions= into =import_file()= (run after insert)
+- [X] Wire =categorize_transactions= into =import_file()= (run after insert)
 - [ ] Expose =categorize_transactions= for on-demand call from the UI
 
 ** Decisions
