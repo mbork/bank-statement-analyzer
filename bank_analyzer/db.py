@@ -48,7 +48,7 @@ def create_schema(conn: sqlite3.Connection) -> None:
             date text not null,
             description text not null,
             amount integer not null, -- [grosz]
-            category_id references categories(category_id),
+            category_id integer references categories(category_id),
             imported_file_id integer not null references imported_files(imported_file_id),
             unique (date, amount, description)
         )
