@@ -719,6 +719,18 @@ column uses a SQLite window function to avoid Python post-processing.
   single-category limitation, no uniform structure — replaced by this design.
 
 ** Session log
+*** [2026-04-15]
+- Completed: `spending_report()` implemented in `reports.py` (filtering,
+  period expressions, window function for %, sign flip); `TransactionFilters`
+  converted to `datetime.date`; shared `conn` fixture moved to `conftest.py`;
+  comprehensive test suite in `test_reports.py` (17 tests, all passing)
+- In progress: NONE
+- Next: write helper functions (Arabic→Roman, group rows by period) + their
+  tests; then step 3 (UI controls in `ui/reports_view.py`)
+- Blockers: NONE
+- Decisions: `category_ids: list[int | None]`, no outer `None`, `[]` = empty;
+  income excluded, sign flipped; `datetime.date` throughout; periods from
+  actual data, not generated from date bounds
 
 * TODO Fill in =README.org=
 
