@@ -53,6 +53,13 @@ def create_schema(conn: sqlite3.Connection) -> None:
             unique (date, amount, description)
         )
     ''')
+    conn.execute('''
+        create table if not exists rules (
+            rule_id integer primary key,
+            pattern text unique not null,
+            category_id integer not null references categories(category_id)
+        )
+    ''')
     conn.commit()
 
 # * Importing transactions
@@ -160,3 +167,36 @@ def delete_category(conn: sqlite3.Connection, category_id: int) -> None:
     cursor = conn.execute('delete from categories where category_id = ?', (category_id,))
     if cursor.rowcount == 0:
         raise ValueError(f'no category with id {category_id}')
+
+# * Rules
+
+def get_all_rules(conn: sqlite3.Connection) -> list[dict]:
+    cursor = conn.execute('''
+        select rule_id, pattern, r.category_id, c.name as category
+        from rules r
+        left join categories c using (category_id)
+        order by rule_id
+    ''')
+    return [dict(row) for row in cursor]
+
+def insert_rule(conn: sqlite3.Connection, pattern: str, category_id: int) -> dict:
+    cursor = conn.execute('''
+        insert into rules (pattern, category_id) values (?, ?)
+        returning rule_id, pattern, category_id
+    ''', (pattern, category_id))
+    return dict(cursor.fetchone())
+
+def update_rule(
+        conn: sqlite3.Connection, rule_id: int, new_pattern: str, new_category_id: int
+) -> None:
+    cursor = conn.execute(
+        'update rules set pattern = ?, category_id = ? where rule_id = ?',
+        (new_pattern, new_category_id, rule_id,),
+    )
+    if cursor.rowcount == 0:
+        raise ValueError(f'no rule with id {rule_id}')
+
+def delete_rule(conn: sqlite3.Connection, rule_id: int) -> None:
+    cursor = conn.execute('delete from rules where rule_id = ?', (rule_id,))
+    if cursor.rowcount == 0:
+        raise ValueError(f'no rule with id {rule_id}')

@@ -307,6 +307,49 @@ def test_get_all_transactions_amount_range_includes_matching_income_and_expense(
     assert len(rows) == 2
     assert {r['description'] for r in rows} == {'Biedronka', 'Premia'}
 
+# * Rules
+
+@pytest.fixture
+def category_id(conn):
+    return db.insert_category(conn, 'groceries')['category_id']
+
+def test_insert_rule(conn, category_id):
+    result = db.insert_rule(conn, 'Biedronka', category_id)
+    assert result['rule_id'] is not None
+    assert result['pattern'] == 'Biedronka'
+    assert result['category_id'] == category_id
+
+def test_get_all_rules_returns_rules_with_category_name(conn, category_id):
+    db.insert_rule(conn, 'Biedronka', category_id)
+    rules = db.get_all_rules(conn)
+    assert len(rules) == 1
+    assert rules[0]['pattern'] == 'Biedronka'
+    assert rules[0]['category_id'] == category_id
+    assert rules[0]['category'] == 'groceries'
+
+def test_delete_rule_removes_row(conn, category_id):
+    rule_id = db.insert_rule(conn, 'Biedronka', category_id)['rule_id']
+    db.delete_rule(conn, rule_id)
+    assert db.get_all_rules(conn) == []
+
+def test_delete_rule_nonexistent_raises(conn):
+    with pytest.raises(ValueError, match='no rule with id 1337'):
+        db.delete_rule(conn, 1337)
+
+def test_update_rule_changes_pattern_and_category(conn, category_id):
+    other_id = db.insert_category(conn, 'transport')['category_id']
+    rule_id = db.insert_rule(conn, 'Biedronka', category_id)['rule_id']
+    db.update_rule(conn, rule_id, 'PKP', other_id)
+    rules = db.get_all_rules(conn)
+    assert rules[0]['pattern'] == 'PKP'
+    assert rules[0]['category_id'] == other_id
+
+def test_update_rule_nonexistent_raises(conn):
+    with pytest.raises(ValueError, match='no rule with id 1337'):
+        db.update_rule(conn, 1337, 'PKP', 1)
+
+# * Transactions
+
 def test_get_all_transactions_combined_filters(conn):
     file_id = db.insert_imported_file(conn, 'file.csv', 'bank')
     db.insert_transactions(conn, [

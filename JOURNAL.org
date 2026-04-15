@@ -666,18 +666,19 @@ would need the import wizard, and the end-user is explicitly a Windows/Excel use
 - Decisions: keep `setSpecialValueText`/`textFromDateTime` asymmetry as-is (cosmetic,
   user chose to leave it); decided NOT to drop `MAX_DATE` in favor of "today" sentinel
 
-* TODO =categorizer.py= — rule-based auto-categorization
+* INPROGRESS =categorizer.py= — rule-based auto-categorization
 :LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-04-15 Wed 12:02]
 - State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
 :END:
 Apply saved substring rules to uncategorized transactions; wire into import
 and expose as an on-demand call.
 Blocked by: [[*=categories.py= — category CRUD]]
 
-** Steps [0/5]
-- [ ] Add =categorization_rules= table to schema: =rule_id=, =pattern= (text), =category_id= (FK)
-- [ ] Write =db.py= helpers: =insert_rule=, =get_all_rules=, =delete_rule=
-- [ ] Write =categorize_transactions(conn)=: apply all rules to uncategorized transactions only
+** Steps [3/5]
+- [X] Add =rules= table to schema: =rule_id=, =pattern= (text), =category_id= (FK)
+- [X] Write =db.py= helpers: =insert_rule=, =get_all_rules=, =delete_rule=
+- [X] Write =categorize_transactions(conn)=: apply all rules to uncategorized transactions only
 - [ ] Wire =categorize_transactions= into =import_file()= (run after insert)
 - [ ] Expose =categorize_transactions= for on-demand call from the UI
 
@@ -704,10 +705,10 @@ date" mode (see deferred task at end of file).
 Most merchants appear across all banks with similar descriptions.  Bank-scoped
 rules would require duplicating every rule per bank — a real usability cost for
 a problem most users will never hit.  No =bank= column on
-=categorization_rules=, no escape hatch, to keep the MVP simple.
+=rules=, no escape hatch, to keep the MVP simple.
 
 **** Alternatives considered
-Optional nullable =bank= FK on =categorization_rules= (global when =NULL=):
+Optional nullable =bank= FK on =rules= (global when =NULL=):
 ruled out to avoid schema and UI complexity in the MVP.
 
 ** Session log
