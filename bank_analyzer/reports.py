@@ -4,6 +4,35 @@ import datetime
 import sqlite3
 from typing import Literal
 
+# * Century formatting
+
+_ROMAN_DIGITS = [
+    (1000, 'M'),
+    (900, 'CM'),
+    (500, 'D'),
+    (400, 'CD'),
+    (100, 'C'),
+    (90, 'XC'),
+    (50, 'L'),
+    (40, 'XL'),
+    (10, 'X'),
+    (9, 'IX'),
+    (5, 'V'),
+    (4, 'IV'),
+    (1, 'I'),
+]
+
+def arabic_to_roman(n: int) -> str:
+    """Convert a positive integer to a Roman numeral string."""
+    result = []
+    if n <= 0:
+        raise ValueError(f'expected positive integer, got {n}')
+
+    for value, symbol in _ROMAN_DIGITS:
+        count, n = divmod(n, value)
+        result.append(symbol * count)
+    return ''.join(result)
+
 # * Queries
 
 def spending_report(

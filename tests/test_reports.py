@@ -6,6 +6,37 @@ import pytest
 
 from bank_analyzer import db, reports
 
+# * arabic_to_roman tests
+
+@pytest.mark.parametrize(('n', 'expected'), [
+    (1,    'I'),
+    (4,    'IV'),
+    (9,    'IX'),
+    (14,   'XIV'),
+    (40,   'XL'),
+    (90,   'XC'),
+    (99,   'XCIX'),
+    (400,  'CD'),
+    (900,  'CM'),
+    (999,  'CMXCIX'),
+    (1000, 'M'),
+    (1994, 'MCMXCIV'),
+    (21,   'XXI'),    # the century display case
+])
+def test_arabic_to_roman(n: int, expected: str) -> None:
+    assert reports.arabic_to_roman(n) == expected
+
+
+def test_arabic_to_roman_raises_for_zero() -> None:
+    with pytest.raises(ValueError, match='expected positive integer'):
+        reports.arabic_to_roman(0)
+
+
+def test_arabic_to_roman_raises_for_negative() -> None:
+    with pytest.raises(ValueError, match='expected positive integer'):
+        reports.arabic_to_roman(-1)
+
+
 # * Fixtures
 
 @pytest.fixture
