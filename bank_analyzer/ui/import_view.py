@@ -81,11 +81,13 @@ class ImportView(QWidget):
             result = importer.import_file(self._filepath, bank)
             self._status_label.setText(
                 self.tr(
-                    'Done: {inserted} inserted, {skipped} skipped (total {total}).'
+                    'Done: {inserted} inserted, {skipped} skipped (total {total}),'
+                    ' {categorized} auto-categorized.'
                 ).format(
                     inserted=result['inserted'],
                     skipped=result['skipped'],
                     total=result['total'],
+                    categorized=result['categorized'],
                 )
             )
             self.import_succeeded.emit()

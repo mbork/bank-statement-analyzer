@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bank_analyzer import categories, db, export
+from bank_analyzer import categories, categorizer, db, export
 from bank_analyzer.money import format_amount_ui
 from bank_analyzer.ui.constants import MAX_DATE, MIN_DATE
 
@@ -134,7 +134,7 @@ class TransactionsView(QWidget):
         self._filter_category_combo.currentIndexChanged.connect(self.refresh)
 
         self._description_input = QLineEdit()
-        self._description_input.setPlaceholderText(self.tr('Description…'))
+        self._description_input.setPlaceholderText(self.tr('search text…'))
         self._description_input.textChanged.connect(self.refresh)
 
         amount_validator = QDoubleValidator(0.0, 1e9, 2)
@@ -158,6 +158,16 @@ class TransactionsView(QWidget):
         export_button = QPushButton(self.tr('Export CSV\u2026'))
         export_button.clicked.connect(self._export_csv)
 
+        recategorize_button = QPushButton(self.tr('Re-categorize'))
+        recategorize_button.clicked.connect(self._recategorize)
+
+        # Make Export CSV and Re-categorize the same width
+        action_button_width = max(
+            export_button.sizeHint().width(), recategorize_button.sizeHint().width()
+        )
+        export_button.setFixedWidth(action_button_width)
+        recategorize_button.setFixedWidth(action_button_width)
+
         filter_row = QHBoxLayout()
         filter_row.addWidget(QLabel(self.tr('From:')))
         filter_row.addWidget(self._date_from)
@@ -169,9 +179,14 @@ class TransactionsView(QWidget):
         filter_row.addWidget(self._amount_max_input)
         filter_row.addWidget(QLabel(self.tr('Category:')))
         filter_row.addWidget(self._filter_category_combo, stretch=1)
+        filter_row.addWidget(QLabel(self.tr('Description:')))
         filter_row.addWidget(self._description_input, stretch=2)
         filter_row.addWidget(clear_button)
-        filter_row.addWidget(export_button)
+
+        action_row = QHBoxLayout()
+        action_row.addStretch()
+        action_row.addWidget(export_button)
+        action_row.addWidget(recategorize_button)
 
         # ** Category assignment panel
         self._category_label = QLabel(self.tr('Assign category:'))
@@ -190,6 +205,7 @@ class TransactionsView(QWidget):
         # ** Outer layout
         layout = QVBoxLayout()
         layout.addLayout(filter_row)
+        layout.addLayout(action_row)
         layout.addWidget(self._table)
         layout.addLayout(assign_row)
         self.setLayout(layout)
@@ -327,6 +343,11 @@ class TransactionsView(QWidget):
         with db.manage_connection() as conn:
             for transaction_id in transaction_ids:
                 db.set_transaction_category(conn, transaction_id, category_id)
+        self.refresh()
+
+    def _recategorize(self) -> None:
+        with db.manage_connection() as conn:
+            categorizer.categorize_transactions(conn)
         self.refresh()
 
     def refresh(self) -> None:

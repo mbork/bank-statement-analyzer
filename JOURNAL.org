@@ -666,8 +666,9 @@ would need the import wizard, and the end-user is explicitly a Windows/Excel use
 - Decisions: keep `setSpecialValueText`/`textFromDateTime` asymmetry as-is (cosmetic,
   user chose to leave it); decided NOT to drop `MAX_DATE` in favor of "today" sentinel
 
-* INPROGRESS =categorizer.py= — rule-based auto-categorization
+* DONE =categorizer.py= — rule-based auto-categorization
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-15 Wed 16:33]
 - State "INPROGRESS" from "TODO"       [2026-04-15 Wed 12:02]
 - State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:41]
 :END:
@@ -675,12 +676,12 @@ Apply saved substring rules to uncategorized transactions; wire into import
 and expose as an on-demand call.
 Blocked by: [[*=categories.py= — category CRUD]]
 
-** Steps [4/5]
+** Steps [5/5]
 - [X] Add =rules= table to schema: =rule_id=, =pattern= (text), =category_id= (FK)
 - [X] Write =db.py= helpers: =insert_rule=, =get_all_rules=, =delete_rule=
 - [X] Write =categorize_transactions(conn)=: apply all rules to uncategorized transactions only
 - [X] Wire =categorize_transactions= into =import_file()= (run after insert)
-- [ ] Expose =categorize_transactions= for on-demand call from the UI
+- [X] Expose =categorize_transactions= for on-demand call from the UI
 
 ** Decisions
 *** [2026-04-13] – Substring match (not regex) for rules
