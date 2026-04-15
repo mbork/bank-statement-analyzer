@@ -1,5 +1,9 @@
 # Bank Statement Analyzer — CLAUDE.md
 
+# User profile
+
+Even though I develop this on GNU/Linux, assume that the end-user will be a Windows/Excel user.
+
 # Architecture
 
 Approach 1: SQLite + Tkinter, themed with ttkbootstrap.

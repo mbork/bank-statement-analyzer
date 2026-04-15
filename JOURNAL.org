@@ -585,16 +585,49 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/transactions_view.py=
 ** Decisions
 ** Session log
 
-* TODO CSV export (transactions table and report)
+* INPROGRESS CSV export (transactions table and report)
+:LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-04-15 Wed 09:55]
+:END:
 Export the full transactions table and current report to CSV format
 for analysis in spreadsheets or other tools.
 
-** Steps
-- [ ] Design CSV format for transactions (columns, date format)
-- [ ] Implement =transactions_to_csv()= in =reports.py=
-- [ ] Implement =report_to_csv()= in =reports.py=
+** Steps [1/5]
+- [X] Design CSV format for transactions (columns, date format)
+- [ ] Implement =transactions_to_csv()= and =report_to_csv()= in new =export.py=
 - [ ] Add export buttons to UI (transactions view and report view)
 - [ ] Test CSV import/export round-trip in spreadsheet
+
+** Decisions
+*** [2026-04-15] – CSV functions live in =export.py=, not =reports.py=
+**** Reason
+=reports.py= is focused on aggregation queries; =db.py= should be free of file I/O.
+A separate =export.py= keeps both modules focused.
+
+**** Alternatives considered
+Putting both in =reports.py= (simpler, one place to look) — rejected because it
+mixes query logic with serialization concerns.
+
+*** [2026-04-15] – Functions accept =TextIO=, not a file path
+**** Reason
+Caller opens the file (with correct encoding/newline settings); function writes to
+any file-like object.  Enables unit tests via =io.StringIO()= without touching the
+filesystem.
+
+*** [2026-04-15] – CSV format: UTF-8 with BOM; amounts as decimal PLN; semicolon separator
+**** Reason
+End-user is a Windows/Polish Excel user (per CLAUDE.md).  Polish Excel uses comma
+as decimal separator and semicolon as field separator — this format opens without
+any import wizard.  BOM lets Excel auto-detect UTF-8.  Python codec =utf-8-sig=
+writes the BOM automatically.  Decimal PLN (divided by 100) friendlier than raw grosz.
+Transactions columns: =date=, =description=, =amount=, =category=.
+Report columns: =period=, =category=, =total=.
+
+**** Alternatives considered
+Comma separator with decimal point (RFC 4180) — rejected because Polish Excel users
+would need the import wizard, and the end-user is explicitly a Windows/Excel user.
+
+** Session log
 
 * TODO =categorizer.py= — rule-based auto-categorization
 :LOGBOOK:
