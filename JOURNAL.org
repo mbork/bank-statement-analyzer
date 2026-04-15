@@ -6,17 +6,6 @@ assigning them to categories, and generating tabular spending reports
 by category and time interval.  Built with Python (learning project),
 SQLite, and Tkinter + ttkbootstrap.
 
-* TODO CSV export (transactions table and report)
-Export the full transactions table and current report to CSV format
-for analysis in spreadsheets or other tools.
-
-** Steps
-- [ ] Design CSV format for transactions (columns, date format)
-- [ ] Implement =transactions_to_csv()= in =reports.py=
-- [ ] Implement =report_to_csv()= in =reports.py=
-- [ ] Add export buttons to UI (transactions view and report view)
-- [ ] Test CSV import/export round-trip in spreadsheet
-
 * DONE Scaffold
 :LOGBOOK:
 - State "DONE"       from "INPROGRESS" [2026-04-02 Thu 14:46]
@@ -578,20 +567,6 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/app.py= — root wind
 - Next: =ui/categories_view.py=
 - Blockers: NONE
 
-* TODO Internationalization (English/Polish)
-Support English and Polish UI, selected by system locale or manually by the
-user.  Language change takes effect after restart.
-
-** Steps [1/5]
-- [X] Wrap all user-visible strings in =ui/= with =self.tr()=
-- [ ] Run =lupdate= to extract strings into a =.ts= file; create Polish translation
-- [ ] Run =lrelease= to compile =.ts= → =.qm= binary
-- [ ] Auto-detect language at startup via =QLocale.system()= and load the right =.qm=
-- [ ] Add manual language selection (combo box in settings or menu); store preference; restart to apply
-
-** Decisions
-** Session log
-
 * DONE Manual transaction categorization
 :LOGBOOK:
 - State "DONE"       from "INPROGRESS" [2026-04-14 Tue 11:04]
@@ -609,6 +584,17 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/transactions_view.py=
 
 ** Decisions
 ** Session log
+
+* TODO CSV export (transactions table and report)
+Export the full transactions table and current report to CSV format
+for analysis in spreadsheets or other tools.
+
+** Steps
+- [ ] Design CSV format for transactions (columns, date format)
+- [ ] Implement =transactions_to_csv()= in =reports.py=
+- [ ] Implement =report_to_csv()= in =reports.py=
+- [ ] Add export buttons to UI (transactions view and report view)
+- [ ] Test CSV import/export round-trip in spreadsheet
 
 * TODO =categorizer.py= — rule-based auto-categorization
 :LOGBOOK:
@@ -755,19 +741,6 @@ column uses a SQLite window function to avoid Python post-processing.
   income excluded, sign flipped; `datetime.date` throughout; periods from
   actual data, not generated from date bounds
 
-* TODO Fill in =README.org=
-
-** Steps [0/6]
-- [ ] Requirements (minimum Python version, =uv= install link, Linux/Windows support)
-- [ ] Installation (clone, =uv sync=, =cp .env.example .env=)
-- [ ] Configuration (explain =BANK_ANALYZER_DATA_DIR= and the prod fallback)
-- [ ] Usage (=uv run python main.py=; expand as features are added)
-- [ ] Development (how to run tests; pointer to =BANKS= in =importer.py= for new banks)
-- [ ] License (choose and state a license; MIT recommended)
-
-** Decisions
-** Session log
-
 * DONE Apply ttkbootstrap theme
 :LOGBOOK:
 - State "DONE"       from "INPROGRESS" [2026-04-13 Mon 15:19]
@@ -838,6 +811,33 @@ have a category assigned.
   applies all rules to transactions on or after =date=, overwriting existing
   category assignments
 - [ ] Wire into UI (e.g. "Re-apply rules since..." dialog)
+
+** Decisions
+** Session log
+
+* TODO Internationalization (English/Polish)
+Support English and Polish UI, selected by system locale or manually by the
+user.  Language change takes effect after restart.
+
+** Steps [1/5]
+- [X] Wrap all user-visible strings in =ui/= with =self.tr()=
+- [ ] Run =lupdate= to extract strings into a =.ts= file; create Polish translation
+- [ ] Run =lrelease= to compile =.ts= → =.qm= binary
+- [ ] Auto-detect language at startup via =QLocale.system()= and load the right =.qm=
+- [ ] Add manual language selection (combo box in settings or menu); store preference; restart to apply
+
+** Decisions
+** Session log
+
+* TODO Fill in =README.org=
+
+** Steps [0/6]
+- [ ] Requirements (minimum Python version, =uv= install link, Linux/Windows support)
+- [ ] Installation (clone, =uv sync=, =cp .env.example .env=)
+- [ ] Configuration (explain =BANK_ANALYZER_DATA_DIR= and the prod fallback)
+- [ ] Usage (=uv run python main.py=; expand as features are added)
+- [ ] Development (how to run tests; pointer to =BANKS= in =importer.py= for new banks)
+- [ ] License (choose and state a license; MIT recommended)
 
 ** Decisions
 ** Session log
