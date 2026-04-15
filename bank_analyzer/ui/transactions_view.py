@@ -1,5 +1,8 @@
 # * Transactions view
 
+import datetime
+from typing import cast
+
 from PySide6.QtCore import QDate, Qt, QTimer
 from PySide6.QtGui import QColor, QDoubleValidator
 from PySide6.QtWidgets import (
@@ -205,12 +208,12 @@ class TransactionsView(QWidget):
             return None
 
     def _build_filters(self) -> db.TransactionFilters | None:
-        date_from = (
-            self._date_from.date().toPython()
+        date_from: datetime.date | None = (
+            cast(datetime.date, self._date_from.date().toPython())
             if self._date_from.date() != _MIN_DATE else None
         )
-        date_to = (
-            self._date_to.date().toPython()
+        date_to: datetime.date | None = (
+            cast(datetime.date, self._date_to.date().toPython())
             if self._date_to.date() != _MIN_DATE else None
         )
         category_id: int | None = self._filter_category_combo.currentData()
