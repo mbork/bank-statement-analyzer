@@ -6,6 +6,17 @@ assigning them to categories, and generating tabular spending reports
 by category and time interval.  Built with Python (learning project),
 SQLite, and Tkinter + ttkbootstrap.
 
+* TODO CSV export (transactions table and report)
+Export the full transactions table and current report to CSV format
+for analysis in spreadsheets or other tools.
+
+** Steps
+- [ ] Design CSV format for transactions (columns, date format)
+- [ ] Implement =transactions_to_csv()= in =reports.py=
+- [ ] Implement =report_to_csv()= in =reports.py=
+- [ ] Add export buttons to UI (transactions view and report view)
+- [ ] Test CSV import/export round-trip in spreadsheet
+
 * DONE Scaffold
 :LOGBOOK:
 - State "DONE"       from "INPROGRESS" [2026-04-02 Thu 14:46]
