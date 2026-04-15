@@ -656,15 +656,16 @@ ruled out to avoid schema and UI complexity in the MVP.
 
 ** Session log
 
-* INPROGRESS Spending reports (=reports.py= + =ui/reports_view.py=)
+* DONE Spending reports (=reports.py= + =ui/reports_view.py=)
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-15 Wed 09:49]
 - State "INPROGRESS" from "TODO"       [2026-04-15 Wed 08:24]
 - State "TODO"       from "BLOCKED"    [2026-04-13 Mon 14:03]
 :END:
 Spending summary by category and time interval: backend query + UI.
 Blocked by: [[*=categories.py= — category CRUD]]
 
-** Steps [2/4]
+** Steps [4/4]
 - [X] [me] Write =spending_report(date_from, date_to, granularity, category_ids)= in
   =reports.py=: returns flat list of =(period, category, total_grosz, percentage)=
   rows; =granularity= is one of =month= / =quarter= / =year= / =century=; =century=
@@ -674,10 +675,10 @@ Blocked by: [[*=categories.py= — category CRUD]]
 - [X] [me] Write unit-testable helper functions (in =reports.py= or a separate
   module): Arabic→Roman numeral conversion; grouping of flat rows by period
   (returns e.g. =list[tuple[str, list[Row]]]=); these must have =pytest= tests
-- [ ] [Claude] Controls in =ui/reports_view.py=: date range pickers (from / to),
+- [X] [Claude] Controls in =ui/reports_view.py=: date range pickers (from / to),
   four granularity radio buttons (month / quarter / year / century), multi-select
   category checkboxes
-- [ ] [Claude] Two-level table: period as section header rows, one category per
+- [X] [Claude] Two-level table: period as section header rows, one category per
   data row with amount and percentage columns; uses grouping helper from step 2;
   report updates live on any control change (no "Run" button); category selector
   uses a 200ms =QTimer.singleShot= debounce to avoid re-running on every tick
