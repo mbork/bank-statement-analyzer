@@ -161,12 +161,16 @@ class TransactionsView(QWidget):
         recategorize_button = QPushButton(self.tr('Re-categorize'))
         recategorize_button.clicked.connect(self._recategorize)
 
-        # Make Export CSV and Re-categorize the same width
-        action_button_width = max(
-            export_button.sizeHint().width(), recategorize_button.sizeHint().width()
-        )
-        export_button.setFixedWidth(action_button_width)
-        recategorize_button.setFixedWidth(action_button_width)
+        # Force all three buttons to the same width, based on the widest
+        # text plus generous padding for button chrome.  Uses font metrics
+        # directly because sizeHint() is unreliable before the widget is shown.
+        fm = clear_button.fontMetrics()
+        button_texts = [clear_button.text(), export_button.text(), recategorize_button.text()]
+        max_text_width = max(fm.horizontalAdvance(text) for text in button_texts)
+        button_width = max_text_width + 40
+        clear_button.setFixedWidth(button_width)
+        export_button.setFixedWidth(button_width)
+        recategorize_button.setFixedWidth(button_width)
 
         filter_row = QHBoxLayout()
         filter_row.addWidget(QLabel(self.tr('From:')))
