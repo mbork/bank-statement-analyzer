@@ -731,6 +731,17 @@ column uses a SQLite window function to avoid Python post-processing.
   single-category limitation, no uniform structure — replaced by this design.
 
 ** Session log
+*** [2026-04-15] (session 2)
+- Completed: `arabic_to_roman()` + `group_rows_by_period()` in `reports.py`
+  with full test suites; `ReportsView` in `ui/reports_view.py` (date pickers,
+  granularity radio buttons, category checkboxes with All/None, two-level table);
+  Pyright `toPython()` cast fixes in both UI files
+- In progress: NONE — feature DONE
+- Next: start next TODO feature
+- Blockers: NONE
+- Decisions: `arabic_to_roman` stays in `reports.py` (single consumer, no
+  premature extraction); All/None kept over "Toggle all" (ambiguous with
+  mixed state); debounce kept at 200ms
 *** [2026-04-15]
 - Completed: `spending_report()` implemented in `reports.py` (filtering,
   period expressions, window function for %, sign flip); `TransactionFilters`
