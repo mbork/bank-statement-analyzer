@@ -585,20 +585,21 @@ Blocked by: [[*=categories.py= — category CRUD]], [[*=ui/transactions_view.py=
 ** Decisions
 ** Session log
 
-* INPROGRESS CSV export (transactions table and report)
+* DONE CSV export (transactions table and report)
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-15 Wed 12:01]
 - State "INPROGRESS" from "TODO"       [2026-04-15 Wed 09:55]
 :END:
 Export the full transactions table and current report to CSV format
 for analysis in spreadsheets or other tools.
 
-** Steps [5/6]
+** Steps [6/6]
 - [X] Design CSV format for transactions (columns, date format)
 - [X] Implement =transactions_to_csv()= and =report_to_csv()= in new =export.py=
 - [X] Write unit tests for =export.py=
 - [X] Add export buttons to UI (transactions view and report view); UI writes header row
 - [X] Write UI test verifying header/data column alignment (via =io.StringIO()=)
-- [ ] Test CSV import/export round-trip in spreadsheet
+- [X] Test CSV import/export round-trip in spreadsheet
 
 ** Decisions
 *** [2026-04-15] – CSV functions live in =export.py=, not =reports.py=
@@ -654,6 +655,16 @@ Comma separator with decimal point (RFC 4180) — rejected because Polish Excel 
 would need the import wizard, and the end-user is explicitly a Windows/Excel user.
 
 ** Session log
+*** [2026-04-15]
+- Completed: fixed `date_to` sentinel display — `textFromDateTime` override in
+  `_DateFilterEdit` (`any_at_max=True`); `setFixedWidth` to match `date_from` width;
+  `_DefaultPageCalendar.showEvent` checks both min and max sentinels;
+  added granularity to report CSV export suggested filename
+- In progress: NONE — all steps complete; mark feature DONE
+- Next: mark CSV export DONE; start next feature (e.g. category name validation or auto-categorizer)
+- Blockers: NONE
+- Decisions: keep `setSpecialValueText`/`textFromDateTime` asymmetry as-is (cosmetic,
+  user chose to leave it); decided NOT to drop `MAX_DATE` in favor of "today" sentinel
 
 * TODO =categorizer.py= — rule-based auto-categorization
 :LOGBOOK:
