@@ -9,6 +9,8 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
 
@@ -16,15 +18,22 @@ jobs:
 
       - run: uv sync
 
-      - run: uv run pyinstaller --noconsole --onefile --name bank-statement-analyzer main.py
+      - run: uv run pytest tests/
 
-      - uses: actions/upload-artifact@v7
+      - run: |
+          uv run pyinstaller --onefile --name bank-statement-analyzer \
+            --add-data "translations:translations" \
+            --add-data "bank_analyzer/ui/help:bank_analyzer/ui/help" \
+            main.py
+
+      - uses: softprops/action-gh-release@v3
         with:
-          name: bank-statement-analyzer-linux
-          path: dist/bank-statement-analyzer
+          files: dist/bank-statement-analyzer
 
   build-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
 
@@ -32,9 +41,14 @@ jobs:
 
       - run: uv sync
 
-      - run: uv run pyinstaller --onefile --name bank-statement-analyzer main.py
+      - run: uv run pytest tests/
 
-      - uses: actions/upload-artifact@v7
+      - run: |
+          uv run pyinstaller --onefile --noconsole --name bank-statement-analyzer `
+            --add-data "translations;translations" `
+            --add-data "bank_analyzer/ui/help;bank_analyzer/ui/help" `
+            main.py
+
+      - uses: softprops/action-gh-release@v3
         with:
-          name: bank-statement-analyzer-windows
-          path: dist/bank-statement-analyzer.exe
+          files: dist/bank-statement-analyzer.exe
