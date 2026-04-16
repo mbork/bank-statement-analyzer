@@ -186,7 +186,7 @@ def test_parse_csv_pko_bp_2():
 
 @pytest.fixture
 def temp_db(tmp_path, monkeypatch):
-    monkeypatch.setenv('BANK_ANALYZER_DATA_DIR', str(tmp_path))
+    monkeypatch.setenv('BANK_ANALYZER_DB_PATH', str(tmp_path / 'test.db'))
     with db.manage_connection() as conn:
         db.create_schema(conn)
         yield

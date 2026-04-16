@@ -909,6 +909,40 @@ by =db.insert_rule=, =db.get_all_rules=, =db.delete_rule=.
 - Blockers: NONE
 - Decisions: NONE
 
+* DONE Rename =BANK_ANALYZER_DATA_DIR= to =BANK_ANALYZER_DB_PATH=
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-16 Thu 08:28]
+- State "INPROGRESS" from "TODO"       [2026-04-16 Thu 08:28]
+:END:
+Replace the directory-based env var with a full file path, giving direct
+control over which DB file is used.
+
+** Steps [1/1]
+- [X] Update =config.py=, =.env=, =.env.example=, =CLAUDE.md=, and
+  =tests/test_importer.py= to use =BANK_ANALYZER_DB_PATH=
+
+** Decisions
+*** [2026-04-16] – Use full DB file path instead of directory in env var
+**** Reason
+Allows pointing at different DB files for dev, testing, or snapshots without
+any code changes — just set the env var to the desired file path.  A directory
+var forces the filename to always be =bank_analyzer.db=.
+
+*** [2026-04-16] – Call =.resolve()= on env-var path only
+**** Reason
+Converts a relative path (e.g. =./data/bank_analyzer.db=) to absolute at call
+time, locking in the CWD before Qt or any other code can change it.  Not needed
+on the OS fallback branches since =Path.home()= and =Path(APPDATA)= are already
+absolute.
+
+** Session log
+*** [2026-04-16]
+- Completed: all references updated; =.resolve()= added to env-var branch
+- In progress: NONE
+- Next: N/A
+- Blockers: NONE
+- Decisions: logged above
+
 * TODO Database seeds for testing
 Provide predefined test data so the Rules view (and other views) can be
 exercised without manually entering data each run.

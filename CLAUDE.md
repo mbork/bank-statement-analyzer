@@ -15,8 +15,8 @@ by replacing `ui/` only.  Modules outside `ui/` must never import from `ui/`.
 
 | Module           | Responsibility                                                        |
 |------------------|-----------------------------------------------------------------------|
-| `config.py`      | Resolves DB path: `BANK_ANALYZER_DATA_DIR` env var → OS user-data dir |
-| `db.py`          | Schema creation, all `sqlite3` queries; returns plain `list[dict]`   |
+| `config.py`      | Resolves DB path: `BANK_ANALYZER_DB_PATH` env var → OS user-data path |
+| `db.py`          | Schema creation, all `sqlite3` queries; returns plain `list[dict]`    |
 | `importer.py`    | CSV parsing, description canonicalization, deduplication              |
 | `categories.py`  | Category CRUD                                                         |
 | `reports.py`     | Spending report queries (by category and time interval)               |
@@ -31,7 +31,7 @@ by replacing `ui/` only.  Modules outside `ui/` must never import from `ui/`.
 
 ## Data location
 
-- **Dev:** `./data/bank_analyzer.db` — set `BANK_ANALYZER_DATA_DIR=./data` in `.env`
+- **Dev:** `./data/bank_analyzer.db` — set `BANK_ANALYZER_DB_PATH=./data/bank_analyzer.db` in `.env`
 - **Linux (prod):** `~/.local/share/bank-statement-analyzer/bank_analyzer.db`
 - **Windows (prod):** `%APPDATA%\bank-statement-analyzer\bank_analyzer.db`
 
