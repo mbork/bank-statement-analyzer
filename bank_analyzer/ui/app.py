@@ -43,6 +43,7 @@ class App(QMainWindow):
         self._help_tab = help_view.HelpView()
         self._import_tab.import_succeeded.connect(self._transactions_tab.refresh)
         self._categories_tab.categories_changed.connect(self._transactions_tab.refresh)
+        self._categories_tab.categories_changed.connect(self._rules_tab.refresh)
 
         self._tabs.addTab(self._import_tab, self.tr('Import'))
         self._tabs.addTab(self._transactions_tab, self.tr('Transactions'))

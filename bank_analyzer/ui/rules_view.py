@@ -71,11 +71,11 @@ class RulesView(QWidget):
         layout.addWidget(self._status_label)
         self.setLayout(layout)
 
-        self._refresh()
+        self.refresh()
 
     # ** Helpers
 
-    def _refresh(self) -> None:
+    def refresh(self) -> None:
         current_category_id = self._category_combo.currentData()
 
         self._table.setRowCount(0)
@@ -122,7 +122,7 @@ class RulesView(QWidget):
             rules.insert_rule(pattern, category_id)
             self._pattern_input.clear()
             self._status_label.clear()
-            self._refresh()
+            self.refresh()
             self.rules_changed.emit()
         except Exception as e:
             self._status_label.setText(self.tr('Error: {error}').format(error=e))
@@ -143,7 +143,7 @@ class RulesView(QWidget):
         try:
             rules.delete_rule(rule_id)
             self._status_label.clear()
-            self._refresh()
+            self.refresh()
             self.rules_changed.emit()
         except Exception as e:
             self._status_label.setText(self.tr('Error: {error}').format(error=e))
