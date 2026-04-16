@@ -50,13 +50,22 @@ To add a dependency: `uv add <package>`.  Never use `pip install` directly.
 
 # Commands
 
-| Task                | Command                               |
-|---------------------|---------------------------------------|
-| Run the app         | `uv run python main.py`               |
-| Run in demo mode    | `uv run python scripts/demo.py`       |
-| Run all tests       | `uv run pytest tests/`                |
-| Run one test file   | `uv run pytest tests/test_importer.py` |
-| Run tests verbosely | `uv run pytest --verbose tests/`      |
+| Task                               | Command                                        |
+|------------------------------------|------------------------------------------------|
+| Run the app                        | `uv run python main.py`                        |
+| Run in demo mode                   | `uv run python scripts/demo.py`                |
+| Run all tests                      | `uv run pytest tests/`                         |
+| Run one test file                  | `uv run pytest tests/test_importer.py`         |
+| Run tests verbosely                | `uv run pytest --verbose tests/`               |
+| Extract new translatable strings   | `uv run python scripts/extract-strings.py`     |
+| Compile translations + help HTML   | `uv run python scripts/build-assets.py`        |
+
+i18n workflow: after adding new `self.tr()` calls, run `extract-strings.py`,
+translate the new entries in `translations/*.ts`, then run `build-assets.py`.
+`build-assets.py` also requires `pandoc` on PATH to regenerate help HTML.
+
+Help workflow: after editing `docs/help.*.org`, run `build-assets.py` and commit
+both the `.org` and generated `.html` files.
 
 # Coding conventions
 

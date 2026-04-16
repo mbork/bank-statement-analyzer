@@ -1,0 +1,99 @@
+<h1 id="bank-statement-analyzer-help">Bank Statement Analyzer —
+Help</h1>
+<p>(under construction)</p>
+<h2 id="overview">Overview</h2>
+<p>Things to write:</p>
+<ul>
+<li>What the app does (import CSV bank statements, categorize
+transactions, generate spending reports)</li>
+<li>Typical workflow: import -&gt; categorize -&gt; view reports</li>
+<li>Note about demo mode (what it is, how to launch it, data is not
+saved)</li>
+<li>Note that data is stored locally on the user's machine (no cloud, no
+account needed)</li>
+<li>Visit the project website at <a
+href="https://github.com/mbork/bank-statement-analyzer">https://github.com/mbork/bank-statement-analyzer</a></li>
+</ul>
+<h2 id="import">Import</h2>
+<p>Things to write:</p>
+<ul>
+<li>How to select the bank from the dropdown (list supported banks)</li>
+<li>How to browse for a CSV file exported from your bank</li>
+<li>What happens when you click Import (success message, deduplication —
+same file can be imported safely twice)</li>
+<li>Error messages: file not found, wrong format, unsupported bank</li>
+<li>Where to get the CSV file from your bank (brief note; may vary by
+bank)</li>
+</ul>
+<h2 id="transactions">Transactions</h2>
+<p>Things to write:</p>
+<ul>
+<li>Overview of the transactions table (columns: date, description,
+amount, category)</li>
+<li>Income vs. expense (visual distinction — income shown in grey)</li>
+<li>Filtering:
+<ul>
+<li>Date range (From/To date pickers, calendar popup, "(any)" sentinel
+meaning no bound)</li>
+<li>Amount range (min/max fields)</li>
+<li>Category filter dropdown (including "(all)" and
+"(uncategorized)")</li>
+<li>Description text search (substring match)</li>
+<li>Clear filters button</li>
+</ul></li>
+<li>Sorting columns by clicking headers</li>
+<li>Selecting transactions (single and multi-select)</li>
+<li>Assigning a category to selected transactions manually (Assign
+button)</li>
+<li>Re-categorize button (applies all rules to all transactions,
+overwrites existing categories)</li>
+<li>Exporting filtered transactions to CSV</li>
+</ul>
+<h2 id="reports">Reports</h2>
+<p>Things to write:</p>
+<ul>
+<li>Overview: spending grouped by category over a time period</li>
+<li>Date range filter (From/To pickers) and quick presets: This month,
+Last month, All time</li>
+<li>Granularity options: Month, Quarter, Year, Century (what each means
+in the table)</li>
+<li>Category filter: selecting/deselecting categories with All/None
+shortcuts</li>
+<li>Reading the report table (columns: period, category, amount,
+percentage)</li>
+<li>Uncategorized transactions in reports</li>
+<li>Exporting report to CSV</li>
+</ul>
+<h2 id="categories">Categories</h2>
+<p>Things to write:</p>
+<ul>
+<li>What categories are and how they're used</li>
+<li>Adding a new category (type name, press Enter or click Add)</li>
+<li>Renaming a category (select, click Rename)</li>
+<li>Deleting a category (select, click Delete; warn about effect on
+categorized transactions)</li>
+<li>Category names must be unique (error if duplicate)</li>
+</ul>
+<h2 id="rules">Rules</h2>
+<p>Things to write:</p>
+<ul>
+<li>What rules are: pattern -&gt; category mappings for automatic
+categorization</li>
+<li>Pattern matching (case-insensitive substring match against
+transaction description)</li>
+<li>Adding a rule (enter pattern, select category, click Add rule or
+press Enter)</li>
+<li>Deleting a rule (select row, click Delete rule)</li>
+<li>How rules interact with Re-categorize (in Transactions tab)</li>
+<li>Rules do not automatically apply on import — Re-categorize must be
+run manually</li>
+<li>Rule order / conflict resolution (if multiple rules match)</li>
+</ul>
+<h2 id="settings">Settings</h2>
+<p>Things to write:</p>
+<ul>
+<li>Language selector: available languages (English, Polish, system
+default)</li>
+<li>Applying changes requires restarting the app</li>
+<li>What "system default" means (uses OS locale)</li>
+</ul>

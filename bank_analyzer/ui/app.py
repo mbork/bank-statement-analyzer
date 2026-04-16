@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 from bank_analyzer import db
 from bank_analyzer.ui import (
     categories_view,
+    help_view,
     import_view,
     reports_view,
     rules_view,
@@ -45,6 +46,7 @@ class App(QMainWindow):
         tabs.addTab(categories_tab, self.tr('Categories'))
         tabs.addTab(rules_view.RulesView(), self.tr('Rules'))
         tabs.addTab(settings_view.SettingsView(), self.tr('Settings'))
+        tabs.addTab(help_view.HelpView(), self.tr('Help'))
 
         # ** Central widget (with optional demo banner)
         central = QWidget()

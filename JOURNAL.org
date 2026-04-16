@@ -1102,19 +1102,20 @@ their language regardless of the current UI language.
 - Blockers: NONE
 - Decisions: all logged above
 
-* INPROGRESS Help tab (=ui/help_view.py=)
+* DONE Help tab (=ui/help_view.py=)
 :LOGBOOK:
+- State "DONE" from "INPROGRESS"       [2026-04-16 Thu]
 - State "INPROGRESS" from "TODO"       [2026-04-16 Thu 13:36]
 :END:
 Display in-app help by rendering the appropriate =docs/help.*.org= file
 based on the active UI locale.
 
-** Steps [0/5]
-- [ ] Create =docs/help.en.org= (English help content)
-- [ ] Create =docs/help.pl.org= (Polish help content)
-- [ ] Link to both from =README.org=
-- [ ] Implement =ui/help_view.py=: load and display the correct file (verbatim) based on locale
-- [ ] Consider applying light Org mode-based formatting to the help screen
+** Steps [5/5]
+- [x] Create =docs/help.en.org= (stub with section checklists)
+- [x] Create =docs/help.pl.org= (Polish section titles)
+- [x] Link to both from =README.org=
+- [x] Implement =ui/help_view.py=: load pre-built HTML from =ui/help/= based on locale
+- [x] Add =scripts/build-assets.py= (pandoc + lrelease) and =scripts/extract-strings.py=
 
 ** Decisions
 *** [2026-04-16] – In-app help lives in =docs/help.en.org= and =docs/help.pl.org=, not in =README.org=
@@ -1130,6 +1131,18 @@ richer and localized independently.  =README.org= will link to both help files.
 filenames, so the repo front page would show no readme.  Would also conflate the
 developer readme with user-facing help content.
 
+*** [2026-04-16] – Help HTML pre-built by Pandoc, not converted at runtime
+**** Reason
+End users (Windows/Excel) won't have Pandoc or Emacs installed.  Pre-converting at
+dev time keeps the runtime simple (=help_view.py= just reads a =.html= file) and
+produces better output than a hand-rolled Org→HTML converter.  Generated =.html= files
+are committed alongside the =.org= sources.
+
+*** [2026-04-16] – Generated HTML lives in =bank_analyzer/ui/help/=, sources in =docs/=
+**** Reason
+=docs/= is for human-readable source; =ui/help/= co-locates the runtime assets with the
+code that reads them.
+
 ** Session log
 
 * TODO Fill in =README.org=
@@ -1144,6 +1157,14 @@ developer readme with user-facing help content.
 
 ** Decisions
 ** Session log
+
+* TODO Write help content (=docs/help.en.org=, =docs/help.pl.org=)
+Infrastructure is in place (=ui/help_view.py=, build scripts, stub files with
+section checklists).  This task covers writing the actual user-facing text.
+
+** Steps [0/2]
+- [ ] Write English help content in =docs/help.en.org=
+- [ ] Write Polish help content in =docs/help.pl.org=
 
 * TODO [Future] Recategorize transactions using updated rules
 Allow the user to re-run categorization rules against already-categorized
