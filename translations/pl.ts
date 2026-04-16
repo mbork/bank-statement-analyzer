@@ -4,42 +4,47 @@
 <context>
     <name>App</name>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="32"/>
+        <location filename="../bank_analyzer/ui/app.py" line="33"/>
         <source>Bank Statement Analyzer</source>
         <translation>Analizator wyciągów bankowych</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="42"/>
+        <location filename="../bank_analyzer/ui/app.py" line="43"/>
         <source>Import</source>
         <translation>Import</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="43"/>
+        <location filename="../bank_analyzer/ui/app.py" line="44"/>
         <source>Transactions</source>
         <translation>Transakcje</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="44"/>
+        <location filename="../bank_analyzer/ui/app.py" line="45"/>
         <source>Reports</source>
         <translation>Raporty</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="45"/>
+        <location filename="../bank_analyzer/ui/app.py" line="46"/>
         <source>Categories</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="46"/>
+        <location filename="../bank_analyzer/ui/app.py" line="47"/>
         <source>Rules</source>
         <translation>Reguły</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="47"/>
+        <location filename="../bank_analyzer/ui/app.py" line="48"/>
         <source>Settings</source>
         <translation>Ustawienia</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="57"/>
+        <location filename="../bank_analyzer/ui/app.py" line="49"/>
+        <source>Help</source>
+        <translation>Pomoc</translation>
+    </message>
+    <message>
+        <location filename="../bank_analyzer/ui/app.py" line="59"/>
         <source>DEMO MODE — this is temporary data, everything will be lost when you quit.</source>
         <translation>TRYB DEMO — to są tymczasowe dane, wszystko zostanie utracone po zamknięciu programu.</translation>
     </message>
@@ -452,8 +457,8 @@
 <context>
     <name>_DateFilterEdit</name>
     <message>
-        <location filename="../bank_analyzer/ui/transactions_view.py" line="72"/>
         <location filename="../bank_analyzer/ui/reports_view.py" line="67"/>
+        <location filename="../bank_analyzer/ui/transactions_view.py" line="72"/>
         <source>(any)</source>
         <translation>(dowolna)</translation>
     </message>
