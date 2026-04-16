@@ -53,6 +53,7 @@ To add a dependency: `uv add <package>`.  Never use `pip install` directly.
 | Task                | Command                               |
 |---------------------|---------------------------------------|
 | Run the app         | `uv run python main.py`               |
+| Run in demo mode    | `uv run python scripts/demo.py`       |
 | Run all tests       | `uv run pytest tests/`                |
 | Run one test file   | `uv run pytest tests/test_importer.py` |
 | Run tests verbosely | `uv run pytest --verbose tests/`      |

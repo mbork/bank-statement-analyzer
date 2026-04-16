@@ -943,20 +943,21 @@ absolute.
 - Blockers: NONE
 - Decisions: logged above
 
-* INPROGRESS Database seeds for testing
+* DONE Database seeds for testing
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-16 Thu 09:22]
 - State "INPROGRESS" from "TODO"       [2026-04-16 Thu 08:30]
 :END:
 Provide predefined test data so the Rules view (and other views) can be
 exercised without manually entering data each run.
 
-** Steps [2/6]
+** Steps [6/6]
 - [X] Define seed categories and rules in =scripts/seed.py=
 - [X] Verify =seed.py= works against a fresh DB
-- [ ] Add =scripts/demo.py=: set temp =BANK_ANALYZER_DB_PATH=, call =seed.seed()=, launch app
-- [ ] Add =is_demo: bool = False= parameter to =app.run()= and =App.__init__()=
-- [ ] Show demo banner (=QLabel= above tabs) when =is_demo=True=
-- [ ] Document =demo.py= usage in =CLAUDE.md=
+- [X] Add =scripts/demo.py=: set temp =BANK_ANALYZER_DB_PATH=, call =seed.seed()=, launch app
+- [X] Add =is_demo: bool = False= parameter to =app.run()= and =App.__init__()=
+- [X] Show demo banner (=QLabel= above tabs) when =is_demo=True=
+- [X] Document =demo.py= usage in =CLAUDE.md=
 
 ** Decisions
 *** [2026-04-16] – Seed data lives in =scripts/seed.py=, not a pytest fixture
@@ -992,18 +993,23 @@ Passing =is_demo=True= as a parameter to =run()= is explicit and keeps
 does not.
 
 ** Session log
+*** [2026-04-16]
+- Completed: =scripts/seed.py= (categories, rules, CSV import, =load_dotenv=,
+  =create_schema=); =scripts/demo.py= (temp DB, seed, launch); demo banner in
+  =app.py= (amber =QLabel=, centered, 40px); =pyright= added as dev dependency
+  with =typeCheckingMode = "standard"=
+- In progress: NONE — mark DONE
+- Next: N/A
+- Blockers: NONE
+- Decisions: all logged above
 
-* TODO [Future] Recategorize transactions using updated rules
-Allow the user to re-run categorization rules against already-categorized
-transactions, optionally scoped to transactions since a specified date.
-Deferred from MVP: =categorizer.py= currently skips transactions that already
-have a category assigned.
+* TODO Quick date range presets in reports view
+Add "This month", "Last month", "This quarter", "Last quarter" buttons
+to the reports view that set the date range inputs in one click.
 
 ** Steps [0/2]
-- [ ] Add a =recategorize_since(conn, date)= function in =categorizer.py= that
-  applies all rules to transactions on or after =date=, overwriting existing
-  category assignments
-- [ ] Wire into UI (e.g. "Re-apply rules since..." dialog)
+- [ ] Add preset buttons row to =ui/reports_view.py=
+- [ ] Wire each button to set the from/to date fields and trigger a refresh
 
 ** Decisions
 ** Session log
@@ -1022,6 +1028,32 @@ user.  Language change takes effect after restart.
 ** Decisions
 ** Session log
 
+* TODO Help tab (=ui/help_view.py=)
+Display in-app help by rendering the appropriate =docs/help.*.org= file
+based on the active UI locale.
+
+** Steps [0/4]
+- [ ] Create =docs/help.en.org= (English help content)
+- [ ] Create =docs/help.pl.org= (Polish help content)
+- [ ] Link to both from =README.org=
+- [ ] Implement =ui/help_view.py=: load and display the correct file based on locale
+
+** Decisions
+*** [2026-04-16] – In-app help lives in =docs/help.en.org= and =docs/help.pl.org=, not in =README.org=
+**** Reason
+=README.org= is the GitHub-facing developer readme; GitHub auto-renders it because it
+uses the exact filename =README.org=.  A locale-suffixed =README.en.org= would not be
+rendered by GitHub at all.  Separating user-facing help into =docs/help.*.org= keeps
+the developer readme short and always visible on GitHub, while the in-app help can be
+richer and localized independently.  =README.org= will link to both help files.
+
+**** Alternatives considered
+=README.en.org= + =README.pl.org=: GitHub does not auto-render non-standard README
+filenames, so the repo front page would show no readme.  Would also conflate the
+developer readme with user-facing help content.
+
+** Session log
+
 * TODO Fill in =README.org=
 
 ** Steps [0/6]
@@ -1031,6 +1063,21 @@ user.  Language change takes effect after restart.
 - [ ] Usage (=uv run python main.py=; expand as features are added)
 - [ ] Development (how to run tests; pointer to =BANKS= in =importer.py= for new banks)
 - [ ] License (choose and state a license; MIT recommended)
+
+** Decisions
+** Session log
+
+* TODO [Future] Recategorize transactions using updated rules
+Allow the user to re-run categorization rules against already-categorized
+transactions, optionally scoped to transactions since a specified date.
+Deferred from MVP: =categorizer.py= currently skips transactions that already
+have a category assigned.
+
+** Steps [0/2]
+- [ ] Add a =recategorize_since(conn, date)= function in =categorizer.py= that
+  applies all rules to transactions on or after =date=, overwriting existing
+  category assignments
+- [ ] Wire into UI (e.g. "Re-apply rules since..." dialog)
 
 ** Decisions
 ** Session log
