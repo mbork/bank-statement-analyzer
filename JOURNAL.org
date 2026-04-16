@@ -1171,7 +1171,11 @@ code that reads them.
 ** Decisions
 ** Session log
 
-* TODO Improve demo mode (=--demo= flag, in-memory DB)
+* DONE Improve demo mode (=--demo= flag)
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-16 Thu 15:53]
+- State "INPROGRESS" from "TODO"       [2026-04-16 Thu 15:37]
+:END:
 Replace =scripts/demo.py= with a =--demo= CLI flag on =main.py=.
 Use SQLite =:memory:= instead of a temp file so no cleanup is needed.
 Include a =demo.bat= in the Windows release.
@@ -1183,6 +1187,26 @@ Include a =demo.bat= in the Windows release.
 - [ ] Add =demo.bat= to Windows release in =build.yml=
 
 ** Decisions
+*** [2026-04-16] – Use temp file for demo DB instead of SQLite =:memory:=
+**** Reason
+=:memory:= databases are destroyed when the last connection closes.
+=manage_connection()= opens and closes a connection on every call, so each
+call would get a fresh empty DB.  The workaround (shared-cache URI +
+anchor connection) is fragile and hard to reason about.  A temp file via
+=tempfile.mkstemp()= + =atexit.register(os.unlink, ...)= is simpler,
+reliable, and costs nothing in practice.
+
+**** Alternatives considered
+=file::memory:?cache=shared= with an anchor connection kept open for the
+app's lifetime: works, but relies on CPython frame lifetime to prevent GC
+collection of the anchor, which is non-obvious.
+
+Single persistent connection for the whole app: would solve the =:memory:=
+problem cleanly and is common for single-user SQLite desktop apps, but
+would require refactoring =manage_connection()= and all its callers —
+disproportionate cost for a demo-mode concern.  Worth revisiting as a
+separate architectural change if performance or transaction management
+become a reason to reconsider.
 
 ** Session log
 
