@@ -1171,6 +1171,21 @@ code that reads them.
 ** Decisions
 ** Session log
 
+* TODO Improve demo mode (=--demo= flag, in-memory DB)
+Replace =scripts/demo.py= with a =--demo= CLI flag on =main.py=.
+Use SQLite =:memory:= instead of a temp file so no cleanup is needed.
+Include a =demo.bat= in the Windows release.
+
+** Steps [0/4]
+- [ ] Add =--demo= flag to =main.py= (detect via =sys.argv=)
+- [ ] Handle =:memory:= sentinel in =config.py= (return string, not =Path=)
+- [ ] Delete =scripts/demo.py=
+- [ ] Add =demo.bat= to Windows release in =build.yml=
+
+** Decisions
+
+** Session log
+
 * TODO Write help content (=docs/help.en.org=, =docs/help.pl.org=)
 Infrastructure is in place (=ui/help_view.py=, build scripts, stub files with
 section checklists).  This task covers writing the actual user-facing text.
