@@ -26,7 +26,13 @@ jobs:
             --add-data "bank_analyzer/ui/help:bank_analyzer/ui/help" \
             main.py
 
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bank-statement-analyzer-linux
+          path: dist/bank-statement-analyzer
+
       - uses: softprops/action-gh-release@v3
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: dist/bank-statement-analyzer
 
@@ -49,6 +55,12 @@ jobs:
             --add-data "bank_analyzer/ui/help;bank_analyzer/ui/help" `
             main.py
 
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bank-statement-analyzer-windows
+          path: dist/bank-statement-analyzer.exe
+
       - uses: softprops/action-gh-release@v3
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: dist/bank-statement-analyzer.exe
