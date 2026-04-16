@@ -1067,7 +1067,40 @@ user.  Language change takes effect after restart.
 - [X] Add manual language selection (combo box in settings or menu); store preference; restart to apply
 
 ** Decisions
+*** [2026-04-16] – Language preference stored in =settings= DB table, not =QSettings=
+**** Reason
+=QSettings= uses the Windows registry (unacceptable); a JSON file next to the DB
+was considered but adds a second file format. The =settings= table is already there
+and the DB connection is open at startup anyway.
+
+*** [2026-04-16] – "System default" deletes the =language= row rather than storing =''=
+**** Reason
+Deleting the row is semantically cleaner: "no preference" vs "preference stored
+as empty string". =delete_setting= is idempotent so callers need no guard.
+
+*** [2026-04-16] – Language selector placed in a new Settings tab, not a menu bar
+**** Reason
+App has no menu bar; adding tabs is consistent with the existing UI pattern.
+
+*** [2026-04-16] – Call =locale.setlocale(LC_ALL, '')= before =QApplication=
+**** Reason
+Python starts with the C locale; without this call, =QLocale.system()= ignores
+=LANG=/=LC_ALL= on Linux. Must be called before =QApplication= construction.
+
+*** [2026-04-16] – Language names in combo not translated
+**** Reason
+"English" and "Polski" must always appear in their own script so users can find
+their language regardless of the current UI language.
+
 ** Session log
+*** [2026-04-16]
+- Completed: =locale.setlocale= fix; =get_setting=/=set_setting=/=delete_setting=
+  in =db.py= with tests; =ui/settings_view.py= with language combo; Settings tab
+  in =app.py=; =pl.ts=/=pl.qm= updated with 4 new strings; all committed
+- In progress: NONE — feature DONE
+- Next: N/A
+- Blockers: NONE
+- Decisions: all logged above
 
 * TODO Help tab (=ui/help_view.py=)
 Display in-app help by rendering the appropriate =docs/help.*.org= file
