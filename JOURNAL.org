@@ -943,16 +943,54 @@ absolute.
 - Blockers: NONE
 - Decisions: logged above
 
-* TODO Database seeds for testing
+* INPROGRESS Database seeds for testing
+:LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-04-16 Thu 08:30]
+:END:
 Provide predefined test data so the Rules view (and other views) can be
 exercised without manually entering data each run.
 
-** Steps [0/3]
-- [ ] Define a set of seed categories in a fixture or script
-- [ ] Define a set of seed rules covering those categories
-- [ ] Add a seed CSV with matching transactions (or extend existing test CSV)
+** Steps [2/6]
+- [X] Define seed categories and rules in =scripts/seed.py=
+- [X] Verify =seed.py= works against a fresh DB
+- [ ] Add =scripts/demo.py=: set temp =BANK_ANALYZER_DB_PATH=, call =seed.seed()=, launch app
+- [ ] Add =is_demo: bool = False= parameter to =app.run()= and =App.__init__()=
+- [ ] Show demo banner (=QLabel= above tabs) when =is_demo=True=
+- [ ] Document =demo.py= usage in =CLAUDE.md=
 
 ** Decisions
+*** [2026-04-16] – Seed data lives in =scripts/seed.py=, not a pytest fixture
+**** Reason
+The seed is for manual dev/demo use, not automated testing.  A callable
+=seed()= function in a standalone script is simpler and more obvious than
+a pytest fixture used outside of pytest.
+
+*** [2026-04-16] – =seed.py= is non-destructive; reset via =rm= or =demo.py=
+**** Reason
+A destructive seed risks silently wiping a real DB if =BANK_ANALYZER_DB_PATH=
+is not set.  Non-destructive is safer; explicit reset (delete the file) is
+self-documenting.
+
+*** [2026-04-16] – Add =scripts/demo.py= for isolated demo/dev runs
+**** Reason
+Sets =BANK_ANALYZER_DB_PATH= to a =tempfile= path, calls =seed.seed()=,
+then launches the app — guaranteeing a fresh throwaway DB each run with
+zero risk to real data.  Pure Python, so works on Windows too (unlike a
+shell script).
+
+*** [2026-04-16] – =demo.py= calls =bank_analyzer.ui.app.run()= directly, skipping =main.py=
+**** Reason
+=main.py= only adds =load_dotenv()=, which =demo.py= must skip anyway
+(=.env= must not override the temp path set by =demo.py=).  Calling
+=app.run()= directly is cleaner and avoids a subprocess.
+
+*** [2026-04-16] – Demo mode banner via =is_demo: bool= parameter to =app.run()=
+**** Reason
+A =QLabel= warning banner above the tabs signals demo mode clearly.
+Passing =is_demo=True= as a parameter to =run()= is explicit and keeps
+=app.py= free of env-var logic.  =demo.py= passes it; normal =main.py=
+does not.
+
 ** Session log
 
 * TODO [Future] Recategorize transactions using updated rules
