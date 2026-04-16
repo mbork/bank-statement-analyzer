@@ -1144,6 +1144,15 @@ are committed alongside the =.org= sources.
 code that reads them.
 
 ** Session log
+*** [2026-04-16]
+- Completed: =ui/help_view.py= (Help tab after Settings, reads pre-built HTML by locale);
+  =docs/help.en.org= + =docs/help.pl.org= stubs; =bank_analyzer/ui/help/*.html= generated
+  by Pandoc; =scripts/build-assets.py= (lrelease + pandoc); =scripts/extract-strings.py=
+  (lupdate); =CLAUDE.md= updated with commands and workflows; all committed
+- In progress: NONE — feature DONE
+- Next: write actual help content (see "Write help content" task)
+- Blockers: NONE
+- Decisions: all logged above
 
 * TODO Fill in =README.org=
 
