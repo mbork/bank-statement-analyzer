@@ -5,7 +5,13 @@ import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
 
 from bank_analyzer import db
-from bank_analyzer.ui import categories_view, import_view, reports_view, transactions_view
+from bank_analyzer.ui import (
+    categories_view,
+    import_view,
+    reports_view,
+    rules_view,
+    transactions_view,
+)
 
 # * Application
 
@@ -26,7 +32,7 @@ class App(QMainWindow):
         tabs.addTab(transactions_tab, self.tr('Transactions'))
         tabs.addTab(reports_view.ReportsView(), self.tr('Reports'))
         tabs.addTab(categories_tab, self.tr('Categories'))
-        # TODO Rules tab will be here
+        tabs.addTab(rules_view.RulesView(), self.tr('Rules'))
 
         self.setCentralWidget(tabs)
 

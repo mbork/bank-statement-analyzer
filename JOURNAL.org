@@ -885,6 +885,42 @@ install so no extra step needed.
 - Blockers: NONE
 - Decisions: logged above
 
+* DONE Rules management UI (=ui/rules_view.py=)
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-16 Thu 08:16]
+- State "INPROGRESS" from "TODO"       [2026-04-15 Wed 16:37]
+:END:
+Allow the user to view, add, and delete categorization rules.  Backed
+by =db.insert_rule=, =db.get_all_rules=, =db.delete_rule=.
+
+** Steps [3/3]
+- [X] Create =ui/rules_view.py=: table of existing rules (pattern + category), delete button
+- [X] Add form to insert a new rule (pattern input + category dropdown + Add button)
+- [X] Wire view into =app.py= as a new tab
+
+** Decisions
+** Session log
+*** [2026-04-15]
+- Completed: =ui/rules_view.py= (table, add-rule form, delete with confirm, =_refresh=,
+  =rules_changed= signal); =rules.py= service layer; wired into =app.py= as "Rules" tab;
+  category column width fixed at 250px
+- In progress: NONE — mark DONE
+- Next: create database seeds for testing (see next task)
+- Blockers: NONE
+- Decisions: NONE
+
+* TODO Database seeds for testing
+Provide predefined test data so the Rules view (and other views) can be
+exercised without manually entering data each run.
+
+** Steps [0/3]
+- [ ] Define a set of seed categories in a fixture or script
+- [ ] Define a set of seed rules covering those categories
+- [ ] Add a seed CSV with matching transactions (or extend existing test CSV)
+
+** Decisions
+** Session log
+
 * TODO [Future] Recategorize transactions using updated rules
 Allow the user to re-run categorization rules against already-categorized
 transactions, optionally scoped to transactions since a specified date.
