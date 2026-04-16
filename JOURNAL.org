@@ -1210,6 +1210,35 @@ become a reason to reconsider.
 
 ** Session log
 
+* INPROGRESS Fix Linux binary segfault
+Packaged Linux binary (PyInstaller) crashes with =Segmentation fault= after
+a few seconds of interaction.  Does not crash when run via =uv run python main.py=.
+
+** Attempts
+*** Attempt 1 – =systemd-tmpfiles= cleaning =/tmp/_MEIxxxxxx=
+Hypothesis: =--onefile= extracts to =/tmp/_MEIxxxxxx=; =systemd-tmpfiles= deletes
+it while the app runs.
+Fix tried: =--collect-all PySide6= — binary became much larger, still crashed.
+Fix tried: switch Linux build to =--onedir= + =.tar.gz= — reported as "still crashes",
+but =coredumpctl gdb= later confirmed identical bootloader =raise()= backtrace on a
+fresh =--onefile= build; the =--onedir= binary was likely not the one being tested.
+Hypothesis confirmed correct by backtrace (frame #2 is bootloader, not Python/Qt).
+Fix: =--onedir= + =.tar.gz= + =libegl1= system dependency (re-applied).
+
+*** Attempt 2 – PySide6 GC collecting tab widget wrappers
+Hypothesis: tab widgets created as temporaries in =App.__init__= (no =self._xxx=
+reference) have their Python wrappers collected by the cyclic GC.  The non-
+deterministic timing (5–40s) and interaction-triggered crash pattern fit.
+Fix tried: store all tab widgets and =QTabWidget= as =self._xxx= instance attrs.
+Outcome: crash persisted — not the root cause of this specific crash.
+The code change is still valid practice for PySide6 and was kept.
+
+** Next
+Obtain a stack trace via =coredumpctl gdb= or =coredumpctl debug= to identify
+the actual crash site.
+
+** Session log
+
 * TODO Write help content (=docs/help.en.org=, =docs/help.pl.org=)
 Infrastructure is in place (=ui/help_view.py=, build scripts, stub files with
 section checklists).  This task covers writing the actual user-facing text.
