@@ -4,6 +4,11 @@ from typing import TextIO
 
 from bank_analyzer.money import format_amount_csv
 
+# * Column headers
+
+TRANSACTIONS_CSV_HEADERS = ('date', 'description', 'amount', 'category')
+REPORT_CSV_HEADERS = ('period', 'category', 'total')
+
 # * Transactions
 
 def transactions_to_csv(rows: list[dict], dest: TextIO) -> None:

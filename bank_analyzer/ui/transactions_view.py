@@ -23,13 +23,13 @@ from PySide6.QtWidgets import (
 )
 
 from bank_analyzer import categories, categorizer, db, export
+from bank_analyzer.export import TRANSACTIONS_CSV_HEADERS
 from bank_analyzer.money import format_amount_ui
 from bank_analyzer.ui.constants import MAX_DATE, MIN_DATE
 
 # * Helpers
 
 NUM_COLUMNS = 4
-_TRANSACTIONS_CSV_HEADERS = ('date', 'description', 'amount', 'category')
 _ROLE_TRANSACTION_ID = Qt.ItemDataRole.UserRole
 _ROLE_CATEGORY_ID = Qt.ItemDataRole.UserRole + 1
 _ROLE_IS_INCOME = Qt.ItemDataRole.UserRole + 2
@@ -408,7 +408,7 @@ class TransactionsView(QWidget):
         )
         if not path:
             return
-        headers = [self.tr(h) for h in _TRANSACTIONS_CSV_HEADERS]
+        headers = [self.tr(h) for h in TRANSACTIONS_CSV_HEADERS]
         with open(path, 'w', encoding='utf-8-sig', newline='') as f:
             writer = csv.writer(f, delimiter=';')
             writer.writerow(headers)

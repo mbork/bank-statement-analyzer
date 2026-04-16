@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 )
 
 from bank_analyzer import categories, db, export, reports
+from bank_analyzer.export import REPORT_CSV_HEADERS
 from bank_analyzer.money import format_amount_ui
 from bank_analyzer.ui.constants import MAX_DATE, MIN_DATE
 
@@ -68,7 +69,6 @@ class _DateFilterEdit(QDateEdit):
         return super().textFromDateTime(dt)
 
 _GRANULARITIES = ['month', 'quarter', 'year', 'century']
-_REPORT_CSV_HEADERS = ('period', 'category', 'total')
 
 # * View
 
@@ -359,7 +359,7 @@ class ReportsView(QWidget):
         )
         if not path:
             return
-        headers = [self.tr(h) for h in _REPORT_CSV_HEADERS]
+        headers = [self.tr(h) for h in REPORT_CSV_HEADERS]
         with open(path, 'w', encoding='utf-8-sig', newline='') as f:
             writer = csv.writer(f, delimiter=';')
             writer.writerow(headers)

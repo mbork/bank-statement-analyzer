@@ -9,8 +9,7 @@ import csv
 import io
 
 from bank_analyzer import export
-from bank_analyzer.ui.reports_view import _REPORT_CSV_HEADERS
-from bank_analyzer.ui.transactions_view import _TRANSACTIONS_CSV_HEADERS
+from bank_analyzer.export import REPORT_CSV_HEADERS, TRANSACTIONS_CSV_HEADERS
 
 # * Tests
 
@@ -18,7 +17,7 @@ def test_transactions_header_aligns_with_export_columns() -> None:
     row = {'date': '2024-01-15', 'description': 'Sklep', 'amount': -1234, 'category': 'Food'}
     dest = io.StringIO()
     writer = csv.writer(dest, delimiter=';')
-    writer.writerow(_TRANSACTIONS_CSV_HEADERS)
+    writer.writerow(TRANSACTIONS_CSV_HEADERS)
     export.transactions_to_csv([row], dest)
     expected = (
         'date;description;amount;category\r\n'
@@ -30,7 +29,7 @@ def test_report_header_aligns_with_export_columns() -> None:
     row = {'period': '2024-01', 'category': 'Food', 'total_grosz': 5000}
     dest = io.StringIO()
     writer = csv.writer(dest, delimiter=';')
-    writer.writerow(_REPORT_CSV_HEADERS)
+    writer.writerow(REPORT_CSV_HEADERS)
     export.report_to_csv([row], dest)
     expected = (
         'period;category;total\r\n'
