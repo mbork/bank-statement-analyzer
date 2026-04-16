@@ -11,6 +11,7 @@ dependencies = [
 [dependency-groups]
 dev = [
 	"pyinstaller>=6.19.0",
+	"pyright>=1.1.408",
 	"pytest",
 	"ruff>=0.15.10",
 ]
@@ -26,6 +27,7 @@ build-backend = "hatchling.build"
 venvPath = "."
 venv = ".venv"
 exclude = [".venv"]
+typeCheckingMode = "standard"
 
 [tool.ruff]
 line-length = 100
