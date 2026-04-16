@@ -1102,7 +1102,10 @@ their language regardless of the current UI language.
 - Blockers: NONE
 - Decisions: all logged above
 
-* TODO Help tab (=ui/help_view.py=)
+* INPROGRESS Help tab (=ui/help_view.py=)
+:LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-04-16 Thu 13:36]
+:END:
 Display in-app help by rendering the appropriate =docs/help.*.org= file
 based on the active UI locale.
 

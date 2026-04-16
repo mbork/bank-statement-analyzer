@@ -12,6 +12,8 @@ A simple app for ingesting bank statements as csvs and categorizing spending.  M
 
 * Usage
 
+See [[file:docs/help.en.org][English]] and [[file:docs/help.pl.org][Polish]] docs.
+
 * Development
 
 * License

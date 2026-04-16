@@ -1,0 +1,15 @@
+#+TITLE: Analizator wyciągów bankowych — Pomoc
+
+* Przegląd
+
+* Import
+
+* Transakcje
+
+* Raporty
+
+* Kategorie
+
+* Reguły
+
+* Ustawienia
