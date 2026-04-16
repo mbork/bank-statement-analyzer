@@ -1210,7 +1210,10 @@ become a reason to reconsider.
 
 ** Session log
 
-* INPROGRESS Fix Linux binary segfault
+* DONE Fix Linux binary segfault
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-16 Thu 16:22]
+:END:
 Packaged Linux binary (PyInstaller) crashes with =Segmentation fault= after
 a few seconds of interaction.  Does not crash when run via =uv run python main.py=.
 
@@ -1233,11 +1236,25 @@ Fix tried: store all tab widgets and =QTabWidget= as =self._xxx= instance attrs.
 Outcome: crash persisted — not the root cause of this specific crash.
 The code change is still valid practice for PySide6 and was kept.
 
-** Next
-Obtain a stack trace via =coredumpctl gdb= or =coredumpctl debug= to identify
-the actual crash site.
+*** Attempt 3 – bundled =libxkbcommon= incompatible with host system
+=coredumpctl gdb= on the =--onedir= binary showed crash in
+=xkb_state_key_get_layout()= inside the bundled =libxkbcommon.so.0= (built on
+Ubuntu), triggered on every keypress.  Ubuntu's =libxkbcommon= looks for XKB
+keymap data in Ubuntu-specific paths, which don't exist on Arch Linux.
+Fix: delete =libxkbcommon*.so*= from =_internal/= after the PyInstaller build,
+forcing Qt to use the system library.
+Outcome: confirmed fixed.
 
 ** Session log
+*** [2026-04-16]
+- Completed: =--demo= flag in =main.py= (temp file + =atexit= cleanup, =demo.bat= in
+  Windows release, fixtures bundled); GC fix in =App.__init__= (=self._xxx= attrs);
+  =--onedir= + =libegl1= re-applied; bundled =libxkbcommon= removed post-build;
+  crash confirmed fixed
+- In progress: NONE
+- Next: mark task DONE, continue with other features
+- Blockers: NONE
+- Decisions: NONE (all logged above)
 
 * TODO Write help content (=docs/help.en.org=, =docs/help.pl.org=)
 Infrastructure is in place (=ui/help_view.py=, build scripts, stub files with
