@@ -32,21 +32,25 @@ class App(QMainWindow):
         super().__init__()
         self.setWindowTitle(self.tr("Bank Statement Analyzer"))
 
-        tabs = QTabWidget()
+        self._tabs = QTabWidget()
 
-        import_tab = import_view.ImportView()
-        transactions_tab = transactions_view.TransactionsView()
-        categories_tab = categories_view.CategoriesView()
-        import_tab.import_succeeded.connect(transactions_tab.refresh)
-        categories_tab.categories_changed.connect(transactions_tab.refresh)
+        self._import_tab = import_view.ImportView()
+        self._transactions_tab = transactions_view.TransactionsView()
+        self._categories_tab = categories_view.CategoriesView()
+        self._reports_tab = reports_view.ReportsView()
+        self._rules_tab = rules_view.RulesView()
+        self._settings_tab = settings_view.SettingsView()
+        self._help_tab = help_view.HelpView()
+        self._import_tab.import_succeeded.connect(self._transactions_tab.refresh)
+        self._categories_tab.categories_changed.connect(self._transactions_tab.refresh)
 
-        tabs.addTab(import_tab, self.tr('Import'))
-        tabs.addTab(transactions_tab, self.tr('Transactions'))
-        tabs.addTab(reports_view.ReportsView(), self.tr('Reports'))
-        tabs.addTab(categories_tab, self.tr('Categories'))
-        tabs.addTab(rules_view.RulesView(), self.tr('Rules'))
-        tabs.addTab(settings_view.SettingsView(), self.tr('Settings'))
-        tabs.addTab(help_view.HelpView(), self.tr('Help'))
+        self._tabs.addTab(self._import_tab, self.tr('Import'))
+        self._tabs.addTab(self._transactions_tab, self.tr('Transactions'))
+        self._tabs.addTab(self._reports_tab, self.tr('Reports'))
+        self._tabs.addTab(self._categories_tab, self.tr('Categories'))
+        self._tabs.addTab(self._rules_tab, self.tr('Rules'))
+        self._tabs.addTab(self._settings_tab, self.tr('Settings'))
+        self._tabs.addTab(self._help_tab, self.tr('Help'))
 
         # ** Central widget (with optional demo banner)
         central = QWidget()
@@ -63,7 +67,7 @@ class App(QMainWindow):
             banner.setStyleSheet('background: #f0ad4e; color: #000; padding: 4px 8px;')
             layout.addWidget(banner)
 
-        layout.addWidget(tabs)
+        layout.addWidget(self._tabs)
         self.setCentralWidget(central)
 
 # * Entry point
