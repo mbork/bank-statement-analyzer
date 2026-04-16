@@ -348,6 +348,37 @@ def test_update_rule_nonexistent_raises(conn):
     with pytest.raises(ValueError, match='no rule with id 1337'):
         db.update_rule(conn, 1337, 'PKP', 1)
 
+# * Settings
+
+def test_get_setting_returns_none_for_missing_key(conn):
+    assert db.get_setting(conn, 'lang') is None
+
+def test_get_setting_returns_stored_value(conn):
+    conn.execute("insert into settings (key, value) values ('lang', 'pl')")
+    assert db.get_setting(conn, 'lang') == 'pl'
+
+def test_set_setting_stores_value(conn):
+    db.set_setting(conn, 'lang', 'pl')
+    row = conn.execute('select value from settings where key = ?', ('lang',)).fetchone()
+    assert row is not None
+    assert row['value'] == 'pl'
+
+def test_set_setting_overwrites_existing_value(conn):
+    db.set_setting(conn, 'lang', 'pl')
+    db.set_setting(conn, 'lang', 'en')
+    row = conn.execute('select value from settings where key = ?', ('lang',)).fetchone()
+    assert row is not None
+    assert row['value'] == 'en'
+
+def test_set_setting_stores_independent_keys(conn):
+    db.set_setting(conn, 'lang', 'pl')
+    db.set_setting(conn, 'theme', 'dark')
+    rows = {
+        r['key']: r['value']
+        for r in conn.execute('select key, value from settings').fetchall()
+    }
+    assert rows == {'lang': 'pl', 'theme': 'dark'}
+
 # * Transactions
 
 def test_get_all_transactions_combined_filters(conn):

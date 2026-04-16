@@ -60,6 +60,12 @@ def create_schema(conn: sqlite3.Connection) -> None:
             category_id integer not null references categories(category_id)
         )
     ''')
+    conn.execute('''
+        create table if not exists settings (
+            key text primary key,
+            value text not null
+        )
+    ''')
     conn.commit()
 
 # * Importing transactions
@@ -200,3 +206,15 @@ def delete_rule(conn: sqlite3.Connection, rule_id: int) -> None:
     cursor = conn.execute('delete from rules where rule_id = ?', (rule_id,))
     if cursor.rowcount == 0:
         raise ValueError(f'no rule with id {rule_id}')
+
+# * Settings
+
+def get_setting(conn: sqlite3.Connection, key: str) -> str | None:
+    cursor = conn.execute('select value from settings where key = ?', (key,))
+    return next((row['value'] for row in cursor), None)
+
+def set_setting(conn: sqlite3.Connection, key: str, value: str) -> None:
+    conn.execute('''
+        insert into settings (key, value) values (?, ?)
+        on conflict(key) do update set value = excluded.value
+    ''', (key, value))
