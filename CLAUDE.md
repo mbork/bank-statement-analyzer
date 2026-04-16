@@ -67,6 +67,20 @@ translate the new entries in `translations/*.ts`, then run `build-assets.py`.
 Help workflow: after editing `docs/help.*.org`, run `build-assets.py` and commit
 both the `.org` and generated `.html` files.
 
+# Releasing
+
+Version is stored in `pyproject.toml` (`version` field).  Use semantic versioning:
+`0.MINOR.PATCH` until stable; bump `MINOR` for new user-visible features, `PATCH`
+for bug fixes and content-only changes (help text, translations).
+
+Release steps:
+1. Update `version` in `pyproject.toml` and commit (`chore: bump version to x.y.z`)
+2. `git tag vx.y.z`
+3. `git push --tags`
+
+Pushing a `v*` tag triggers GitHub Actions: tests run, Windows installer is built,
+and artifacts are attached to a GitHub Release automatically.
+
 # Coding conventions
 
 Inherits all rules from `~/.claude/CLAUDE.md`.  Project-specific additions:

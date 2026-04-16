@@ -2,18 +2,44 @@
 #+AUTHOR: mbork
 
 * Description
-A simple app for ingesting bank statements as csvs and categorizing spending.  My Python learning project.
+A simple app for ingesting bank statements as csvs and categorizing spending.  Currently supports PKO BP and mBank.
 
 * Requirements
+The Windows release is self-contained.  For developing on Linux:
+
+- [[https://www.python.org/][Python]] v3.10+
+- [[https://docs.astral.sh/uv/][uv]]
+- [[https://pandoc.org/][Pandoc]] (for building help HTML)
 
 * Installation
+** Linux
+#+begin_example
+  git clone git@github.com:mbork/bank-statement-analyzer.git
+  uv sync
+  cp .env.example .env # if you want to develop the app
+  uv run python main.py
+#+end_example
+
+** Windows
+Download the app (single-file, compressed) from the [[https://github.com/mbork/bank-statement-analyzer/releases][Releases]] page.
 
 * Configuration
+The data are kept in an SQLite database at:
+- Linux: =~/.local/share/bank-statement-analyzer/bank_analyzer.db=,
+- Windows: ~%APPDATA%\bank-statement-analyzer\bank_analyzer.db~.
+
+To override that location, copy ~.env.example~ to ~.env~ and set ~BANK_ANALYZER_DB_PATH~ there.
 
 * Usage
+- Define spending categories.
+- Define rules for associating transactions with categories.
+- Import a CSV from your bank.
+- View and/or export the spending report.
 
-See [[file:docs/help.en.org][English]] and [[file:docs/help.pl.org][Polish]] docs.
+See [[file:docs/help.en.org][English]] and [[file:docs/help.pl.org][Polish]] docs for more.
 
 * Development
+See [[file:CLAUDE.md][CLAUDE.md]].
 
 * License
+This project is licensed under the [[https://www.gnu.org/licenses/gpl-3.0.html][GNU General Public License v3.0]]. See the =LICENSE= file for details.

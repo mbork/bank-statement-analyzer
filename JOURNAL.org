@@ -1154,15 +1154,19 @@ code that reads them.
 - Blockers: NONE
 - Decisions: all logged above
 
-* TODO Fill in =README.org=
+* DONE Fill in =README.org=
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-16 Thu 15:21]
+- State "INPROGRESS" from "TODO"       [2026-04-16 Thu 15:21]
+:END:
 
-** Steps [0/6]
-- [ ] Requirements (minimum Python version, =uv= install link, Linux/Windows support)
-- [ ] Installation (clone, =uv sync=, =cp .env.example .env=)
-- [ ] Configuration (explain =BANK_ANALYZER_DATA_DIR= and the prod fallback)
-- [ ] Usage (=uv run python main.py=; expand as features are added)
-- [ ] Development (how to run tests; pointer to =BANKS= in =importer.py= for new banks)
-- [ ] License (choose and state a license; MIT recommended)
+** Steps [6/6]
+- [x] Requirements (minimum Python version, =uv= install link, Linux/Windows support)
+- [x] Installation (clone, =uv sync=, =cp .env.example .env=)
+- [x] Configuration (explain =BANK_ANALYZER_DB_PATH= and the prod fallback)
+- [x] Usage (=uv run python main.py=; expand as features are added)
+- [x] Development (pointer to =CLAUDE.md=)
+- [x] License (GPL3)
 
 ** Decisions
 ** Session log
