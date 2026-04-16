@@ -1,8 +1,10 @@
 # * Main application window
 
+import locale
 import sys
+from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QLocale, Qt, QTranslator
 from PySide6.QtWidgets import (
     QApplication,
     QLabel,
@@ -62,10 +64,18 @@ class App(QMainWindow):
 
 # * Entry point
 
+_TRANSLATIONS_DIR = Path(__file__).resolve().parents[2] / 'translations'
+
 def run(is_demo: bool = False) -> None:
     with db.manage_connection() as conn:
         db.create_schema(conn)
+    locale.setlocale(locale.LC_ALL, '')
     qt_app = QApplication(sys.argv)
+    translator = QTranslator()
+    lang = QLocale.system().name()[:2]
+    qm_path = _TRANSLATIONS_DIR / f'{lang}.qm'
+    if translator.load(str(qm_path)):
+        qt_app.installTranslator(translator)
     window = App(is_demo=is_demo)
     window.show()
     sys.exit(qt_app.exec())
