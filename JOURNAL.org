@@ -1069,11 +1069,12 @@ user.  Language change takes effect after restart.
 Display in-app help by rendering the appropriate =docs/help.*.org= file
 based on the active UI locale.
 
-** Steps [0/4]
+** Steps [0/5]
 - [ ] Create =docs/help.en.org= (English help content)
 - [ ] Create =docs/help.pl.org= (Polish help content)
 - [ ] Link to both from =README.org=
-- [ ] Implement =ui/help_view.py=: load and display the correct file based on locale
+- [ ] Implement =ui/help_view.py=: load and display the correct file (verbatim) based on locale
+- [ ] Consider applying light Org mode-based formatting to the help screen
 
 ** Decisions
 *** [2026-04-16] – In-app help lives in =docs/help.en.org= and =docs/help.pl.org=, not in =README.org=
