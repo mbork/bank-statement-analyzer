@@ -4,37 +4,42 @@
 <context>
     <name>App</name>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="29"/>
+        <location filename="../bank_analyzer/ui/app.py" line="32"/>
         <source>Bank Statement Analyzer</source>
         <translation>Analizator wyciągów bankowych</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="39"/>
+        <location filename="../bank_analyzer/ui/app.py" line="42"/>
         <source>Import</source>
         <translation>Import</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="40"/>
+        <location filename="../bank_analyzer/ui/app.py" line="43"/>
         <source>Transactions</source>
         <translation>Transakcje</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="41"/>
+        <location filename="../bank_analyzer/ui/app.py" line="44"/>
         <source>Reports</source>
         <translation>Raporty</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="42"/>
+        <location filename="../bank_analyzer/ui/app.py" line="45"/>
         <source>Categories</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="43"/>
+        <location filename="../bank_analyzer/ui/app.py" line="46"/>
         <source>Rules</source>
         <translation>Reguły</translation>
     </message>
     <message>
-        <location filename="../bank_analyzer/ui/app.py" line="53"/>
+        <location filename="../bank_analyzer/ui/app.py" line="47"/>
+        <source>Settings</source>
+        <translation>Ustawienia</translation>
+    </message>
+    <message>
+        <location filename="../bank_analyzer/ui/app.py" line="57"/>
         <source>DEMO MODE — this is temporary data, everything will be lost when you quit.</source>
         <translation>TRYB DEMO — to są tymczasowe dane, wszystko zostanie utracone po zamknięciu programu.</translation>
     </message>
@@ -305,6 +310,24 @@
         <location filename="../bank_analyzer/ui/rules_view.py" line="139"/>
         <source>Delete rule &apos;{pattern}&apos;?</source>
         <translation>Usunąć regułę &apos;{pattern}&apos;?</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsView</name>
+    <message>
+        <location filename="../bank_analyzer/ui/settings_view.py" line="32"/>
+        <source>(system default)</source>
+        <translation>(domyślny systemowy)</translation>
+    </message>
+    <message>
+        <location filename="../bank_analyzer/ui/settings_view.py" line="37"/>
+        <source>Restart the app to apply changes.</source>
+        <translation>Uruchom ponownie aplikację, aby zastosować zmiany.</translation>
+    </message>
+    <message>
+        <location filename="../bank_analyzer/ui/settings_view.py" line="41"/>
+        <source>Language:</source>
+        <translation>Język:</translation>
     </message>
 </context>
 <context>

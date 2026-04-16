@@ -370,6 +370,15 @@ def test_set_setting_overwrites_existing_value(conn):
     assert row is not None
     assert row['value'] == 'en'
 
+def test_delete_setting_removes_row(conn):
+    conn.execute("insert into settings (key, value) values ('language', 'pl')")
+    db.delete_setting(conn, 'language')
+    row = conn.execute("select * from settings where key = 'language'").fetchone()
+    assert row is None
+
+def test_delete_setting_missing_key_does_not_raise(conn):
+    db.delete_setting(conn, 'language')  # no exception expected
+
 def test_set_setting_stores_independent_keys(conn):
     db.set_setting(conn, 'lang', 'pl')
     db.set_setting(conn, 'theme', 'dark')

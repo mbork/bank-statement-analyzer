@@ -218,3 +218,6 @@ def set_setting(conn: sqlite3.Connection, key: str, value: str) -> None:
         insert into settings (key, value) values (?, ?)
         on conflict(key) do update set value = excluded.value
     ''', (key, value))
+
+def delete_setting(conn: sqlite3.Connection, key: str) -> None:
+    conn.execute('delete from settings where key = ?', (key,))

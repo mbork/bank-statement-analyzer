@@ -1051,19 +1051,20 @@ is introduced.
 - Blockers: NONE
 - Decisions: all logged above; i18n explored (no decisions made)
 
-* INPROGRESS Internationalization (English/Polish)
+* DONE Internationalization (English/Polish)
 :LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-16 Thu 13:28]
 - State "INPROGRESS" from "TODO"       [2026-04-16 Thu 09:58]
 :END:
 Support English and Polish UI, selected by system locale or manually by the
 user.  Language change takes effect after restart.
 
-** Steps [4/5]
+** Steps [5/5]
 - [X] Wrap all user-visible strings in =ui/= with =self.tr()=
 - [X] Run =lupdate= to extract strings into a =.ts= file; create Polish translation
 - [X] Run =lrelease= to compile =.ts= → =.qm= binary
 - [X] Auto-detect language at startup via =QLocale.system()= and load the right =.qm=
-- [ ] Add manual language selection (combo box in settings or menu); store preference; restart to apply
+- [X] Add manual language selection (combo box in settings or menu); store preference; restart to apply
 
 ** Decisions
 ** Session log

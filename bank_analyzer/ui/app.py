@@ -20,6 +20,7 @@ from bank_analyzer.ui import (
     import_view,
     reports_view,
     rules_view,
+    settings_view,
     transactions_view,
 )
 
@@ -43,6 +44,7 @@ class App(QMainWindow):
         tabs.addTab(reports_view.ReportsView(), self.tr('Reports'))
         tabs.addTab(categories_tab, self.tr('Categories'))
         tabs.addTab(rules_view.RulesView(), self.tr('Rules'))
+        tabs.addTab(settings_view.SettingsView(), self.tr('Settings'))
 
         # ** Central widget (with optional demo banner)
         central = QWidget()
@@ -69,11 +71,12 @@ _TRANSLATIONS_DIR = Path(__file__).resolve().parents[2] / 'translations'
 def run(is_demo: bool = False) -> None:
     with db.manage_connection() as conn:
         db.create_schema(conn)
+        language_override = db.get_setting(conn, 'language')
     locale.setlocale(locale.LC_ALL, '')
     qt_app = QApplication(sys.argv)
     translator = QTranslator()
-    lang = QLocale.system().name()[:2]
-    qm_path = _TRANSLATIONS_DIR / f'{lang}.qm'
+    language = language_override or QLocale.system().name()[:2]
+    qm_path = _TRANSLATIONS_DIR / f'{language}.qm'
     if translator.load(str(qm_path)):
         qt_app.installTranslator(translator)
     window = App(is_demo=is_demo)
