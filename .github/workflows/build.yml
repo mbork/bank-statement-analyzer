@@ -29,6 +29,7 @@ jobs:
             --add-data "bank_analyzer/ui/help:bank_analyzer/ui/help" \
             --add-data "tests/fixtures:tests/fixtures" \
             main.py
+          find dist/bank-statement-analyzer/_internal -name "libxkbcommon*.so*" -delete
           tar -czf dist/bank-statement-analyzer-linux.tar.gz \
             -C dist bank-statement-analyzer
 
