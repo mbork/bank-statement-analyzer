@@ -1003,16 +1003,53 @@ does not.
 - Blockers: NONE
 - Decisions: all logged above
 
-* TODO Quick date range presets in reports view
+* DONE Quick date range presets in reports view
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-04-16 Thu 09:56]
+- State "INPROGRESS" from "TODO"       [2026-04-16 Thu 09:56]
+:END:
 Add "This month", "Last month", "This quarter", "Last quarter" buttons
 to the reports view that set the date range inputs in one click.
 
-** Steps [0/2]
-- [ ] Add preset buttons row to =ui/reports_view.py=
-- [ ] Wire each button to set the from/to date fields and trigger a refresh
+** Steps [2/2]
+- [X] Add preset buttons row to =ui/reports_view.py=
+- [X] Wire each button to set the from/to date fields and trigger a refresh
 
 ** Decisions
+*** [2026-04-16] – "To" date defaults to end-of-month, not today
+**** Reason
+Bank statements can include near-future transactions (e.g. interest
+compounding 1–2 days ahead), so capping at today could miss real data.
+End-of-month is a safer and more natural default for a report view.
+
+*** [2026-04-16] – Keep =MAX_DATE= sentinel; show "(any)" via =textFromDateTime= override
+**** Reason
+Dropping =MAX_DATE= was considered (use today as the "all time" upper
+bound), but near-future transactions make that risky.  Instead,
+subclassed =QDateEdit= as =_DateFilterEdit= (copied from
+=transactions_view.py=) and overrode =textFromDateTime= to return
+"(any)" when the date equals =maximumDate()= (i.e. =MAX_DATE=).
+
+**** Alternatives considered
+Drop =MAX_DATE= entirely and set upper bound to today — rejected because
+of near-future bank transactions.
+
+*** [2026-04-16] – Copy helper classes from =transactions_view.py=, do not import them
+**** Reason
+=_DefaultPageCalendar= and =_DateFilterEdit= are private (=_=-prefixed)
+implementation details of that module.  Importing across views would
+expose internals; copying is correct until/unless a shared =ui/widgets.py=
+is introduced.
+
 ** Session log
+*** [2026-04-16]
+- Completed: preset buttons ("This month", "Last month", "All time") in
+  =ui/reports_view.py=; =_DateFilterEdit= with =any_at_max= support;
+  end-of-month default for =_date_to=; commit prepared
+- In progress: NONE — feature DONE
+- Next: N/A
+- Blockers: NONE
+- Decisions: all logged above; i18n explored (no decisions made)
 
 * TODO Internationalization (English/Polish)
 Support English and Polish UI, selected by system locale or manually by the

@@ -7,6 +7,7 @@ from typing import Literal, cast
 from PySide6.QtCore import QDate, Qt, QTimer
 from PySide6.QtWidgets import (
     QButtonGroup,
+    QCalendarWidget,
     QDateEdit,
     QFileDialog,
     QGroupBox,
@@ -29,6 +30,43 @@ from bank_analyzer.ui.constants import MAX_DATE, MIN_DATE
 
 # * Helpers
 
+class _DefaultPageCalendar(QCalendarWidget):
+    """Calendar widget that navigates to a default page when the owning date edit has no date."""
+    def __init__(self, owner: QDateEdit, default_page: QDate) -> None:
+        super().__init__()
+        self._owner = owner
+        self._default_page = default_page
+
+    def showEvent(self, event) -> None:  # type: ignore[override]  # noqa: N802
+        super().showEvent(event)
+        is_at_sentinel = self._owner.date() in (
+            self._owner.minimumDate(), self._owner.maximumDate()
+        )
+        if is_at_sentinel:
+            default = self._default_page
+            def navigate() -> None:
+                self.blockSignals(True)
+                self.setSelectedDate(default)
+                self.blockSignals(False)
+            QTimer.singleShot(0, navigate)
+
+class _DateFilterEdit(QDateEdit):
+    """QDateEdit that opens its calendar at a given default when no date is set.
+
+    If `any_at_max` is True, displays '(any)' when the date equals the widget's
+    maximum (i.e. the MAX_DATE sentinel meaning 'no upper bound').
+    """
+    def __init__(self, popup_default: QDate, any_at_max: bool = False) -> None:
+        super().__init__()
+        self._any_at_max = any_at_max
+        self.setCalendarPopup(True)
+        self.setCalendarWidget(_DefaultPageCalendar(self, popup_default))
+
+    def textFromDateTime(self, dt) -> str:  # type: ignore[override]  # noqa: N802
+        if self._any_at_max and self.date() == self.maximumDate():
+            return self.tr('(any)')
+        return super().textFromDateTime(dt)
+
 _GRANULARITIES = ['month', 'quarter', 'year', 'century']
 _REPORT_CSV_HEADERS = ('period', 'category', 'total')
 
@@ -46,32 +84,41 @@ class ReportsView(QWidget):
         # ** Date range
         today = QDate.currentDate()
         first_of_month = QDate(today.year(), today.month(), 1)
+        end_of_month = QDate(today.year(), today.month(), today.daysInMonth())
 
-        self._date_from = QDateEdit()
-        self._date_from.setCalendarPopup(True)
+        self._date_from = _DateFilterEdit(popup_default=first_of_month)
         self._date_from.setSpecialValueText(self.tr('(any)'))
         self._date_from.setMinimumDate(MIN_DATE)
         self._date_from.setDate(first_of_month)
         self._date_from.setDisplayFormat('yyyy-MM-dd')
         self._date_from.dateChanged.connect(self.refresh)
 
-        self._date_to = QDateEdit()
-        self._date_to.setCalendarPopup(True)
+        self._date_to = _DateFilterEdit(popup_default=end_of_month, any_at_max=True)
         self._date_to.setSpecialValueText(self.tr('(any)'))
         self._date_to.setMinimumDate(MIN_DATE)
         self._date_to.setMaximumDate(MAX_DATE)
-        self._date_to.setDate(today)
+        self._date_to.setDate(end_of_month)
         self._date_to.setDisplayFormat('yyyy-MM-dd')
         self._date_to.dateChanged.connect(self.refresh)
 
         export_button = QPushButton(self.tr('Export CSV\u2026'))
         export_button.clicked.connect(self._export_csv)
 
+        preset_this_month = QPushButton(self.tr('This month'))
+        preset_this_month.clicked.connect(self._preset_this_month)
+        preset_last_month = QPushButton(self.tr('Last month'))
+        preset_last_month.clicked.connect(self._preset_last_month)
+        preset_all_time = QPushButton(self.tr('All time'))
+        preset_all_time.clicked.connect(self._preset_all_time)
+
         date_row = QHBoxLayout()
         date_row.addWidget(QLabel(self.tr('From:')))
         date_row.addWidget(self._date_from)
         date_row.addWidget(QLabel(self.tr('To:')))
         date_row.addWidget(self._date_to)
+        date_row.addWidget(preset_this_month)
+        date_row.addWidget(preset_last_month)
+        date_row.addWidget(preset_all_time)
         date_row.addStretch()
         date_row.addWidget(export_button)
 
@@ -247,6 +294,30 @@ class ReportsView(QWidget):
 
     def _on_category_changed(self) -> None:
         self._debounce_timer.start()
+
+    def _apply_date_preset(self, date_from: QDate, date_to: QDate) -> None:
+        self._date_from.blockSignals(True)
+        self._date_to.blockSignals(True)
+        self._date_from.setDate(date_from)
+        self._date_to.setDate(date_to)
+        self._date_from.blockSignals(False)
+        self._date_to.blockSignals(False)
+        self.refresh()
+
+    def _preset_this_month(self) -> None:
+        today = QDate.currentDate()
+        first_of_month = QDate(today.year(), today.month(), 1)
+        end_of_month = QDate(today.year(), today.month(), today.daysInMonth())
+        self._apply_date_preset(first_of_month, end_of_month)
+
+    def _preset_last_month(self) -> None:
+        today = QDate.currentDate()
+        last_day = QDate(today.year(), today.month(), 1).addDays(-1)
+        first_day = QDate(last_day.year(), last_day.month(), 1)
+        self._apply_date_preset(first_day, last_day)
+
+    def _preset_all_time(self) -> None:
+        self._apply_date_preset(MIN_DATE, MAX_DATE)
 
     def refresh(self) -> None:
         date_from: datetime.date | None = (
