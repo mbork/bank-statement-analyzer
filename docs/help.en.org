@@ -1,27 +1,34 @@
-* Bank Statement Analyzer — Help
+* Bank Statement Analyzer – Help
 
 (under construction)
 
 ** Overview
-Things to write:
-- What the app does (import CSV bank statements, categorize transactions, generate spending reports)
-- Typical workflow: import -> categorize -> view reports
-- Note about demo mode (what it is, how to launch it, data is not saved)
-- Note that data is stored locally on the user's machine (no cloud, no account needed)
-- Visit the project website at https://github.com/mbork/bank-statement-analyzer
+This app allows for importing CSV bank statements (currently from two Polish banks, PKO BP and mBank), categorizing transactions (assigning them to spending categories), and generating a spending report.
+
+An important feature of the app is that it works fully locally – no Internet connection is required for it to work, no data is sent anywhere, no account/registration is needed to use it.
+
+A typical workflow looks like this:
+- create spending categories
+- create /rules/ ("/if/ a transaction's description contains a /string/, /then/ it belongs to /category/")
+- import a CSV file (which categorizes all transactions according to the created rules)
+- view and/or CSV-export a spending report
+
+You can run ~demo.bat~ (Windows) or use the ~--demo~ CLI argument to run in /demo mode/.  All data in demo mode are deleted after quitting the app, but you can see a few categories, rules, and transactions to get a feeling of how to use the app.
+
+Visit the app's GitHub repo at https://github.com/mbork/bank-statement-analyzer to learn more, report bugs, or contribute.
 
 ** Import
 Things to write:
 - How to select the bank from the dropdown (list supported banks)
 - How to browse for a CSV file exported from your bank
-- What happens when you click Import (success message, deduplication — same file can be imported safely twice)
+- What happens when you click Import (success message, deduplication – same file can be imported safely twice)
 - Error messages: file not found, wrong format, unsupported bank
 - Where to get the CSV file from your bank (brief note; may vary by bank)
 
 ** Transactions
 Things to write:
 - Overview of the transactions table (columns: date, description, amount, category)
-- Income vs. expense (visual distinction — income shown in grey)
+- Income vs. expense (visual distinction – income shown in grey)
 - Filtering:
   - Date range (From/To date pickers, calendar popup, "(any)" sentinel meaning no bound)
   - Amount range (min/max fields)
@@ -31,7 +38,7 @@ Things to write:
 - Sorting columns by clicking headers
 - Selecting transactions (single and multi-select)
 - Assigning a category to selected transactions manually (Assign button)
-- Re-categorize button (applies all rules to all transactions, overwrites existing categories)
+- Re-categorize button (applies all rules to all transactions without a category assigned)
 - Exporting filtered transactions to CSV
 
 ** Reports
@@ -59,7 +66,7 @@ Things to write:
 - Adding a rule (enter pattern, select category, click Add rule or press Enter)
 - Deleting a rule (select row, click Delete rule)
 - How rules interact with Re-categorize (in Transactions tab)
-- Rules do not automatically apply on import — Re-categorize must be run manually
+- Rules automatically apply on import
 - Rule order / conflict resolution (if multiple rules match)
 
 ** Settings
