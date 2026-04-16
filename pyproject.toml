@@ -1,6 +1,6 @@
 [project]
 name = "bank-statement-analyzer"
-version = "0.1.0"
+version = "0.1.1"
 description = "Analyze bank statements from CSV files, categorize transactions, and report spending."
 requires-python = ">=3.10"
 dependencies = [
