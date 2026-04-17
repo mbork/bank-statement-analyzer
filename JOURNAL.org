@@ -1256,13 +1256,45 @@ Outcome: confirmed fixed.
 - Blockers: NONE
 - Decisions: NONE (all logged above)
 
-* TODO Write help content (=docs/help.en.org=, =docs/help.pl.org=)
+* INPROGRESS Write help content (=docs/help.en.org=, =docs/help.pl.org=)
+:LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-04-16 Thu 16:33]
+:END:
 Infrastructure is in place (=ui/help_view.py=, build scripts, stub files with
 section checklists).  This task covers writing the actual user-facing text.
 
 ** Steps [0/2]
 - [ ] Write English help content in =docs/help.en.org=
 - [ ] Write Polish help content in =docs/help.pl.org=
+
+** Session log
+*** [2026-04-16]
+- Completed: Overview section written in =docs/help.en.org=; rules view refresh bug
+  fixed (=categories_changed= now also connected to =RulesView.refresh=);
+  version bumped to 0.1.1 and tagged =v0.1.1=
+- In progress: remaining help sections (Import, Transactions, Reports, Categories,
+  Rules, Settings) still stubs
+- Next: write Import section in =docs/help.en.org=
+- Blockers: NONE
+- Decisions: NONE
+
+* TODO Write a changelog
+Create a =CHANGELOG.org= (or similar) documenting user-facing changes per
+release, based on git history and the journal.
+
+** Steps [0/2]
+- [ ] Write entries for v0.1.0 and v0.1.1
+- [ ] Decide on format and location (=CHANGELOG.org= in project root, linked from =README.org=)
+
+* TODO Keyboard-only usability
+Verify and improve keyboard navigation so the app is fully usable without
+a mouse.  Check tab order, focus handling, and keyboard shortcuts across
+all tabs.
+
+** Steps [0/3]
+- [ ] Audit each tab for correct tab order and visible focus indicators
+- [ ] Ensure all actions (add, delete, assign, import, export) are reachable by keyboard
+- [ ] Fix any focus or tab-order issues found
 
 * TODO [Future] Recategorize transactions using updated rules
 Allow the user to re-run categorization rules against already-categorized
