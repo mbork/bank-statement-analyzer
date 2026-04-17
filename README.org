@@ -2,7 +2,7 @@
 #+AUTHOR: mbork
 
 * Description
-A simple app for ingesting bank statements as csvs and categorizing spending.  Currently supports PKO BP and mBank.
+A simple app for ingesting bank statements as CSV files and categorizing spending.  Currently supports PKO BP and mBank.
 
 * Requirements
 The Windows release is self-contained.  For developing on Linux:
@@ -13,22 +13,19 @@ The Windows release is self-contained.  For developing on Linux:
 
 * Installation
 ** Linux
-#+begin_example
-  git clone git@github.com:mbork/bank-statement-analyzer.git
-  uv sync
-  cp .env.example .env # if you want to develop the app
-  uv run python main.py
-#+end_example
+[[https://github.com/mbork/bank-statement-analyzer/releases][Download the app]], decompress and run the binary.
 
 ** Windows
 Download the app (single-file, compressed) from the [[https://github.com/mbork/bank-statement-analyzer/releases][Releases]] page.
 
+*Note*: Windows will show a "Windows protected your PC" alert since this app is not code-signed.  This is completely normal, and you need to click "More info" and "Run anyway" (the exact wording may vary depending on your Windows version).  The app never connects to the Internet and does not modify any files on your disk except its database file (see [[*Configuration]] below).  To uninstall the app, delete the ~.exe~ file and the database directory at ~%APPDATA%\bank-statement-analyzer~.
+
 * Configuration
 The data are kept in an SQLite database at:
 - Linux: =~/.local/share/bank-statement-analyzer/bank_analyzer.db=,
-- Windows: ~%APPDATA%\bank-statement-analyzer\bank_analyzer.db~.
+- Windows: =%APPDATA%\bank-statement-analyzer\bank_analyzer.db=.
 
-To override that location, copy ~.env.example~ to ~.env~ and set ~BANK_ANALYZER_DB_PATH~ there.
+The only in-app setting is the language.  After changing it you need to restart the app for the change to take effect.
 
 * Usage
 - Define spending categories.
@@ -39,7 +36,21 @@ To override that location, copy ~.env.example~ to ~.env~ and set ~BANK_ANALYZER_
 See [[file:docs/help.en.org][English]] and [[file:docs/help.pl.org][Polish]] docs for more.
 
 * Development
-See [[file:CLAUDE.md][CLAUDE.md]].
+*Note*: This app was developed using Claude Code:
+- the logic was ~80% written by me with Claude's guidance (since this is my Python learning project and I wanted a hands-on experience) and the rest was written by Claude and studied by me,
+- the tests were ~40% written by me and the rest was written by Claude and skimmed by me,
+- the UI was 100% written by Claude.
+
+The development is documented in [[file:JOURNAL.org][JOURNAL.org]].
+
+#+begin_example
+  git clone git@github.com:mbork/bank-statement-analyzer.git
+  uv sync
+  cp .env.example .env # BANK_ANALYZER_DB_PATH points to the SQLite database file
+  uv run python main.py
+#+end_example
+
+See [[file:CLAUDE.md][CLAUDE.md]] for more.
 
 * License
 This project is licensed under the [[https://www.gnu.org/licenses/gpl-3.0.html][GNU General Public License v3.0]]. See the =LICENSE= file for details.
