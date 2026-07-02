@@ -26,7 +26,11 @@ BANKS: dict[str, dict] = {
         'decimal_sep': '.',
         'thousand_sep': '',
         'description_cols': [
-            'Typ transakcji', 'Opis transakcji', 'Opis transakcji+1', 'Opis transakcji+3',
+            'Typ transakcji',
+            'Opis transakcji',
+            'Opis transakcji+1',
+            'Opis transakcji+2',
+            'Opis transakcji+3',
         ],
     },
     'mbank': {

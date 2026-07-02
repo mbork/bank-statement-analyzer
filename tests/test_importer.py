@@ -164,7 +164,7 @@ def test_parse_csv_pko_bp_1():
     assert result[2] == {
         'date': datetime.date(2026, 2, 19),
         'amount': -160000,
-        'description': 'Wypłata z bankomatu Tytuł: PKO BP 10204027S1PO1965N6625C1252 Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA Kwota Cash Back: 0.00',
+        'description': 'Wypłata z bankomatu Tytuł: PKO BP 10204027S1PO1965N6625C1252 Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA Data wykonania operacji: 2026-02-19 17:57 Kwota Cash Back: 0.00',
     }
     assert result[10] == {
         'date': datetime.date(2026, 2, 4),
@@ -178,7 +178,7 @@ def test_parse_csv_pko_bp_2():
     assert result[10] == {
         'date': datetime.date(2026, 2, 19),
         'amount': -160000,
-        'description': 'Wypłata z bankomatu Tytuł: PKO BP 10204027S1PO1965N6625C1252 Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA Kwota Cash Back: 0.00',
+        'description': 'Wypłata z bankomatu Tytuł: PKO BP 10204027S1PO1965N6625C1252 Lokalizacja: Adres: Szeroka 67 Miasto: POZNAN Kraj: POLSKA Data wykonania operacji: 2026-02-19 17:57 Kwota Cash Back: 0.00',
     }
 
 
