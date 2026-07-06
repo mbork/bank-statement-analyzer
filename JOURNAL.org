@@ -6,7 +6,10 @@ assigning them to categories, and generating tabular spending reports
 by category and time interval.  Built with Python (learning project),
 SQLite, and Tkinter + ttkbootstrap.
 
-* TODO Single persistent DB connection + transaction-scope guard
+* INPROGRESS Single persistent DB connection + transaction-scope guard
+:LOGBOOK:
+- State "INPROGRESS" from "TODO"       [2026-07-06 Mon 05:33]
+:END:
 Replace the open-a-connection-per-operation pattern (=manage_connection()=) with one
 long-lived connection opened at startup and closed at shutdown.  Motivated by a ~40s
 categorize on Windows: with open/close per operation, WAL's =-wal=/=-shm= files are
@@ -16,16 +19,17 @@ from transaction lifetime; adds a guard so nested transaction scopes fail loudly
 (restoring the isolation the per-connection pattern gave for free).
 Revisits the persistent-connection idea deferred in [[*Improve demo mode (=--demo= flag)]].
 
-** Steps [0/8]
-- [ ] =db.py=: add connection holder — =open_connection()= (opens, applies existing
-  PRAGMAs =foreign_keys=/=journal_mode = WAL=, sets =row_factory=, registers =lower=,
-  resets the nesting flag), =get_connection()= (lazily opens if needed),
+** Steps [1/8]
+- [X] =db.py=: add connection holder — =open_connection()= (opens, applies existing
+  PRAGMAs =foreign_keys=/=journal_mode = WAL=, sets =row_factory=, registers =lower=),
+  =get_connection()= (lazily opens if needed),
   =close_connection()= (closes, resets holder to =None=)
 - [ ] =db.py=: convert =manage_connection()= into a transaction-only context manager
   (rename to =transaction()=) — yields =get_connection()=, commits on success, rolls back
   on exception, no open/close; move the PRAGMAs out into =open_connection()=
 - [ ] =db.py=: add nesting guard (module-level =_in_transaction= flag) — raise
-  =RuntimeError= on re-entry, clear it in =finally= (not only the success path)
+  =RuntimeError= on re-entry, clear it in =finally= (not only the success path); reset it
+  in =open_connection=
 - [ ] Rename all call sites =with db.manage_connection() as conn:= →
   =with db.transaction() as conn:= (=categories.py=, =importer.py=, =rules.py=, =db.py=
   settings helpers, =ui/app.py=, =ui/help_view.py=, =ui/reports_view.py=,

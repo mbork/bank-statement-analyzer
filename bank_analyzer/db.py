@@ -8,15 +8,37 @@ from dataclasses import dataclass
 from bank_analyzer import config
 
 # * Connection
+_conn: sqlite3.Connection | None = None
+
+def _configure_connection(conn: sqlite3.Connection) -> None:
+    conn.execute('PRAGMA foreign_keys = ON')
+    conn.execute('PRAGMA journal_mode = WAL')
+    conn.create_function('lower', 1, lambda s: s.lower() if isinstance(s, str) else s)
+    conn.row_factory = sqlite3.Row
+
+def open_connection() -> sqlite3.Connection:
+    global _conn
+    path = config.get_db_path()
+    _conn = sqlite3.connect(path)
+    _configure_connection(_conn)
+    return _conn
+
+def get_connection() -> sqlite3.Connection:
+    if _conn is None:
+        return open_connection()
+    return _conn
+
+def close_connection() -> None:
+    global _conn
+    if _conn is not None:
+        _conn.close()
+        _conn = None
 
 @contextmanager
 def manage_connection() -> Generator[sqlite3.Connection, None, None]:
     path = config.get_db_path()
     conn = sqlite3.connect(path)
-    conn.execute('PRAGMA foreign_keys = ON')
-    conn.execute('PRAGMA journal_mode = WAL')
-    conn.create_function('lower', 1, lambda s: s.lower() if isinstance(s, str) else s)
-    conn.row_factory = sqlite3.Row
+    _configure_connection(conn)
     try:
         yield conn
         conn.commit()
