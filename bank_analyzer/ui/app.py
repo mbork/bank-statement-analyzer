@@ -75,17 +75,21 @@ class App(QMainWindow):
 
 _TRANSLATIONS_DIR = Path(__file__).resolve().parents[2] / 'translations'
 
-def run(is_demo: bool = False) -> None:
-    with db.manage_connection() as conn:
-        db.create_schema(conn)
-        language_override = db.get_setting(conn, 'language')
-    locale.setlocale(locale.LC_ALL, '')
-    qt_app = QApplication(sys.argv)
-    translator = QTranslator()
-    language = language_override or QLocale.system().name()[:2]
-    qm_path = _TRANSLATIONS_DIR / f'{language}.qm'
-    if translator.load(str(qm_path)):
-        qt_app.installTranslator(translator)
-    window = App(is_demo=is_demo)
-    window.show()
-    sys.exit(qt_app.exec())
+def run(is_demo: bool = False) -> int:
+    db.open_connection()
+    try:
+        with db.manage_connection() as conn:
+            db.create_schema(conn)
+            language_override = db.get_setting(conn, 'language')
+        locale.setlocale(locale.LC_ALL, '')
+        qt_app = QApplication(sys.argv)
+        translator = QTranslator()
+        language = language_override or QLocale.system().name()[:2]
+        qm_path = _TRANSLATIONS_DIR / f'{language}.qm'
+        if translator.load(str(qm_path)):
+            qt_app.installTranslator(translator)
+        window = App(is_demo=is_demo)
+        window.show()
+        return qt_app.exec()
+    finally:
+        db.close_connection()

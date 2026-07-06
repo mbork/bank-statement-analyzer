@@ -9,6 +9,7 @@ from bank_analyzer import config
 
 # * Connection
 _conn: sqlite3.Connection | None = None
+_is_in_transaction: bool = False
 
 def _configure_connection(conn: sqlite3.Connection) -> None:
     conn.execute('PRAGMA foreign_keys = ON')
@@ -17,9 +18,12 @@ def _configure_connection(conn: sqlite3.Connection) -> None:
     conn.row_factory = sqlite3.Row
 
 def open_connection() -> sqlite3.Connection:
-    global _conn
+    global _conn, _is_in_transaction
+    if _conn is not None:
+        _conn.close()
     path = config.get_db_path()
     _conn = sqlite3.connect(path)
+    _is_in_transaction = False
     _configure_connection(_conn)
     return _conn
 
@@ -29,16 +33,22 @@ def get_connection() -> sqlite3.Connection:
     return _conn
 
 def close_connection() -> None:
-    global _conn
+    global _conn, _is_in_transaction
     if _conn is not None:
         _conn.close()
         _conn = None
+    _is_in_transaction = False
 
 @contextmanager
 def manage_connection() -> Generator[sqlite3.Connection, None, None]:
-    path = config.get_db_path()
-    conn = sqlite3.connect(path)
-    _configure_connection(conn)
+    global _is_in_transaction
+    if _is_in_transaction:
+        raise RuntimeError(
+            'nested manage_connection() on the shared connection; '
+            'compose by passing conn instead'
+        )
+    conn = get_connection()
+    _is_in_transaction = True
     try:
         yield conn
         conn.commit()
@@ -46,7 +56,7 @@ def manage_connection() -> Generator[sqlite3.Connection, None, None]:
         conn.rollback()
         raise
     finally:
-        conn.close()
+        _is_in_transaction = False
 
 # * Schema
 

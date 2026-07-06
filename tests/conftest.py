@@ -16,3 +16,9 @@ def conn():
     connection.create_function('lower', 1, lambda s: s.lower() if isinstance(s, str) else s)
     yield connection
     connection.close()
+
+
+@pytest.fixture(autouse=True)
+def _reset_shared_connection():
+    yield
+    db.close_connection()

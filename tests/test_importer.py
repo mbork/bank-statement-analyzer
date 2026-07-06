@@ -187,9 +187,15 @@ def test_parse_csv_pko_bp_2():
 @pytest.fixture
 def temp_db(tmp_path, monkeypatch):
     monkeypatch.setenv('BANK_ANALYZER_DB_PATH', str(tmp_path / 'test.db'))
+    db.open_connection()
     with db.manage_connection() as conn:
         db.create_schema(conn)
-        yield
+    yield
+    db.close_connection()
+
+def test_nested_manage_connection_raises(temp_db):
+    with db.manage_connection(), pytest.raises(RuntimeError), db.manage_connection():
+        pass
 
 def test_import_file(temp_db):
     with db.manage_connection() as conn:

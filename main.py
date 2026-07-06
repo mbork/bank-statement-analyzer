@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import sys
 
 from dotenv import load_dotenv
 
@@ -24,4 +25,4 @@ if __name__ == "__main__":
         seed.seed()
 
     import bank_analyzer.ui.app as app
-    app.run(is_demo=args.demo)
+    sys.exit(app.run(is_demo=args.demo))

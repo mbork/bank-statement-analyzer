@@ -19,31 +19,40 @@ from transaction lifetime; adds a guard so nested transaction scopes fail loudly
 (restoring the isolation the per-connection pattern gave for free).
 Revisits the persistent-connection idea deferred in [[*Improve demo mode (=--demo= flag)]].
 
-** Steps [1/8]
+** Steps [6/8]
 - [X] =db.py=: add connection holder — =open_connection()= (opens, applies existing
   PRAGMAs =foreign_keys=/=journal_mode = WAL=, sets =row_factory=, registers =lower=),
   =get_connection()= (lazily opens if needed),
   =close_connection()= (closes, resets holder to =None=)
-- [ ] =db.py=: convert =manage_connection()= into a transaction-only context manager
-  (rename to =transaction()=) — yields =get_connection()=, commits on success, rolls back
-  on exception, no open/close; move the PRAGMAs out into =open_connection()=
-- [ ] =db.py=: add nesting guard (module-level =_in_transaction= flag) — raise
+- [X] =db.py=: convert =manage_connection()= into a transaction-only context manager —
+  yields =get_connection()=, commits on success, rolls back on exception, no open/close;
+  PRAGMAs applied in =open_connection()= (rename to =transaction()= is the next step)
+- [X] =db.py=: add nesting guard (module-level =_is_in_transaction= flag) — raise
   =RuntimeError= on re-entry, clear it in =finally= (not only the success path); reset it
-  in =open_connection=
+  in =open_connection= / =close_connection=
 - [ ] Rename all call sites =with db.manage_connection() as conn:= →
-  =with db.transaction() as conn:= (=categories.py=, =importer.py=, =rules.py=, =db.py=
-  settings helpers, =ui/app.py=, =ui/help_view.py=, =ui/reports_view.py=,
-  =ui/settings_view.py=, =ui/transactions_view.py=, =scripts/seed.py=)
-- [ ] =main.py=: =db.open_connection()= at startup (after =load_dotenv=);
-  =db.close_connection()= on shutdown (connect to =QApplication.aboutToQuit= or call after
-  =app.exec()=); cover the =--demo= path too
-- [ ] Tests: adapt =conftest.py= / =temp_db= fixtures to open/close the singleton per test
-  for isolation, still honoring =BANK_ANALYZER_DB_PATH=
-- [ ] Tests: add a test asserting nested =transaction()= raises =RuntimeError=
-- [ ] Verify: full suite green; on Windows confirm =-wal=/=-shm= persist for the whole
-  session (created at launch, gone at exit) and re-time a categorize
+  =with db.transaction() as conn:= (=categories.py=, =importer.py=, =rules.py=,
+  =ui/app.py=, =ui/help_view.py=, =ui/reports_view.py=, =ui/settings_view.py=,
+  =ui/transactions_view.py=, =scripts/seed.py=, and the =tests/test_importer.py= uses)
+- [X] =ui/app.py= =run()=: explicit =db.open_connection()= + =try/finally=
+  =db.close_connection()= (exception-safe); =run()= returns the exit code and =main.py= does
+  =sys.exit(app.run(...))=
+- [X] Tests: =temp_db= opens/closes the singleton per test (=open_connection= /
+  =close_connection=, =yield= outside the =with=); autouse =_reset_shared_connection= in
+  =conftest.py= as a cross-test safety net
+- [X] Tests: =test_nested_manage_connection_raises= asserts a nested =manage_connection()=
+  raises =RuntimeError=
+- [ ] Verify: full suite green (152) + sidecar persistence confirmed on Linux; on Windows
+  confirm =-wal=/=-shm= persist for the whole session and re-time a categorize
 
 ** Decisions
+*** [2026-07-06] – Connection lifecycle in =run()= via try/finally, not =main.py= or aboutToQuit
+**** Reason
+=run()= ends in =sys.exit(qt_app.exec())=, so post-=exec= cleanup in =main.py= is unreachable
+(=main.py= would need =atexit=).  The connection's lifetime is the GUI session, which =run()=
+owns.  A =try/finally= around =exec()= closes even if =exec= raises, unlike an =aboutToQuit=
+signal (fires only on a clean quit).  =run()= returns the exit code; =main.py= does
+=sys.exit(app.run(...))=.
 *** [2026-07-06] – Reuse one connection for the app lifetime (perf fix for Windows/AV)
 **** Reason
 Empirically, =manage_connection()= opens and closes a connection per operation; in WAL mode
