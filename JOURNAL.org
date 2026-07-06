@@ -6,6 +6,126 @@ assigning them to categories, and generating tabular spending reports
 by category and time interval.  Built with Python (learning project),
 SQLite, and Tkinter + ttkbootstrap.
 
+* TODO Single persistent DB connection + transaction-scope guard
+Replace the open-a-connection-per-operation pattern (=manage_connection()=) with one
+long-lived connection opened at startup and closed at shutdown.  Motivated by a ~40s
+categorize on Windows: with open/close per operation, WAL's =-wal=/=-shm= files are
+created on open and deleted on close (each close checkpoints, rewriting the whole =.db=),
+and real-time antivirus scans every one of those file events.  Splits connection lifetime
+from transaction lifetime; adds a guard so nested transaction scopes fail loudly
+(restoring the isolation the per-connection pattern gave for free).
+Revisits the persistent-connection idea deferred in [[*Improve demo mode (=--demo= flag)]].
+
+** Steps [0/8]
+- [ ] =db.py=: add connection holder — =open_connection()= (opens, applies existing
+  PRAGMAs =foreign_keys=/=journal_mode = WAL=, sets =row_factory=, registers =lower=,
+  resets the nesting flag), =get_connection()= (lazily opens if needed),
+  =close_connection()= (closes, resets holder to =None=)
+- [ ] =db.py=: convert =manage_connection()= into a transaction-only context manager
+  (rename to =transaction()=) — yields =get_connection()=, commits on success, rolls back
+  on exception, no open/close; move the PRAGMAs out into =open_connection()=
+- [ ] =db.py=: add nesting guard (module-level =_in_transaction= flag) — raise
+  =RuntimeError= on re-entry, clear it in =finally= (not only the success path)
+- [ ] Rename all call sites =with db.manage_connection() as conn:= →
+  =with db.transaction() as conn:= (=categories.py=, =importer.py=, =rules.py=, =db.py=
+  settings helpers, =ui/app.py=, =ui/help_view.py=, =ui/reports_view.py=,
+  =ui/settings_view.py=, =ui/transactions_view.py=, =scripts/seed.py=)
+- [ ] =main.py=: =db.open_connection()= at startup (after =load_dotenv=);
+  =db.close_connection()= on shutdown (connect to =QApplication.aboutToQuit= or call after
+  =app.exec()=); cover the =--demo= path too
+- [ ] Tests: adapt =conftest.py= / =temp_db= fixtures to open/close the singleton per test
+  for isolation, still honoring =BANK_ANALYZER_DB_PATH=
+- [ ] Tests: add a test asserting nested =transaction()= raises =RuntimeError=
+- [ ] Verify: full suite green; on Windows confirm =-wal=/=-shm= persist for the whole
+  session (created at launch, gone at exit) and re-time a categorize
+
+** Decisions
+*** [2026-07-06] – Reuse one connection for the app lifetime (perf fix for Windows/AV)
+**** Reason
+Empirically, =manage_connection()= opens and closes a connection per operation; in WAL mode
+the =-wal=/=-shm= sidecars are created on open and deleted on close (each close checkpoints,
+rewriting the whole =.db=).  Under Windows real-time antivirus, scanning those per-operation
+file events is the likely cause of the ~40s categorize.  A persistent connection creates the
+sidecars once at startup and checkpoints rarely, removing the churn.
+
+*** [2026-07-06] – Split connection lifetime from transaction lifetime
+**** Reason
+Reusing the connection must not mean one giant transaction.  =open_connection()= /
+=close_connection()= own the connection; a per-action =transaction()= context manager keeps
+the existing commit-on-success / rollback-on-exception boundary at every call site, so call
+sites change only by name.
+
+*** [2026-07-06] – Nesting guard via a scope flag, not =conn.in_transaction=
+**** Reason
+A shared connection has exactly one transaction at a time, so nested =transaction()= blocks
+would silently mis-scope commits instead of failing loudly (the per-connection design failed
+loudly with "database is locked").  A module-level =_in_transaction= flag tracks the logical
+scope precisely.  =conn.in_transaction= is unreliable — it lags until the first write, so it
+misses read-then-nest.
+
+**** Alternatives considered
+- =conn.in_transaction= guard: leaky (only true after the first DML statement).
+- =isolation_level=None= + explicit =BEGIN= (engine-enforced non-nesting): deferred to its
+  own task.
+
+*** [2026-07-06] – Safe because the app is 100% single-threaded
+**** Reason
+Verified against source: no =threading= / =asyncio= / =QThread= / =QRunnable=; the only timer
+is a =QTimer= debounce, which runs on the main thread's event loop.  So one connection with
+=check_same_thread=True= (the default) is safe — all DB access is on the Qt UI thread.
+
+* TODO =PRAGMA synchronous = NORMAL=
+Add =synchronous = NORMAL= alongside the existing =journal_mode = WAL= pragma to cut
+per-commit =fsync= overhead.  Independent of the persistent-connection work; can ship on its
+own.
+
+** Steps [0/1]
+- [ ] Add =conn.execute('PRAGMA synchronous = NORMAL')= where the connection PRAGMAs are
+  applied (currently =manage_connection()= in =db.py=; =open_connection()= after the
+  persistent-connection refactor)
+
+** Decisions
+*** [2026-07-06] – =synchronous = NORMAL= is safe under WAL
+**** Reason
+In WAL mode =NORMAL= never corrupts the database (WAL frames are checksummed); it only risks
+losing the last commit(s) on OS crash / power loss, not on an app crash.  For a re-importable
+bank-statement app that trade-off is acceptable, and it removes the per-commit =fsync=.
+=NORMAL= is only corruption-safe in WAL mode, which we already use.
+
+* BLOCKED Switch to =isolation_level=None= (explicit transactions)
+Drive transactions with explicit =BEGIN= / =COMMIT= / =ROLLBACK= instead of Python sqlite3's
+legacy implicit-transaction handling, for deterministic boundaries and engine-enforced
+non-nesting.  Deliberately deferred until after the persistent-connection work lands and is
+stable.
+Blocked by: [[*Single persistent DB connection + transaction-scope guard]]
+
+** Steps [0/3]
+- [ ] Set =isolation_level=None= on the connection; make =transaction()= issue explicit
+  =BEGIN= / =COMMIT= / =ROLLBACK=
+- [ ] Audit every write path to ensure it runs inside =transaction()= (autocommit makes an
+  unwrapped write commit per statement)
+- [ ] Add tests: nested =BEGIN= raises =OperationalError=; a mid-batch =executemany= failure
+  rolls back to 0 rows (atomicity)
+
+** Decisions
+*** [2026-07-06] – Defer =isolation_level=None=; adopt separately, test-gated
+**** Reason
+It inverts the safety default: under autocommit, any statement outside an explicit =BEGIN=
+commits immediately, and =executemany= commits per row (verified — a mid-batch failure left
+3 rows durable).  That is only safe if 100% of writes go through =transaction()=.  Right
+long-term model, but too risky to bundle with the WAL/perf and connection-reuse work — adopt
+once the shared connection is stable, guarded by atomicity and nested-BEGIN tests.
+
+* TODO Fix stale Tkinter references in project docs
+The app migrated =ui/= from Tkinter + ttkbootstrap to PySide6, but some docs still say
+Tkinter.
+
+** Steps [0/2]
+- [ ] Update the =# Architecture= section in =CLAUDE.md= ("Approach 1: SQLite + Tkinter") to
+  reflect the completed PySide6 migration
+- [ ] Fix the same stale "Tkinter + ttkbootstrap" mention in the =JOURNAL.org= project
+  description
+
 * DONE Scaffold
 :LOGBOOK:
 - State "DONE"       from "INPROGRESS" [2026-04-02 Thu 14:46]
