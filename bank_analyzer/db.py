@@ -40,11 +40,11 @@ def close_connection() -> None:
     _is_in_transaction = False
 
 @contextmanager
-def manage_connection() -> Generator[sqlite3.Connection, None, None]:
+def transaction() -> Generator[sqlite3.Connection, None, None]:
     global _is_in_transaction
     if _is_in_transaction:
         raise RuntimeError(
-            'nested manage_connection() on the shared connection; '
+            'nested transaction() on the shared connection; '
             'compose by passing conn instead'
         )
     conn = get_connection()

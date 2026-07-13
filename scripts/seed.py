@@ -59,7 +59,7 @@ _SEED_FILES = [
 
 def seed() -> None:
     # ** Schema
-    with db.manage_connection() as conn:
+    with db.transaction() as conn:
         db.create_schema(conn)
 
     # ** Categories

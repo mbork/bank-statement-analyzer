@@ -51,7 +51,7 @@ class SettingsView(QWidget):
 
     def showEvent(self, event) -> None:  # type: ignore[override]  # noqa: N802
         super().showEvent(event)
-        with db.manage_connection() as conn:
+        with db.transaction() as conn:
             current = db.get_setting(conn, 'language') or ''
         self._language_combo.blockSignals(True)
         for i in range(self._language_combo.count()):
@@ -64,7 +64,7 @@ class SettingsView(QWidget):
 
     def _on_language_changed(self) -> None:
         code: str = self._language_combo.currentData()
-        with db.manage_connection() as conn:
+        with db.transaction() as conn:
             if code:
                 db.set_setting(conn, 'language', code)
             else:

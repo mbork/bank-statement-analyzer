@@ -78,7 +78,7 @@ _TRANSLATIONS_DIR = Path(__file__).resolve().parents[2] / 'translations'
 def run(is_demo: bool = False) -> int:
     db.open_connection()
     try:
-        with db.manage_connection() as conn:
+        with db.transaction() as conn:
             db.create_schema(conn)
             language_override = db.get_setting(conn, 'language')
         locale.setlocale(locale.LC_ALL, '')

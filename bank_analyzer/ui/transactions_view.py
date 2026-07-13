@@ -348,20 +348,20 @@ class TransactionsView(QWidget):
         if not transaction_ids:
             return
         category_id: int | None = self._category_combo.currentData()
-        with db.manage_connection() as conn:
+        with db.transaction() as conn:
             for transaction_id in transaction_ids:
                 db.set_transaction_category(conn, transaction_id, category_id)
         self.refresh()
 
     def _recategorize(self) -> None:
-        with db.manage_connection() as conn:
+        with db.transaction() as conn:
             categorizer.categorize_transactions(conn)
         self.refresh()
 
     def refresh(self) -> None:
         self._populate_filter_categories()
         filters = self._build_filters()
-        with db.manage_connection() as conn:
+        with db.transaction() as conn:
             rows = db.get_all_transactions(conn, filters)
         self._rows = rows
 

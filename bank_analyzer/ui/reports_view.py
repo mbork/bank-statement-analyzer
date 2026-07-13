@@ -333,7 +333,7 @@ class ReportsView(QWidget):
         if not category_ids:
             self._table.setRowCount(0)
             return
-        with db.manage_connection() as conn:
+        with db.transaction() as conn:
             rows = reports.spending_report(conn, date_from, date_to, category_ids, granularity)
         self._report_rows = rows
         grouped = reports.group_rows_by_period(rows)

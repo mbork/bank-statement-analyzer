@@ -19,29 +19,30 @@ from transaction lifetime; adds a guard so nested transaction scopes fail loudly
 (restoring the isolation the per-connection pattern gave for free).
 Revisits the persistent-connection idea deferred in [[*Improve demo mode (=--demo= flag)]].
 
-** Steps [6/8]
+** Steps [7/8]
 - [X] =db.py=: add connection holder — =open_connection()= (opens, applies existing
   PRAGMAs =foreign_keys=/=journal_mode = WAL=, sets =row_factory=, registers =lower=),
   =get_connection()= (lazily opens if needed),
   =close_connection()= (closes, resets holder to =None=)
-- [X] =db.py=: convert =manage_connection()= into a transaction-only context manager —
+- [X] =db.py=: convert the context manager into a transaction-only form —
   yields =get_connection()=, commits on success, rolls back on exception, no open/close;
-  PRAGMAs applied in =open_connection()= (rename to =transaction()= is the next step)
+  PRAGMAs applied in =open_connection()=
 - [X] =db.py=: add nesting guard (module-level =_is_in_transaction= flag) — raise
   =RuntimeError= on re-entry, clear it in =finally= (not only the success path); reset it
   in =open_connection= / =close_connection=
-- [ ] Rename all call sites =with db.manage_connection() as conn:= →
-  =with db.transaction() as conn:= (=categories.py=, =importer.py=, =rules.py=,
-  =ui/app.py=, =ui/help_view.py=, =ui/reports_view.py=, =ui/settings_view.py=,
-  =ui/transactions_view.py=, =scripts/seed.py=, and the =tests/test_importer.py= uses)
+- [X] Rename =manage_connection= → =transaction= everywhere: the definition, the guard
+  error string, all =db.transaction()= call sites (=categories.py=, =importer.py=,
+  =rules.py=, =ui/app.py=, =ui/help_view.py=, =ui/reports_view.py=, =ui/settings_view.py=,
+  =ui/transactions_view.py=, =scripts/seed.py=), and the =tests/test_importer.py= uses
+  (incl. =test_nested_transaction_raises=)
 - [X] =ui/app.py= =run()=: explicit =db.open_connection()= + =try/finally=
   =db.close_connection()= (exception-safe); =run()= returns the exit code and =main.py= does
   =sys.exit(app.run(...))=
 - [X] Tests: =temp_db= opens/closes the singleton per test (=open_connection= /
   =close_connection=, =yield= outside the =with=); autouse =_reset_shared_connection= in
   =conftest.py= as a cross-test safety net
-- [X] Tests: =test_nested_manage_connection_raises= asserts a nested =manage_connection()=
-  raises =RuntimeError=
+- [X] Tests: =test_nested_transaction_raises= asserts a nested =transaction()= raises
+  =RuntimeError=
 - [ ] Verify: full suite green (152) + sidecar persistence confirmed on Linux; on Windows
   confirm =-wal=/=-shm= persist for the whole session and re-time a categorize
 

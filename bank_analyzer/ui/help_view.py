@@ -31,7 +31,7 @@ class HelpView(QWidget):
     def __init__(self) -> None:
         super().__init__()
 
-        with db.manage_connection() as conn:
+        with db.transaction() as conn:
             language = db.get_setting(conn, 'language') or QLocale.system().name()[:2]
 
         browser = QTextBrowser()

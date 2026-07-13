@@ -188,17 +188,17 @@ def test_parse_csv_pko_bp_2():
 def temp_db(tmp_path, monkeypatch):
     monkeypatch.setenv('BANK_ANALYZER_DB_PATH', str(tmp_path / 'test.db'))
     db.open_connection()
-    with db.manage_connection() as conn:
+    with db.transaction() as conn:
         db.create_schema(conn)
     yield
     db.close_connection()
 
-def test_nested_manage_connection_raises(temp_db):
-    with db.manage_connection(), pytest.raises(RuntimeError), db.manage_connection():
+def test_nested_transaction_raises(temp_db):
+    with db.transaction(), pytest.raises(RuntimeError), db.transaction():
         pass
 
 def test_import_file(temp_db):
-    with db.manage_connection() as conn:
+    with db.transaction() as conn:
         category_id = db.insert_category(conn, 'fees')['category_id']
         db.insert_rule(conn, 'opłata miesięczna za kartę', category_id)
     stats = importer.import_file(FIXTURES / 'lista_operacji_pko_bp_1.csv', 'pko_bp')
