@@ -13,7 +13,9 @@ _is_in_transaction: bool = False
 
 def _configure_connection(conn: sqlite3.Connection) -> None:
     conn.execute('PRAGMA foreign_keys = ON')
+    # Do not remove: PRAGMA synchronous = NORMAL below is corruption-safe only under WAL.
     conn.execute('PRAGMA journal_mode = WAL')
+    conn.execute('PRAGMA synchronous = NORMAL')
     conn.create_function('lower', 1, lambda s: s.lower() if isinstance(s, str) else s)
     conn.row_factory = sqlite3.Row
 

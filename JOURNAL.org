@@ -88,15 +88,18 @@ Verified against source: no =threading= / =asyncio= / =QThread= / =QRunnable=; t
 is a =QTimer= debounce, which runs on the main thread's event loop.  So one connection with
 =check_same_thread=True= (the default) is safe — all DB access is on the Qt UI thread.
 
-* TODO =PRAGMA synchronous = NORMAL=
+* DONE =PRAGMA synchronous = NORMAL=
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-07-13 Mon 05:19]
+- State "INPROGRESS" from "TODO"       [2026-07-13 Mon 05:19]
+:END:
 Add =synchronous = NORMAL= alongside the existing =journal_mode = WAL= pragma to cut
 per-commit =fsync= overhead.  Independent of the persistent-connection work; can ship on its
 own.
 
-** Steps [0/1]
-- [ ] Add =conn.execute('PRAGMA synchronous = NORMAL')= where the connection PRAGMAs are
-  applied (currently =manage_connection()= in =db.py=; =open_connection()= after the
-  persistent-connection refactor)
+** Steps [1/1]
+- [X] Add =conn.execute('PRAGMA synchronous = NORMAL')= in =_configure_connection()= in
+  =db.py=, alongside =journal_mode = WAL= (verified =PRAGMA synchronous= returns =1=)
 
 ** Decisions
 *** [2026-07-06] – =synchronous = NORMAL= is safe under WAL
