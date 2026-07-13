@@ -6,6 +6,89 @@ assigning them to categories, and generating tabular spending reports
 by category and time interval.  Built with Python (learning project),
 SQLite, and Tkinter + ttkbootstrap.
 
+* TODO Transactions CSV export ignores column sort order
+=ui/transactions_view.py= =_export_csv= writes =self._rows= (query order:
+=date desc, transaction_id desc=), so the exported CSV does not reflect a manual column sort
+(header click).  Content is correct (the filtered/visible set); only the row order is off.
+
+** Steps [0/1]
+- [ ] Export in the table's current visual order — read rows off the table model, or re-sort
+  =self._rows= to match the active sort
+
+* TODO "Re-categorize" ignores the active transactions filter
+=_recategorize()= calls =categorizer.categorize_transactions(conn)=, which applies rules to
+all uncategorized transactions regardless of the current filter.  A user who filtered the view
+and clicked "Re-categorize" may expect it to act only on the visible rows.
+
+** Open questions
+- Is global re-categorization intended (rules are global), or should it scope to the
+  visible/filtered set?  Scoping would need =categorize_transactions= to take an optional set
+  of transaction ids (or a filter) and the button to pass =selectedRows()= / the filtered rows.
+
+* TODO Rework duplicate handling
+Revisit how the app prevents duplicate imports and transactions.  Prompted by the
+[[*Delete transactions]] open questions: the file-level import guard makes a hard delete
+permanent, and the transaction-level dedup key cannot tell two identical transactions apart.
+
+** Ideas
+- Drop the =imported_files= table entirely and rely on transaction-level dedup
+  (=UNIQUE(date, amount, description)= + =ON CONFLICT DO NOTHING=).  Replace the file-level
+  guard with a heuristic warning: if an import yields >0 skipped and 0 inserted rows, warn
+  "this file was probably already imported".  Trades the file-identity guard (and its
+  orphan/duplicate =imported_files= rows) for a soft signal.  Note: =transactions= currently
+  have =imported_file_id NOT NULL REFERENCES imported_files= — dropping the table means
+  removing that FK/column and any provenance use.
+- Let the user keep genuinely identical transactions on the same day (e.g. two coffees:
+  same date, amount, description).  Hard: =UNIQUE(date, amount, description)= forbids them,
+  but relaxing it re-opens true duplicates on re-import.  We still don't want duplicates in
+  general — needs a disambiguator (bank per-transaction id? an occurrence counter?).  Needs
+  more thinking.
+
+** Session log
+
+* TODO Delete transactions
+Let the user delete transactions from the transactions view — the highlighted row and/or the
+whole multi-selection — via a "Delete" button in the action row, with a required confirmation.
+
+** Steps [0/6]
+- [ ] =db.py=: add =delete_transactions(conn, transaction_ids)= (bulk delete by id)
+- [ ] =ui/transactions_view.py=: "Delete" button in the =action_row= (with =Clear=/=Export=/
+  =Re-categorize=), away from =Assign=; enabled only when rows are selected (mirror
+  =_on_selection_changed=)
+- [ ] Operate on =selectedRows()= so one action covers the highlighted row and the whole
+  multi-selection
+- [ ] Confirmation dialog before delete (row count; "cannot be undone") — required
+- [ ] =Delete= key accelerator on the table
+- [ ] Tests: single + bulk delete via =db.delete_transactions=; view refreshes after delete
+
+** Decisions
+*** [2026-07-06] – Delete button in the action row, not beside "Assign"; no right-click menu
+**** Reason
+Delete is destructive; next to the frequently-clicked =Assign= (same selection, same rows) it
+invites misclicks.  The action row (=Clear=/=Export=/=Re-categorize=) separates it spatially.
+Right-click menu rejected: right-clicking silently collapses a multi-selection (deletes the
+wrong scope) and is less discoverable than a visible button for this user.
+**** Alternatives considered
+- Delete left/right of the =Assign= controls: adjacency to =Assign= → misclick risk.
+- Right-click context menu: Excel-idiomatic, but the selection-reset trap and extra
+  keyboard-accessibility work aren't worth it here.
+
+*** [2026-07-06] – Deletion confirmation dialog is required (hard yes)
+**** Reason
+Deletion is effectively permanent: import dedup (=imported_files= UNIQUE +
+=FileAlreadyImportedError=) blocks re-importing the source file, so a deleted transaction
+cannot be restored by re-import.  A confirmation ("Delete N transactions? Cannot be undone.")
+is mandatory, not optional.
+
+** Open questions
+- Soft delete (mark rows deleted, keep them) instead of a hard =DELETE=?  Makes deletion
+  reversible and lowers the stakes, but adds a =deleted= flag to filter on everywhere.
+- Reconsider the "never import twice" dedup (=imported_files= UNIQUE +
+  =FileAlreadyImportedError=)?  It is what makes a hard delete permanent; relaxing it would let
+  a re-import restore deleted rows.
+
+** Session log
+
 * INPROGRESS Single persistent DB connection + transaction-scope guard
 :LOGBOOK:
 - State "INPROGRESS" from "TODO"       [2026-07-06 Mon 05:33]
