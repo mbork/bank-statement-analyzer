@@ -4,6 +4,7 @@ import csv
 import datetime
 import pathlib
 import re
+import sqlite3
 
 import pytest
 
@@ -196,6 +197,18 @@ def temp_db(tmp_path, monkeypatch):
 def test_nested_transaction_raises(temp_db):
     with db.transaction(), pytest.raises(RuntimeError), db.transaction():
         pass
+
+def test_transaction_rolls_back_on_error(temp_db):
+    # A mid-transaction failure must undo the whole block, not autocommit the
+    # earlier statement — the key risk of isolation_level=None.
+    def insert_dup_twice():
+        with db.transaction() as conn:
+            db.insert_category(conn, 'dup')
+            db.insert_category(conn, 'dup')  # UNIQUE(name) violation
+    with pytest.raises(sqlite3.IntegrityError):
+        insert_dup_twice()
+    with db.transaction() as conn:
+        assert db.get_all_categories(conn) == []
 
 def test_import_file(temp_db):
     with db.transaction() as conn:

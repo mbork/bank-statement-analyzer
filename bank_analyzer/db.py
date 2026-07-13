@@ -24,7 +24,7 @@ def open_connection() -> sqlite3.Connection:
     if _conn is not None:
         _conn.close()
     path = config.get_db_path()
-    _conn = sqlite3.connect(path)
+    _conn = sqlite3.connect(path, isolation_level=None)
     _is_in_transaction = False
     _configure_connection(_conn)
     return _conn
@@ -52,10 +52,11 @@ def transaction() -> Generator[sqlite3.Connection, None, None]:
     conn = get_connection()
     _is_in_transaction = True
     try:
+        conn.execute('BEGIN')
         yield conn
-        conn.commit()
+        conn.execute('COMMIT')
     except Exception:
-        conn.rollback()
+        conn.execute('ROLLBACK')
         raise
     finally:
         _is_in_transaction = False
@@ -101,7 +102,6 @@ def create_schema(conn: sqlite3.Connection) -> None:
             value text not null
         )
     ''')
-    conn.commit()
 
 # * Importing transactions
 

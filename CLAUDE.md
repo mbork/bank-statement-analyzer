@@ -101,6 +101,28 @@ Inherits all rules from `~/.claude/CLAUDE.md`.  Project-specific additions:
   interpolated values use `self.tr('template {x}').format(x=x)` (not f-strings),
   so `lupdate` can extract them for translation
 
+## Database connection & transactions
+
+The app uses a single process-wide SQLite connection: opened at startup in
+`ui/app.py` `run()` and closed via `try/finally`, held in `db.py`
+(`open_connection`/`get_connection`/`close_connection`), configured with WAL,
+`synchronous = NORMAL`, and `isolation_level=None` (autocommit).  Because the
+connection autocommits by default, these rules are load-bearing:
+
+- Every write goes through `db.transaction()` (a context manager issuing
+  explicit `BEGIN`/`COMMIT`/`ROLLBACK`).  Never write directly on
+  `db.get_connection()`: an unwrapped multi-statement write autocommits per
+  statement and silently loses atomicity (partial data, no exception).
+- `db.py` functions take a `conn` and never `commit()`/`rollback()` themselves —
+  the caller's `transaction()` owns the boundary.  An internal commit makes the
+  wrapper's `COMMIT` raise `OperationalError`.
+- Compose DB operations by passing `conn` around; never nest `transaction()`
+  (the `_is_in_transaction` guard raises `RuntimeError`).
+- Keep `synchronous = NORMAL` paired with WAL — it is corruption-safe only
+  under WAL.
+- All DB access is on the single Qt UI thread; the shared connection is not
+  thread-safe — do not touch the DB from a worker thread.
+
 # Learning guidance
 
 **IMPORTANT** This is a learning project — the user writes the code himself.

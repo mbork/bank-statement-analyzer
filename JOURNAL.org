@@ -109,22 +109,36 @@ losing the last commit(s) on OS crash / power loss, not on an app crash.  For a 
 bank-statement app that trade-off is acceptable, and it removes the per-commit =fsync=.
 =NORMAL= is only corruption-safe in WAL mode, which we already use.
 
-* BLOCKED Switch to =isolation_level=None= (explicit transactions)
+* DONE Switch to =isolation_level=None= (explicit transactions)
+:LOGBOOK:
+- State "DONE"       from "INPROGRESS" [2026-07-13 Mon 05:42]
+- State "INPROGRESS" from "TODO"       [2026-07-13 Mon 05:29]
+- State "TODO"       from "BLOCKED"    [2026-07-13 Mon 05:29]
+:END:
 Drive transactions with explicit =BEGIN= / =COMMIT= / =ROLLBACK= instead of Python sqlite3's
 legacy implicit-transaction handling, for deterministic boundaries and engine-enforced
 non-nesting.  Deliberately deferred until after the persistent-connection work lands and is
 stable.
 Blocked by: [[*Single persistent DB connection + transaction-scope guard]]
 
-** Steps [0/3]
-- [ ] Set =isolation_level=None= on the connection; make =transaction()= issue explicit
+** Steps [3/3]
+- [X] Set =isolation_level=None= on the connection; =transaction()= issues explicit
   =BEGIN= / =COMMIT= / =ROLLBACK=
-- [ ] Audit every write path to ensure it runs inside =transaction()= (autocommit makes an
-  unwrapped write commit per statement)
-- [ ] Add tests: nested =BEGIN= raises =OperationalError=; a mid-batch =executemany= failure
-  rolls back to 0 rows (atomicity)
+- [X] Audit every write path is inside =transaction()= — the only exception was
+  =create_schema='s own =conn.commit()= (grep confirmed 3 commit/rollback sites); removed it
+  so the caller's =transaction()= owns the commit, consistent with the rest of =db.py=
+- [X] Safeguard tests: =test_transaction_rolls_back_on_error= (a mid-transaction failure
+  rolls back the whole block, not per-statement autocommit) plus the existing
+  =test_nested_transaction_raises= (flag guard raises =RuntimeError= before =BEGIN=)
 
 ** Decisions
+*** [2026-07-06] – Implemented; removed =create_schema='s internal commit
+**** Reason
+With explicit =BEGIN=/=COMMIT= in =transaction()=, =create_schema='s own =conn.commit()= would
+commit mid-block and the wrapper's =COMMIT= would then fail.  Removed it — =create_schema= now
+relies on the caller's =transaction()= (or, for the in-memory test =conn= fixture, SQLite's
+auto-commit of DDL outside a =BEGIN=), matching every other =db.py= function.  Atomicity is
+guarded by =test_transaction_rolls_back_on_error=.
 *** [2026-07-06] – Defer =isolation_level=None=; adopt separately, test-gated
 **** Reason
 It inverts the safety default: under autocommit, any statement outside an explicit =BEGIN=
