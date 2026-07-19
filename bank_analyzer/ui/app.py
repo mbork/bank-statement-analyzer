@@ -24,13 +24,16 @@ from bank_analyzer.ui import (
     settings_view,
     transactions_view,
 )
+from bank_analyzer.version import get_version
 
 # * Application
 
 class App(QMainWindow):
     def __init__(self, is_demo: bool = False) -> None:
         super().__init__()
-        self.setWindowTitle(self.tr("Bank Statement Analyzer"))
+        title = self.tr("Bank Statement Analyzer")
+        version = get_version() or self.tr("unknown version")
+        self.setWindowTitle(f'{title} {version}')
 
         self._tabs = QTabWidget()
 

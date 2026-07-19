@@ -23,8 +23,21 @@ jobs:
       - name: Install Linux system dependencies
         run: sudo apt-get install -y libegl1
 
+      - name: Generate version file
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="$(git rev-parse --short HEAD)"
+          fi
+          printf '# * Generated version (build artifact; do not edit)\nVERSION = "%s"\n' "$version" \
+            > bank_analyzer/_version.py
+          cat bank_analyzer/_version.py
+
       - run: |
           uv run pyinstaller --onedir --name bank-statement-analyzer \
+            --hidden-import bank_analyzer._version \
             --add-data "translations:translations" \
             --add-data "bank_analyzer/ui/help:bank_analyzer/ui/help" \
             --add-data "tests/fixtures:tests/fixtures" \
@@ -56,8 +69,21 @@ jobs:
 
       - run: uv run pytest tests/
 
+      - name: Generate version file
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="$(git rev-parse --short HEAD)"
+          fi
+          printf '# * Generated version (build artifact; do not edit)\nVERSION = "%s"\n' "$version" \
+            > bank_analyzer/_version.py
+          cat bank_analyzer/_version.py
+
       - run: |
           uv run pyinstaller --onefile --noconsole --name bank-statement-analyzer `
+            --hidden-import bank_analyzer._version `
             --add-data "translations;translations" `
             --add-data "bank_analyzer/ui/help;bank_analyzer/ui/help" `
             --add-data "tests/fixtures;tests/fixtures" `
