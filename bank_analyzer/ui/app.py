@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bank_analyzer import db
+from bank_analyzer import config, db, profiling
 from bank_analyzer.ui import (
     categories_view,
     help_view,
@@ -84,6 +84,7 @@ def run(is_demo: bool = False) -> int:
         with db.transaction() as conn:
             db.create_schema(conn)
             language_override = db.get_setting(conn, 'language')
+        profiling.log_environment(db.get_connection(), config.get_db_path())
         locale.setlocale(locale.LC_ALL, '')
         qt_app = QApplication(sys.argv)
         translator = QTranslator()

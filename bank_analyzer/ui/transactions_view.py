@@ -2,6 +2,7 @@
 
 import csv
 import datetime
+import time
 from typing import cast
 
 from PySide6.QtCore import QDate, Qt, QTimer
@@ -22,7 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bank_analyzer import categories, categorizer, db, export
+from bank_analyzer import categories, categorizer, db, export, profiling
 from bank_analyzer.export import TRANSACTIONS_CSV_HEADERS
 from bank_analyzer.money import format_amount_ui
 from bank_analyzer.ui.constants import MAX_DATE, MIN_DATE
@@ -348,10 +349,21 @@ class TransactionsView(QWidget):
         if not transaction_ids:
             return
         category_id: int | None = self._category_combo.currentData()
+        started_at = time.perf_counter()
         with db.transaction() as conn:
             for transaction_id in transaction_ids:
                 db.set_transaction_category(conn, transaction_id, category_id)
+            after_update = time.perf_counter()  # updates done, COMMIT not yet issued
+        after_commit = time.perf_counter()  # transaction block exited (COMMIT done)
         self.refresh()
+        after_refresh = time.perf_counter()
+        profiling.log(
+            f'assign_category: {len(transaction_ids)} transaction(s); timings (ms): '
+            f'update={1000 * (after_update - started_at):.1f} '
+            f'commit={1000 * (after_commit - after_update):.1f} '
+            f'refresh={1000 * (after_refresh - after_commit):.1f} '
+            f'total={1000 * (after_refresh - started_at):.1f}'
+        )
 
     def _recategorize(self) -> None:
         with db.transaction() as conn:
