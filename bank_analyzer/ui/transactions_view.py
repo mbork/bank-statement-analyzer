@@ -371,40 +371,106 @@ class TransactionsView(QWidget):
         self.refresh()
 
     def refresh(self) -> None:
+        t0 = time.perf_counter()
         self._populate_filter_categories()
+        t_populate = time.perf_counter()
         filters = self._build_filters()
+        t_filters = time.perf_counter()
         with db.transaction() as conn:
             rows = db.get_all_transactions(conn, filters)
+        t_query = time.perf_counter()
         self._rows = rows
 
         self._table.setSortingEnabled(False)
+        t_sortoff = time.perf_counter()
         self._table.setRowCount(len(rows))
+        t_rowcount = time.perf_counter()
+
+        # Per-operation accumulators (seconds).  Sub-millisecond buckets are
+        # dominated by perf_counter() overhead — interpret only large ones.
+        acc_format = acc_construct = acc_setdata = 0.0
+        acc_align = acc_foreground = acc_setitem = 0.0
+        slowest_row_ms = 0.0
+        slowest_row_desc_len = 0  # length only — never log description content
+        slow_rows_logged = 0
         for row_idx, row in enumerate(rows):
+            row_start = time.perf_counter()
+
+            t = time.perf_counter()
             amount_pln = format_amount_ui(row['amount'])
+            acc_format += time.perf_counter() - t
+
             category = row['category'] or ''
             is_income = row['amount'] > 0
+
+            t = time.perf_counter()
             items = [
                 QTableWidgetItem(row['date']),
                 QTableWidgetItem(row['description']),
                 _SortableItem(amount_pln, row['amount']),
                 QTableWidgetItem(category),
             ]
+            acc_construct += time.perf_counter() - t
+
             for col_idx, item in enumerate(items):
                 if col_idx == 0:
+                    t = time.perf_counter()
                     item.setData(_ROLE_TRANSACTION_ID, row['transaction_id'])
                     item.setData(_ROLE_CATEGORY_ID, row['category_id'])
                     item.setData(_ROLE_IS_INCOME, is_income)
+                    acc_setdata += time.perf_counter() - t
                 if col_idx == 2:  # amount — right-align
                     align = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+                    t = time.perf_counter()
                     item.setTextAlignment(align)
+                    acc_align += time.perf_counter() - t
                 if is_income:
+                    t = time.perf_counter()
                     item.setForeground(_COLOR_INCOME)
+                    acc_foreground += time.perf_counter() - t
+                t = time.perf_counter()
                 self._table.setItem(row_idx, col_idx, item)
-        self._table.setSortingEnabled(True)
+                acc_setitem += time.perf_counter() - t
+
+            row_ms = 1000 * (time.perf_counter() - row_start)
+            if row_ms > slowest_row_ms:
+                slowest_row_ms = row_ms
+                slowest_row_desc_len = len(row['description'])
+            if row_ms > 50.0 and slow_rows_logged < 20:
+                profiling.log(
+                    f'refresh: slow row idx={row_idx} ms={row_ms:.1f} '
+                    f'desc_len={len(row["description"])}'
+                )
+                slow_rows_logged += 1
+        t_fill = time.perf_counter()
+
+        self._table.setSortingEnabled(True)  # triggers a full re-sort
+        t_sorton = time.perf_counter()
 
         header = self._table.horizontalHeader()
         amount_width = header.sectionSize(2)
         header.resizeSection(3, 2 * amount_width)
+        t_header = time.perf_counter()
+
+        profiling.log(
+            f'refresh: rows={len(rows)}; phases (ms): '
+            f'populate_categories={1000 * (t_populate - t0):.1f} '
+            f'build_filters={1000 * (t_filters - t_populate):.1f} '
+            f'query={1000 * (t_query - t_filters):.1f} '
+            f'sorting_off={1000 * (t_sortoff - t_query):.1f} '
+            f'set_row_count={1000 * (t_rowcount - t_sortoff):.1f} '
+            f'table_fill={1000 * (t_fill - t_rowcount):.1f} '
+            f'sorting_on={1000 * (t_sorton - t_fill):.1f} '
+            f'header_resize={1000 * (t_header - t_sorton):.1f} '
+            f'total={1000 * (t_header - t0):.1f}; '
+            f'fill (ms): format={1000 * acc_format:.1f} '
+            f'construct={1000 * acc_construct:.1f} '
+            f'set_data={1000 * acc_setdata:.1f} '
+            f'set_align={1000 * acc_align:.1f} '
+            f'set_foreground={1000 * acc_foreground:.1f} '
+            f'set_item={1000 * acc_setitem:.1f}; '
+            f'slowest_row_ms={slowest_row_ms:.1f} slowest_row_desc_len={slowest_row_desc_len}'
+        )
 
     def _csv_filename(self, base: str) -> str:
         from_str = self._date_from.date().toString('yyyy-MM-dd')
