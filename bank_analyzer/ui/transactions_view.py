@@ -6,7 +6,7 @@ import time
 from typing import cast
 
 from PySide6.QtCore import QDate, Qt, QTimer
-from PySide6.QtGui import QColor, QDoubleValidator
+from PySide6.QtGui import QAccessible, QColor, QDoubleValidator
 from PySide6.QtWidgets import (
     QCalendarWidget,
     QComboBox,
@@ -83,6 +83,32 @@ class _SortableItem(QTableWidgetItem):
         if isinstance(other, _SortableItem):
             return self._sort_key < other._sort_key
         return super().__lt__(other)
+
+# * Diagnostics: fill-variant probe
+
+# The per-row cost of the slow fill is flat from row 0, so a small sample
+# measures a variant as well as the full table does.
+_PROBE_ROWS = 40
+_AUTO_SIZED_COLUMNS = (0, 2)
+
+def _make_row_items(row: dict) -> list[QTableWidgetItem]:
+    """Build one row's items exactly as refresh() does, minus its timing."""
+    amount_pln = format_amount_ui(row['amount'])
+    is_income = row['amount'] > 0
+    items = [
+        QTableWidgetItem(row['date']),
+        QTableWidgetItem(row['description']),
+        _SortableItem(amount_pln, row['amount']),
+        QTableWidgetItem(row['category'] or ''),
+    ]
+    items[0].setData(_ROLE_TRANSACTION_ID, row['transaction_id'])
+    items[0].setData(_ROLE_CATEGORY_ID, row['category_id'])
+    items[0].setData(_ROLE_IS_INCOME, is_income)
+    items[2].setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+    if is_income:
+        for item in items:
+            item.setForeground(_COLOR_INCOME)
+    return items
 
 # * View
 
@@ -209,6 +235,8 @@ class TransactionsView(QWidget):
 
         self._set_panel_enabled(False)
         self._rows: list[dict] = []
+        self._has_probed = False
+        self._selection_change_count = 0
 
         # ** Outer layout
         layout = QVBoxLayout()
@@ -297,6 +325,93 @@ class TransactionsView(QWidget):
                     result.append(item.data(_ROLE_TRANSACTION_ID))
         return result
 
+    # ** Diagnostics
+
+    def _should_probe(self, rows: list[dict]) -> bool:
+        """Probe once per session, in the slow situation: a shown, populated table."""
+        return (
+            not self._has_probed
+            and self._table.isVisible()
+            and self._table.rowCount() > 0
+            and len(rows) > 0
+        )
+
+    def _probe_fill(self, rows: list[dict], variant: str) -> None:
+        sample_size = min(_PROBE_ROWS, len(rows), self._table.rowCount())
+        selection_changes_before = self._selection_change_count
+        started_at = time.perf_counter()
+        for row_idx in range(sample_size):
+            for col_idx, item in enumerate(_make_row_items(rows[row_idx])):
+                self._table.setItem(row_idx, col_idx, item)
+        elapsed_ms = 1000 * (time.perf_counter() - started_at)
+        ms_per_set_item = elapsed_ms / (sample_size * NUM_COLUMNS)
+        selection_changes = self._selection_change_count - selection_changes_before
+        profiling.log(
+            f'probe: variant={variant} rows={sample_size} ms={elapsed_ms:.1f} '
+            f'ms_per_set_item={ms_per_set_item:.2f} selection_changes={selection_changes}'
+        )
+
+    def _probe_fill_variants(self, rows: list[dict]) -> None:
+        """Time a sample fill under several variants, to tell the suspects apart.
+
+        Must run with sorting disabled, as the real fill does.  Non-destructive
+        variants come first; the last two change state (selection, row count)
+        that the earlier ones rely on.  The real refresh that follows rewrites
+        every cell anyway.
+        """
+        self._has_probed = True
+        is_a11y_active = QAccessible.isActive()
+        profiling.log(
+            f'probe: start; table_rows={self._table.rowCount()} '
+            f'selected_cells={len(self._table.selectedIndexes())} '
+            f'a11y_active={is_a11y_active}'
+        )
+        header = self._table.horizontalHeader()
+        model = self._table.model()
+
+        self._probe_fill(rows, 'baseline')
+
+        # Suspect 1: ResizeToContents re-measuring whole columns.
+        for col in _AUTO_SIZED_COLUMNS:
+            header.setSectionResizeMode(col, QHeaderView.ResizeMode.Fixed)
+        try:
+            self._probe_fill(rows, 'fixed_columns')
+        finally:
+            for col in _AUTO_SIZED_COLUMNS:
+                header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
+
+        # Suspect 2: accessibility (UI Automation) events.
+        QAccessible.setActive(False)
+        try:
+            self._probe_fill(rows, 'a11y_off')
+        finally:
+            QAccessible.setActive(is_a11y_active)
+
+        # Option C: no per-item notifications at all.
+        model.blockSignals(True)
+        try:
+            self._probe_fill(rows, 'signals_blocked')
+        finally:
+            model.blockSignals(False)
+            self._table.viewport().update()
+
+        # The fast startup condition, part 1: table not shown.
+        self._table.hide()
+        try:
+            self._probe_fill(rows, 'hidden')
+        finally:
+            self._table.show()
+
+        # Destructive from here on.
+        self._table.clearSelection()
+        self._probe_fill(rows, 'no_selection')
+
+        # The fast startup condition, part 2 (Option A): empty table.
+        self._table.setRowCount(0)
+        self._table.setRowCount(len(rows))
+        self._probe_fill(rows, 'emptied')
+        profiling.log('probe: end')
+
     # ** Event handlers
 
     def showEvent(self, event) -> None:  # type: ignore[override]  # noqa: N802
@@ -323,6 +438,7 @@ class TransactionsView(QWidget):
         self.refresh()
 
     def _on_selection_changed(self) -> None:
+        self._selection_change_count += 1
         selected_rows = {idx.row() for idx in self._table.selectedIndexes()}
         expense_rows = {
             row for row in selected_rows
@@ -383,6 +499,9 @@ class TransactionsView(QWidget):
 
         self._table.setSortingEnabled(False)
         t_sortoff = time.perf_counter()
+        if self._should_probe(rows):
+            self._probe_fill_variants(rows)
+        t_probe = time.perf_counter()
         self._table.setRowCount(len(rows))
         t_rowcount = time.perf_counter()
 
@@ -453,12 +572,14 @@ class TransactionsView(QWidget):
         t_header = time.perf_counter()
 
         profiling.log(
-            f'refresh: rows={len(rows)}; phases (ms): '
+            f'refresh: rows={len(rows)} visible={self._table.isVisible()} '
+            f'a11y_active={QAccessible.isActive()}; phases (ms): '
             f'populate_categories={1000 * (t_populate - t0):.1f} '
             f'build_filters={1000 * (t_filters - t_populate):.1f} '
             f'query={1000 * (t_query - t_filters):.1f} '
             f'sorting_off={1000 * (t_sortoff - t_query):.1f} '
-            f'set_row_count={1000 * (t_rowcount - t_sortoff):.1f} '
+            f'probe={1000 * (t_probe - t_sortoff):.1f} '
+            f'set_row_count={1000 * (t_rowcount - t_probe):.1f} '
             f'table_fill={1000 * (t_fill - t_rowcount):.1f} '
             f'sorting_on={1000 * (t_sorton - t_fill):.1f} '
             f'header_resize={1000 * (t_header - t_sorton):.1f} '
